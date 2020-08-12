@@ -9,7 +9,7 @@ description = "report-generation-service"
 classifiers=[
   # Full list: https://pypi.org/pypi?%3Aaction=list_classifiers
   "Development Status :: 3 - Alpha",
-  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",  # pylint: disable=line-too-long
+  "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",  # pylint: disable=line-too-long
   "Environment :: Web Environment",
   "Intended Audience :: Developers",
   "Programming Language :: Python :: 3.7",
