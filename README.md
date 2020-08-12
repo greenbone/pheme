@@ -30,7 +30,7 @@ process.
 
 First install poetry via pip
 
-    pip install --user poetry
+    python3 -m pip install --user poetry
 
 Afterwards run
 
