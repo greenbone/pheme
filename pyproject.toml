@@ -2,7 +2,7 @@
 name = "pheme"
 version = "0.0.1"
 authors = ["Greenbone Networks GmbH <info@greenbone.net>"]
-license = "GPL-3.0-or-later"
+license = "AGPL-3.0-or-later"
 readme = "README.md"
 description = "report-generation-service"
 
