@@ -49,6 +49,17 @@ Validate the activated git hooks by running
 
     poetry run autohooks check
 
+## API overview
+
+To get an overview of the API you can start this project
+
+```
+python manage.py runserver
+```
+
+and then go to [swagger](http://localhost:8000/docs/)
+
+
 ## Maintainer
 
 This project is maintained by [Greenbone Networks GmbH][Greenbone Networks]
