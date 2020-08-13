@@ -1,22 +1,9 @@
-from dataclasses import dataclass
-from rest_framework import generics, serializers
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.response import Response
+from pheme.parser.xml import XMLParser
 
 
-@dataclass
-class Test:
-    name: str
-
-
-class TestSerializer(serializers.Serializer):
-    name = serializers.CharField()
-
-    def update(self, instance, validated_data):
-        raise NotImplementedError('`update()` must be implemented.')
-
-    def create(self, validated_data):
-        raise NotImplementedError('`create()` must be implemented.')
-
-
-class TestView(generics.ListAPIView):  # new
-    queryset = iter([Test("1"), Test("2")])
-    serializer_class = TestSerializer
+@api_view(['POST'])
+@parser_classes([XMLParser])
+def report(request):
+    return Response(request.data)
