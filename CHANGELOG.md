@@ -6,16 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-### Changed
-### Deprecated
-### Removed
-### Fixed
-
-[Unreleased]: https://github.com/greenbone/pheme/compare/v0.0.1...HEAD
-
-
-## [0.0.1] - 2020-08-14
-### Added
 - django webserver
 - openapi (/openapi-schema/)
 - swagger (/docs/) 
