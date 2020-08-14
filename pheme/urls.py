@@ -22,6 +22,7 @@ import pheme.version
 import pheme.views
 
 urlpatterns = [
+    path('template/', pheme.views.template),
     path('report/', pheme.views.report),
     url(
         r'^openapi-schema',

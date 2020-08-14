@@ -2,7 +2,7 @@
 Provides XML parsing support.
 
 Although there is the project djangorestframework-xml xmltodict seems to be more
-reliable in our usecase.
+reliable for our usecase.
 
 """
 from typing import Any, Dict, Tuple

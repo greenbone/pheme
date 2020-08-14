@@ -124,7 +124,9 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
-requirements.txt
+
 # Pyre type checker
 .pyre/
 .vim/
+# add later
+test_data/
