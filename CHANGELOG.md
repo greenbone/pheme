@@ -37,4 +37,4 @@ curl -X POST\
 - openapi (/openapi-schema/)
 - swagger (/docs/) 
 
-[GVMD]: https://github.com/greenbone/gvmd
+[gvmd]: https://github.com/greenbone/gvmd
