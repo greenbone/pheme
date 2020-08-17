@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Callable, Optional, List, Union, Tuple, Dict
+from typing import Callable, Optional, Dict
 from .model import (
     Count,
     Filtered,
@@ -19,20 +19,10 @@ from .model import (
 )
 
 
-def __find_first_occurance(
-    candidates: List[Union[HostResults, NVTResult]], is_the_chosen_one: Callable
-) -> Tuple[int, Optional[Union[HostResults, NVTResult]]]:
-    for i, candidate in enumerate(candidates):
-        if is_the_chosen_one(candidate):
-            return i, candidate
-    return -1, None
-
-
 def group_by_host(first, second):
     host = second.pop('host')
     host = host if isinstance(host, str) else host["text"]
-    index, hr = __find_first_occurance(first, lambda h: h.host == host)
-    # hr = first.get(host)
+    hr = first.get(host)
     nvt = second.pop('nvt')
     solution = (
         Solution(nvt['solution']['type'], nvt['solution']['text'])
@@ -67,11 +57,9 @@ def group_by_host(first, second):
     )
     if hr:
         hr.results.append(shr)
-        first[index] = hr
-    # first[host] = hr
+        first[host] = hr
     else:
-        # first[host] = HostResults(host, [shr])
-        first.append(HostResults(host, [shr]))
+        first[host] = HostResults(host, [shr])
     return first
 
 
@@ -80,11 +68,11 @@ def group_by_nvt(first, second):
     host = second.pop('host')
     host = host if isinstance(host, str) else host["text"]
     oid = nvt['oid']
-    index, nvt_result = __find_first_occurance(first, lambda n: n.oid == oid)
+    nvt_result = first.get(oid)
     hs = HostSpecific(host, second.get('description'))
     if nvt_result:
         nvt_result.hosts.append(hs)
-        first[index] = nvt_result
+        first[oid] = nvt_result
     else:
         solution = (
             Solution(nvt['solution']['type'], nvt['solution']['text'])
@@ -101,27 +89,28 @@ def group_by_nvt(first, second):
             if second.get('qod')
             else None
         )
-        first.append(
-            NVTResult(
-                oid,
-                nvt.get('type'),
-                nvt.get('name'),
-                nvt.get('family'),
-                nvt['cvss_base'],
-                nvt.get('tags'),
-                solution,
-                refs,
-                second.get('port'),
-                second.get('threat'),
-                second.get('severity'),
-                qod,
-                [hs],
-            )
+        nvt_result = NVTResult(
+            oid,
+            nvt.get('type'),
+            nvt.get('name'),
+            nvt.get('family'),
+            nvt['cvss_base'],
+            nvt.get('tags'),
+            solution,
+            refs,
+            second.get('port'),
+            second.get('threat'),
+            second.get('severity'),
+            qod,
+            [hs],
         )
+        first[oid] = nvt_result
     return first
 
 
-def transform(data: Dict[str, str], group_by: Callable = group_by_host) -> Report:
+def transform(
+    data: Dict[str, str], group_by: Callable = group_by_host
+) -> Report:
     report = data["report"]["report"]
 
     def may_create_version(key: str) -> Optional[Count]:
@@ -175,10 +164,8 @@ def transform(data: Dict[str, str], group_by: Callable = group_by_host) -> Repor
             result_count['text'],
         )
 
-    # grouped = reduce(group_by, report["results"]["result"], {})
-    grouped = reduce(group_by, report["results"]["result"], [])
-
-    return Report(
+    grouped = reduce(group_by, report["results"]["result"], {})
+    result = Report(
         report.get('id'),
         may_create_version('gmp'),
         report.get('scan_run_status'),
@@ -198,8 +185,11 @@ def transform(data: Dict[str, str], group_by: Callable = group_by_host) -> Repor
         Results(
             report['results'].get('max'),
             report['results'].get('start'),
-            grouped,
+            list(grouped.values()),
         ),
         may_create_filtered(report, 'severity'),
         may_create_result_count(),
     )
+    del grouped
+    del report
+    return result

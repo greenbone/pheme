@@ -15,14 +15,8 @@ def report(request):
 @api_view(['POST'])
 @parser_classes([XMLParser])
 def template(request):
-    # Threat: None, Low, Medium, High
     input_flavour = request.GET.get('flavour', 'gvmd')
     grouping = request.GET.get('grouping')
-    print(
-        'selecting input flavour: {} and grouping {}'.format(
-            input_flavour, grouping
-        )
-    )
     if input_flavour == 'gvmd':
         if grouping == 'nvt':
             grouping = scanreport.gvmd.group_by_nvt

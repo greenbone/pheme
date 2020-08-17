@@ -39,9 +39,12 @@ def normalize_keys(_: str, key: str, value: any) -> Tuple[str, Any]:
             for k, v in data.items()
         )
 
+    normalized_value = (
+        normalize_dict_keys(value) if isinstance(value, dict) else value
+    )
     if key[0].isalpha():
-        return (key, value)
+        return (key, normalized_value)
     return (
         key[1:],
-        normalize_dict_keys(value) if isinstance(value, dict) else value,
+        normalized_value,
     )
