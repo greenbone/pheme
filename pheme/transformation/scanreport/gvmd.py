@@ -121,7 +121,7 @@ def group_by_nvt(first, second):
     return first
 
 
-def transform(data: dict, group_by: Callable = group_by_host) -> Report:
+def transform(data: Dict[str, str], group_by: Callable = group_by_host) -> Report:
     report = data["report"]["report"]
 
     def may_create_version(key: str) -> Optional[Count]:
