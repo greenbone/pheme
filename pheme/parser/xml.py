@@ -23,7 +23,7 @@ class XMLParser(BaseParser):
 
 def normalize_keys(_: str, key: str, value: any) -> Tuple[str, Any]:
     """
-    Due to the expact some keys may have values like '@' or '#' as a
+    Due to expat some keys may have values like '@' or '#' as a
     first character.
 
     This method is used in a postprocessor for xmltodict to remove starting non
