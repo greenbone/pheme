@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - XMLParser (pheme/parser/xml.py)
-- transformation for [GVMD] scan results to host grouped template data
+- transformation for [gvmd] scan results to host grouped template data
 ```
 curl -X POST\
     'http://localhost:8000/template/?grouping=host'\
