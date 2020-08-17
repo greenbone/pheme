@@ -130,7 +130,7 @@ def transform(data: Dict[str, str], group_by: Callable = group_by_host) -> Repor
     def may_create_count(key: str) -> Optional[Count]:
         return Count(**report[key]) if report.get(key) else None
 
-    def may_create_target(data: Dict) -> Target:
+    def may_create_target(data: Dict[str, str]) -> Target:
         target_dict = data.get('target')
         if not target_dict:
             return None
