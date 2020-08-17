@@ -1,16 +1,30 @@
-# pylint: disable=W0614,W0511,W0401,C0103
-import dataclasses
 from functools import reduce
-from typing import Callable, Optional, List, Union, Tuple
-from .model import *
+from typing import Callable, Optional, List, Union, Tuple, Dict
+from .model import (
+    Count,
+    Filtered,
+    HostResult,
+    HostResults,
+    HostSpecific,
+    NVTResult,
+    QOD,
+    Ref,
+    Report,
+    ResultCount,
+    Results,
+    Solution,
+    Target,
+    Task,
+    Version,
+)
 
 
 def __find_first_occurance(
     candidates: List[Union[HostResults, NVTResult]], is_the_chosen_one: Callable
 ) -> Tuple[int, Optional[Union[HostResults, NVTResult]]]:
-    for i, r in enumerate(candidates):
-        if is_the_chosen_one(r):
-            return i, r
+    for i, candidate in enumerate(candidates):
+        if is_the_chosen_one(candidate):
+            return i, candidate
     return -1, None
 
 
@@ -18,8 +32,8 @@ def group_by_host(first, second):
     host = second.pop('host')
     host = host if isinstance(host, str) else host["text"]
     index, hr = __find_first_occurance(first, lambda h: h.host == host)
+    # hr = first.get(host)
     nvt = second.pop('nvt')
-
     solution = (
         Solution(nvt['solution']['type'], nvt['solution']['text'])
         if nvt.get('solution')
@@ -31,25 +45,32 @@ def group_by_host(first, second):
         else []
     )
     oid = nvt['oid']
+    qod = (
+        QOD(second['qod']['value'], second['qod']['type'],)
+        if second.get('qod')
+        else None
+    )
     shr = HostResult(
         oid,
-        nvt['type'],
-        nvt['name'],
-        nvt['family'],
-        nvt['cvss_base'],
-        nvt['tags'],
+        nvt.get('type'),
+        nvt.get('name'),
+        nvt.get('family'),
+        nvt.get('cvss_base'),
+        nvt.get('tags'),
         solution,
         refs,
-        second['port'],
-        second['threat'],
-        second['severity'],
-        QOD(second['qod']['value'], second['qod']['type'],),
-        second['description'],
+        second.get('port'),
+        second.get('threat'),
+        second.get('severity'),
+        qod,
+        second.get('description'),
     )
     if hr:
         hr.results.append(shr)
         first[index] = hr
+    # first[host] = hr
     else:
+        # first[host] = HostResults(host, [shr])
         first.append(HostResults(host, [shr]))
     return first
 
@@ -75,70 +96,110 @@ def group_by_nvt(first, second):
             if nvt.get('refs')
             else []
         )
+        qod = (
+            QOD(second['qod']['value'], second['qod']['type'],)
+            if second.get('qod')
+            else None
+        )
         first.append(
             NVTResult(
                 oid,
-                nvt['type'],
-                nvt['name'],
-                nvt['family'],
+                nvt.get('type'),
+                nvt.get('name'),
+                nvt.get('family'),
                 nvt['cvss_base'],
-                nvt['tags'],
+                nvt.get('tags'),
                 solution,
                 refs,
-                second['port'],
-                second['threat'],
-                second['severity'],
-                QOD(second['qod']['value'], second['qod']['type'],),
+                second.get('port'),
+                second.get('threat'),
+                second.get('severity'),
+                qod,
                 [hs],
             )
         )
     return first
 
 
-def transform(data: dict, group_by: Optional[Callable] = group_by_host) -> dict:
-    result = dict(data)
-    report = result["report"]["report"]
-    raw_results = report["results"]["result"]
-    grouped = reduce(group_by, raw_results, [])
+def transform(data: dict, group_by: Callable = group_by_host) -> Report:
+    report = data["report"]["report"]
 
-    return dataclasses.asdict(
-        Report(
-            report['id'],
-            Version(**report['gmp']),
-            report['scan_run_status'],
-            Count(**report['hosts']),
-            Count(**report['closed_cves']),
-            Count(**report['vulns']),
-            Count(**report['os']),
-            Count(**report['apps']),
-            Count(**report['ssl_certs']),
-            Task(
-                report.get('task').get('id'),
-                report.get('task').get('name'),
-                report.get('task').get('comment'),
-                Target(**report.get('task').get('target')),
-                report.get('task').get('progress'),
-            ),
-            report.get('timestamp'),
-            report.get('scan_start'),
-            report.get('timezone'),
-            report.get('timezone_abbrev'),
-            report.get('scan_end'),
-            Count(**report['errors']),
-            Results(
-                report['results']['max'], report['results']['start'], grouped
-            ),
-            Filtered(**report['severity']),
-            ResultCount(
-                report['result_count']['full'],
-                report['result_count']['filtered'],
-                Filtered(**report['result_count']['debug']),
-                Filtered(**report['result_count']['hole']),
-                Filtered(**report['result_count']['info']),
-                Filtered(**report['result_count']['log']),
-                Filtered(**report['result_count']['warning']),
-                Filtered(**report['result_count']['false_positive']),
-                report['result_count']['text'],
-            ),
+    def may_create_version(key: str) -> Optional[Count]:
+        return Version(**report[key]) if report.get(key) else None
+
+    def may_create_count(key: str) -> Optional[Count]:
+        return Count(**report[key]) if report.get(key) else None
+
+    def may_create_target(data: Dict) -> Target:
+        target_dict = data.get('target')
+        if not target_dict:
+            return None
+        return Target(
+            target_dict.get('id'),
+            target_dict.get('name'),
+            target_dict.get('comment'),
+            target_dict.get('trash'),
+        )
+
+    def may_create_task() -> Task:
+        task = report.get('task')
+        if not task:
+            return None
+        return Task(
+            task.get('id'),
+            task.get('name'),
+            task.get('comment'),
+            may_create_target(task),
+            task.get('progress'),
+        )
+
+    def may_create_filtered(data: Dict, key: str) -> Filtered:
+        filtered = data.get(key)
+        if not filtered:
+            return None
+        return Filtered(**filtered)
+
+    def may_create_result_count() -> ResultCount:
+        result_count = report['result_count']
+        if not result_count:
+            return None
+        return ResultCount(
+            result_count['full'],
+            result_count['filtered'],
+            may_create_filtered(result_count, 'debug'),
+            may_create_filtered(result_count, 'hole'),
+            may_create_filtered(result_count, 'info'),
+            may_create_filtered(result_count, 'log'),
+            may_create_filtered(result_count, 'warning'),
+            may_create_filtered(result_count, 'false_positive'),
+            result_count['text'],
+        )
+
+    # grouped = reduce(group_by, report["results"]["result"], {})
+    grouped = reduce(group_by, report["results"]["result"], [])
+
+    return Report(
+        report.get('id'),
+        may_create_version('gmp'),
+        report.get('scan_run_status'),
+        may_create_count('hosts'),
+        may_create_count('closed_cves'),
+        may_create_count('vulns'),
+        may_create_count('os'),
+        may_create_count('apps'),
+        may_create_count('ssl_certs'),
+        may_create_task(),
+        report.get('timestamp'),
+        report.get('scan_start'),
+        report.get('timezone'),
+        report.get('timezone_abbrev'),
+        report.get('scan_end'),
+        may_create_count('errors'),
+        Results(
+            report['results'].get('max'),
+            report['results'].get('start'),
+            grouped,
         ),
+        may_create_filtered(report, 'severity'),
+        may_create_result_count(),
     )

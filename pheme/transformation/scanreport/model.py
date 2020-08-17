@@ -94,7 +94,7 @@ class Result(NVT):
     port: str
     threat: str
     severity: str
-    qod: QOD  # atm not in nvt
+    qod: QOD
 
 
 @dataclass
@@ -110,7 +110,6 @@ class HostResult(Result):
 @dataclass
 class HostResults:
     host: str
-    # TODO rename
     results: List[HostResult]
 
 
