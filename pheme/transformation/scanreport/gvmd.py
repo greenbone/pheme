@@ -153,7 +153,7 @@ def transform(data: dict, group_by: Callable = group_by_host) -> Report:
             task.get('progress'),
         )
 
-    def may_create_filtered(data: Dict, key: str) -> Filtered:
+    def may_create_filtered(data: Dict[str, str], key: str) -> Filtered:
         filtered = data.get(key)
         if not filtered:
             return None
