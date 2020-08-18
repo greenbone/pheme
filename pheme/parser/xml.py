@@ -36,7 +36,7 @@ class XMLParser(BaseParser):
     media_type = "application/xml"
 
     def parse(self, stream, media_type=None, parser_context=None):
-        return xmltodict.parse(stream, postprocessor=normalize_keys)
+        return xmltodict.parse(stream, attr_prefix='', dict_constructor=dict)
 
 
 def normalize_keys(_: str, key: str, value: any) -> Tuple[str, Any]:

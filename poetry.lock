@@ -244,6 +244,14 @@ version = ">=3.7.4"
 
 [[package]]
 category = "main"
+description = "Guppy 3 -- Guppy-PE ported to Python 3"
+name = "guppy3"
+optional = false
+python-versions = ">=3.5"
+version = "3.0.10.post1"
+
+[[package]]
+category = "main"
 description = "Internationalized Domain Names in Applications (IDNA)"
 name = "idna"
 optional = false
@@ -669,7 +677,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "a6da876f57793b2127ab4c69a25b37001994195392d47e80bbe7152c2932e5bd"
+content-hash = "980921bd22a004572c01cf25583da8bec99901543e6f8adcf06e74540d6583f3"
 lock-version = "1.0"
 python-versions = "^3.7"
 
@@ -784,6 +792,37 @@ djangorestframework = [
 ]
 djangorestframework-dataclasses = [
     {file = "djangorestframework-dataclasses-0.6.tar.gz", hash = "sha256:ec935068baf08f3e95e6a9a6963f97beb13246edf7b6264b706dcd88bf97c7d4"},
+]
+guppy3 = [
+    {file = "guppy3-3.0.10.post1-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:57637276558bb82d0622e43a61538db08450a584aa9e6b20d5d319b68c079ccb"},
+    {file = "guppy3-3.0.10.post1-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:5c53734922c1fbf24beca68cc20277af5a5bea5d16215156b39afabf92a5a18f"},
+    {file = "guppy3-3.0.10.post1-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:13c804d5d933c3ba226a41c8a9edc1899e48eef25e09e4c973a9fd6e24d6b6b3"},
+    {file = "guppy3-3.0.10.post1-cp35-cp35m-manylinux2010_i686.whl", hash = "sha256:40579ea6aa21685afcbd99f4f0e2e2fdf0f7c4df6294c48b29560740efc0cc09"},
+    {file = "guppy3-3.0.10.post1-cp35-cp35m-manylinux2010_x86_64.whl", hash = "sha256:31c5548caced30f542978ce04605cfdcd01a8b09ebd25ad93f544b6ffada4b4e"},
+    {file = "guppy3-3.0.10.post1-cp35-cp35m-win32.whl", hash = "sha256:8e2bf3625b76d7bd5040e4c35d6983a786de90fd50bfad6e06b93f175312b831"},
+    {file = "guppy3-3.0.10.post1-cp35-cp35m-win_amd64.whl", hash = "sha256:df3179250212408ce8bb03a5dbbfc143ffb352c32c08145758e97cc1e83d2550"},
+    {file = "guppy3-3.0.10.post1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:544df75f384a6de6c5a98600155ed5c71c45b5a44207be16b7c3abc9b8e5426d"},
+    {file = "guppy3-3.0.10.post1-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:ab3e08775659e8b8d2c5b46ee3cccfb727fc41bd6c8d99a14bd7745f24a0c605"},
+    {file = "guppy3-3.0.10.post1-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:e7ce770ec28a0f32398de6cc9daae85336043d7d32a95d69fd014ec7abb72072"},
+    {file = "guppy3-3.0.10.post1-cp36-cp36m-manylinux2010_i686.whl", hash = "sha256:71520a994ac3327fea38c1e4b8190f524e96a1bd3ab75ae63896ed822426fe27"},
+    {file = "guppy3-3.0.10.post1-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:796b206a93a70220d896a22675d5110ddef9ed82658fc693804cc59cdbbe1589"},
+    {file = "guppy3-3.0.10.post1-cp36-cp36m-win32.whl", hash = "sha256:fd5c8fa49b1f103fade11953e7949bb5ebe53d8a84c30d6d0a10f6c9dfcbbf71"},
+    {file = "guppy3-3.0.10.post1-cp36-cp36m-win_amd64.whl", hash = "sha256:1c31f39ee3f8491a196e66035e2edb4b2217586c4e3ac62c4576a8363ef42547"},
+    {file = "guppy3-3.0.10.post1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:3df35144fa9ab7eb6b35965c1fa6096f1fae14fef37bfdca6f3469490d44c211"},
+    {file = "guppy3-3.0.10.post1-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:d5df2711a3cc2f4440e2bdec920369330559407f9b7928ccd71a77ff9fe0da94"},
+    {file = "guppy3-3.0.10.post1-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:86b2ec364cb164438ab1341421421f3aad68817b36f22c1970c948c225754cc5"},
+    {file = "guppy3-3.0.10.post1-cp37-cp37m-manylinux2010_i686.whl", hash = "sha256:f8fe7aa42fb12bf6e31d58c24dcee0578f9cda0ec18ce91938da9dfb28f934a6"},
+    {file = "guppy3-3.0.10.post1-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:ebee9ae1c02b4a007d6ae1f669d5b65431178df54c3e929af82b0131a0a1c67c"},
+    {file = "guppy3-3.0.10.post1-cp37-cp37m-win32.whl", hash = "sha256:270caa9baef382f68273f27a28ea3df267c5f6a68ce2655a501ed293bfbedbb5"},
+    {file = "guppy3-3.0.10.post1-cp37-cp37m-win_amd64.whl", hash = "sha256:feeaa7271565da677ed17ec57347e9e1e30002f8d5817e408eff9df3683a8722"},
+    {file = "guppy3-3.0.10.post1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:30badae3dd2a23f1c348f04bced3960efca325f0599f9b9cd1b73b3537678e44"},
+    {file = "guppy3-3.0.10.post1-cp38-cp38-manylinux1_i686.whl", hash = "sha256:b3e05164ff8e440ab82a670fda99ab1e6f369770e69edfb2a6ba1cf8cb43f7dd"},
+    {file = "guppy3-3.0.10.post1-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:e59ed985209abccfe7a8f41c3e1d64dd71a4d32287db1ec77a0e55d0371b3e4d"},
+    {file = "guppy3-3.0.10.post1-cp38-cp38-manylinux2010_i686.whl", hash = "sha256:0b30b563e52a59a665a36559989690fcac4085f0fd6382a5d9255c92eaff8a6c"},
+    {file = "guppy3-3.0.10.post1-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:6fc7911e0ae148404c4d13d33062603f3b3d1f825b034ea291d0ae71c4592b3b"},
+    {file = "guppy3-3.0.10.post1-cp38-cp38-win32.whl", hash = "sha256:fcc44cf850d6196c39cf1ed31b5f245267d8606bcbb63e1af59e1a7eaa8d364a"},
+    {file = "guppy3-3.0.10.post1-cp38-cp38-win_amd64.whl", hash = "sha256:8667b59bd7702b4f1aec0519f9bff9ee656bc56383bb647fdc7b64b1667a72ee"},
+    {file = "guppy3-3.0.10.post1.tar.gz", hash = "sha256:c67a3cdb1923ace502aff8831cf4830ddc8c37c05065a7093dde5fa6fa1fb31c"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},

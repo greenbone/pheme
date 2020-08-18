@@ -18,6 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from functools import reduce
 from typing import Callable, Optional, Dict
+import logging
+
+# from guppy import hpy
 from .model import (
     Count,
     Filtered,
@@ -39,8 +42,8 @@ from .model import (
 
 def group_by_host(first: Dict[str, HostResults], second: Dict[str, str]):
     host = second.pop('host')
-    host = host if isinstance(host, str) else host["text"]
-    hr = first.get(host)
+    host = host if isinstance(host, str) else host.pop("text")
+    hr: HostResults = first.get(host)
     nvt = second.pop('nvt')
     solution = (
         Solution(nvt['solution']['type'], nvt['solution']['text'])
@@ -78,6 +81,7 @@ def group_by_host(first: Dict[str, HostResults], second: Dict[str, str]):
         first[host] = hr
     else:
         first[host] = HostResults(host, [shr])
+    del nvt
     return first
 
 
@@ -123,22 +127,38 @@ def group_by_nvt(first: Dict[str, NVTResult], second: Dict[str, str]):
             [hs],
         )
         first[oid] = nvt_result
+    del nvt
+
     return first
+
+
+logger = logging.getLogger(__name__)
 
 
 def transform(
     data: Dict[str, str], group_by: Callable = group_by_host
 ) -> Report:
-    report = data["report"]["report"]
+    #    h = hpy()
+    #    h.setref()
+    report = data.pop("report")
+    report = report.pop("report")
+    del data
+    logger.info("data transformation; grouped by %s.", group_by)
 
     def may_create_version(key: str) -> Optional[Count]:
-        return Version(**report[key]) if report.get(key) else None
+        value = report.pop(key, None)
+        if not value:
+            return None
+        return Version(value.get('version'))
 
     def may_create_count(key: str) -> Optional[Count]:
-        return Count(**report[key]) if report.get(key) else None
+        value = report.pop(key, None)
+        if not value:
+            return None
+        return Count(value.get('count'))
 
     def may_create_target(data: Dict[str, str]) -> Target:
-        target_dict = data.get('target')
+        target_dict = data.pop('target', None)
         if not target_dict:
             return None
         return Target(
@@ -149,7 +169,7 @@ def transform(
         )
 
     def may_create_task() -> Task:
-        task = report.get('task')
+        task = report.pop('task', None)
         if not task:
             return None
         return Task(
@@ -161,28 +181,29 @@ def transform(
         )
 
     def may_create_filtered(data: Dict[str, str], key: str) -> Filtered:
-        filtered = data.get(key)
+        filtered = data.pop(key, None)
         if not filtered:
             return None
-        return Filtered(**filtered)
+        return Filtered(filtered.get('full'), filtered.get('filtered'))
 
     def may_create_result_count() -> ResultCount:
-        result_count = report['result_count']
+        result_count = report.pop('result_count', None)
         if not result_count:
             return None
         return ResultCount(
-            result_count['full'],
-            result_count['filtered'],
+            result_count.get('full'),
+            result_count.get('filtered'),
             may_create_filtered(result_count, 'debug'),
             may_create_filtered(result_count, 'hole'),
             may_create_filtered(result_count, 'info'),
             may_create_filtered(result_count, 'log'),
             may_create_filtered(result_count, 'warning'),
             may_create_filtered(result_count, 'false_positive'),
-            result_count['text'],
+            result_count.get('text'),
         )
 
-    grouped = reduce(group_by, report["results"]["result"], {})
+    original_results = report.pop('results')
+    grouped = reduce(group_by, original_results.pop("result"), {})
     result = Report(
         report.get('id'),
         may_create_version('gmp'),
@@ -201,13 +222,15 @@ def transform(
         report.get('scan_end'),
         may_create_count('errors'),
         Results(
-            report['results'].get('max'),
-            report['results'].get('start'),
+            original_results.get('max'),
+            original_results.get('start'),
             list(grouped.values()),
         ),
         may_create_filtered(report, 'severity'),
         may_create_result_count(),
     )
     del grouped
+    del original_results
     del report
+    #    logger.debug(h.heap())
     return result
