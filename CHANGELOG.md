@@ -15,7 +15,7 @@ curl -X POST\
      -H 'Accept: application/json; indent=2'\
      -d @path_to/scanreport.xml
 ```
-- transformation for [gvmd] scan results to nvt grouped template data 
+- transformation for [gvmd] scan results to nvt grouped template data [#5](https://github.com/greenbone/pheme/pull/5)
 ```
 curl -X POST\
     'http://localhost:8000/template/?grouping=nvt'\
