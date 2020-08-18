@@ -37,7 +37,7 @@ from .model import (
 )
 
 
-def group_by_host(first, second):
+def group_by_host(first: Dict[str, HostResults], second: Dict[str, str]):
     host = second.pop('host')
     host = host if isinstance(host, str) else host["text"]
     hr = first.get(host)
@@ -81,7 +81,7 @@ def group_by_host(first, second):
     return first
 
 
-def group_by_nvt(first, second):
+def group_by_nvt(first: Dict[str, NVTResult], second: Dict[str, str]):
     nvt = second.pop('nvt')
     host = second.pop('host')
     host = host if isinstance(host, str) else host["text"]

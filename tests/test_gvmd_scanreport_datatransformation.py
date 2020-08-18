@@ -172,7 +172,7 @@ def gen_report(with_optional=False) -> Dict:
     }
 
 
-@pytest.mark.parametrize("scan_result", [gen_report(True)])
+@pytest.mark.parametrize("scan_result", [gen_report(with_optional=True)])
 def test_group_by_nvt(scan_result):
     data = {'report': {'report': scan_result}}
     result = transform(data, group_by=group_by_nvt)
