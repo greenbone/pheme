@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pheme/wsgi.py
+# tests/test_xmlparser.py
 # Copyright (C) 2020 Greenbone Networks GmbH
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -16,19 +16,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-WSGI config for pheme project.
+import pytest
 
-It exposes the WSGI callable as a module-level variable named ``application``.
+from pheme.parser.xml import XMLParser
 
-For more information on this file, see
-https://docs.djangoproject.com/en/3.1/howto/deployment/wsgi/
-"""
 
-import os
-
-from django.core.wsgi import get_wsgi_application
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pheme.settings')
-
-application = get_wsgi_application()
+@pytest.mark.parametrize("xml", ['<data a="b"/>', '<data><a>b</a></data>',])
+def test_parsing(xml):
+    under_test = XMLParser()
+    result = under_test.parse(xml)
+    assert result == {'data': {'a': 'b'}}

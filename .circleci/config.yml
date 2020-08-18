@@ -20,7 +20,7 @@ commands:
           command: poetry install --no-dev
       - run:
           name: Run unit tests
-          command: poetry run python -m unittest
+          command: poetry run python -m pytest 
   test-with-codecov:
     description: "Download and run tests with code coverage"
     steps:
@@ -33,7 +33,7 @@ commands:
           command: poetry run pip install codecov
       - run:
           name: Run unit tests
-          command: poetry run coverage run -m unittest
+          command: poetry run coverage run -m pytest 
       - run:
           name: Upload coverage to Codecov
           command: poetry run codecov

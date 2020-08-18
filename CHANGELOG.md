@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- XMLParser (pheme/parser/xml.py) [#5](https://github.com/greenbone/pheme/pull/5)
+- transformation for [gvmd] scan results to host grouped template data [#5](https://github.com/greenbone/pheme/pull/5)
+```
+curl -X POST\
+    'http://localhost:8000/template/?grouping=host'\
+     -H 'Content-Type: application/xml'\
+     -H 'Accept: application/json; indent=2'\
+     -d @path_to/scanreport.xml
+```
+- transformation for [gvmd] scan results to nvt grouped template data [#5](https://github.com/greenbone/pheme/pull/5)
+```
+curl -X POST\
+    'http://localhost:8000/template/?grouping=nvt'\
+     -H 'Content-Type: application/xml'\
+     -H 'Accept: application/json; indent=2'\
+     -d @path_to/scanreport.xml
+```
 ### Changed
 ### Deprecated
 ### Removed
@@ -19,3 +36,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - django webserver
 - openapi (/openapi-schema/)
 - swagger (/docs/) 
+
+[gvmd]: https://github.com/greenbone/gvmd
