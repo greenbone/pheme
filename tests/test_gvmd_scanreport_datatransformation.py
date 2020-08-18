@@ -41,7 +41,7 @@ def gen_solution() -> Dict:
     }
 
 
-def gen_host(hostname='localhorst') -> Dict:
+def gen_host(hostname='localhost') -> Dict:
     return {
         'text': hostname,
     }
