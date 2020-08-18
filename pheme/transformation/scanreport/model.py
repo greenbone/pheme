@@ -14,19 +14,19 @@ class Count:
 
 
 @dataclass
-class Identifieable:
+class Identifiable:
     id: str
     name: str
     comment: str
 
 
 @dataclass
-class Target(Identifieable):
+class Target(Identifiable):
     trash: str
 
 
 @dataclass
-class Task(Identifieable):
+class Task(Identifiable):
     progress: str
     target: Target
 
