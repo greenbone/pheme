@@ -20,7 +20,6 @@ from functools import reduce
 from typing import Callable, Optional, Dict
 import logging
 
-# from guppy import hpy
 from .model import (
     Count,
     Filtered,
@@ -138,8 +137,6 @@ logger = logging.getLogger(__name__)
 def transform(
     data: Dict[str, str], group_by: Callable = group_by_host
 ) -> Report:
-    #    h = hpy()
-    #    h.setref()
     report = data.pop("report")
     report = report.pop("report")
     del data
@@ -232,5 +229,4 @@ def transform(
     del grouped
     del original_results
     del report
-    #    logger.debug(h.heap())
     return result
