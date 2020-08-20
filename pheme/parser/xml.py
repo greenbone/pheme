@@ -35,4 +35,6 @@ class XMLParser(BaseParser):
     media_type = "application/xml"
 
     def parse(self, stream, media_type=None, parser_context=None):
-        return xmltodict.parse(stream, attr_prefix='', dict_constructor=dict)
+        return xmltodict.parse(
+            stream, attr_prefix='', cdata_key='text', dict_constructor=dict
+        )

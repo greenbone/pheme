@@ -16,13 +16,29 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
+from typing import Dict
+
 import pytest
 
 from pheme.parser.xml import XMLParser
 
 
-@pytest.mark.parametrize("xml", ['<data a="b"/>', '<data><a>b</a></data>',])
+@dataclass
+class Case:
+    data: str
+    expected: Dict
+
+
+@pytest.mark.parametrize(
+    "xml",
+    [
+        Case('<data a="b"/>', {'data': {'a': 'b'}}),
+        Case('<data><a>b</a></data>', {'data': {'a': 'b'}}),
+        Case('<data>a<b></b></data>', {'data': {'b': None, 'text': 'a'}},),
+    ],
+)
 def test_parsing(xml):
     under_test = XMLParser()
-    result = under_test.parse(xml)
-    assert result == {'data': {'a': 'b'}}
+    result = under_test.parse(xml.data)
+    assert result == xml.expected
