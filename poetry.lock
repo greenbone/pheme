@@ -392,11 +392,12 @@ category = "dev"
 description = "Common utilities and tools maintained by Greenbone Networks"
 name = "pontos"
 optional = false
-python-versions = ">=3.5,<4.0"
-version = "0.2.0"
+python-versions = ">=3.7,<4.0"
+version = "0.3.0"
 
 [package.dependencies]
 packaging = ">=20.3,<21.0"
+requests = ">=2.24.0,<3.0.0"
 tomlkit = ">=0.5.11,<0.6.0"
 
 [[package]]
@@ -669,8 +670,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "a6da876f57793b2127ab4c69a25b37001994195392d47e80bbe7152c2932e5bd"
-lock-version = "1.0"
+content-hash = "b4652a5576c2ab18f7ee86790f9ee4aa71b774b255da825dd0143f9515ba700c"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -894,8 +894,8 @@ pluggy = [
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
 ]
 pontos = [
-    {file = "pontos-0.2.0-py3-none-any.whl", hash = "sha256:6f2778efce3374ab91834845c4ef6176bb455cb2fb3f7653f1518cab7008f65e"},
-    {file = "pontos-0.2.0.tar.gz", hash = "sha256:eb94a5af108f99ff32ff63614296835b7343c00fbc7fd6f30c9f78798d2ae217"},
+    {file = "pontos-0.3.0-py3-none-any.whl", hash = "sha256:78b56667e56916d9b1bddef97571f4229e4b9f9b19f90214192b5abadb798a91"},
+    {file = "pontos-0.3.0.tar.gz", hash = "sha256:c040e32acc3bcd123b351d76ddfcbb320292621db89e5c507522903ae209000a"},
 ]
 py = [
     {file = "py-1.9.0-py2.py3-none-any.whl", hash = "sha256:366389d1db726cd2fcfc79732e75410e5fe4d31db13692115529d34069a043c2"},
