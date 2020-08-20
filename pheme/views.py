@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import dataclasses
-
-from rest_framework.decorators import api_view, parser_classes
+import rest_framework.renderers
+from rest_framework.decorators import api_view, parser_classes, renderer_classes
 from rest_framework.response import Response
 from pheme.parser.xml import XMLParser
 from pheme.transformation import scanreport
@@ -32,6 +32,13 @@ def report(request):
 
 @api_view(['POST'])
 @parser_classes([XMLParser])
+@renderer_classes(
+    [
+        rest_framework.renderers.JSONRenderer,
+        scanreport.renderer.DetailScanHTMLReport,
+        scanreport.renderer.DetailScanPDFReport,
+    ]
+)
 def template(request):
     input_flavour = request.GET.get('flavour', 'gvmd')
     grouping = request.GET.get('grouping')
