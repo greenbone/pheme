@@ -63,6 +63,9 @@ class DetailScanPDFReport(DetailScanReport):
         template = self._template_based_on_request(request)
         html = loader.get_template(template).render(data)
         logger.debug("created html")
-        pdf = pdfkit.from_string(html, False)
+        # workaround for https://github.com/wkhtmltopdf/wkhtmltopdf/issues/4460
+        pdf = pdfkit.from_string(
+            html, False, options={'enable-local-file-access': None}
+        )
         logger.debug("created pdf")
         return pdf
