@@ -131,3 +131,5 @@ dmypy.json
 # add later
 test_data/
 requirements.txt
+start.sh
+generate.sh

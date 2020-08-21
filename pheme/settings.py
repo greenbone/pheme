@@ -33,8 +33,11 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-TEMPLATE_PATH = BASE_DIR / 'template'
-
+STATIC_DIR = BASE_DIR / 'static'
+TEMPLATE_DIR = BASE_DIR / 'template'
+TEMPLATE_LOGO_ADDRESS = os.environ.get(
+    "TEMPLATE_LOGO_ADDRESS"
+) or 'file://{}/logo.jpg'.format(STATIC_DIR)
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 # Quick-start development settings - unsuitable for production
@@ -44,10 +47,10 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = None
 SECRET_KEY = 'aq^_++zzyd@q&7olh&huvyc=3v=h)y+muc75i9d6$l@4fewk)='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ENV_HOSTS = os.environ.get("ALLOWED_HOSTS")
+DEBUG = False if ENV_HOSTS else True
+ALLOWED_HOSTS = ENV_HOSTS.split(' ') if ENV_HOSTS else []
 
 # Application definition
 
@@ -76,7 +79,7 @@ ROOT_URLCONF = 'pheme.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATE_PATH,],
+        'DIRS': [TEMPLATE_DIR,],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,10 +125,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-    TEMPLATE_PATH,
+    STATIC_DIR,
+    TEMPLATE_DIR,
 ]
 
 # Logging

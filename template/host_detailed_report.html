@@ -49,7 +49,7 @@
         {% for scan in results.scans %}
         <div id="report_header">
             <div id="header_left">
-                <img class="auto_width" src="/tmp/logo.jpg" alt="logo">
+                <img class="auto_width" src="{{ logo }}" alt="logo">
             </div>
             <div id="header_center">
                 <h1 id=report_title>{{ title|default:"detailed scanreport" }}</h1>

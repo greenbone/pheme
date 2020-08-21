@@ -17,8 +17,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
+from typing import Dict
 
 from django.template import loader
+from django.conf import settings
 from rest_framework import renderers
 from rest_framework.request import HttpRequest
 import pdfkit
@@ -33,6 +35,10 @@ class DetailScanReport(renderers.BaseRenderer):
             if request.GET.get('grouping') == 'host'
             else 'nvt_detailed_report.html'
         )
+
+    def _enrich(self, data: Dict) -> Dict:
+        data['logo'] = settings.TEMPLATE_LOGO_ADDRESS
+        return data
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         raise NotImplementedError(
@@ -49,7 +55,7 @@ class DetailScanHTMLReport(DetailScanReport):
         renderer_context = renderer_context or {}  # to throw key error
         request = renderer_context['request']
         template = self._template_based_on_request(request)
-        return loader.get_template(template).render(data)
+        return loader.get_template(template).render(self._enrich(data))
 
 
 class DetailScanPDFReport(DetailScanReport):
@@ -61,7 +67,7 @@ class DetailScanPDFReport(DetailScanReport):
         renderer_context = renderer_context or {}  # to throw key error
         request = renderer_context['request']
         template = self._template_based_on_request(request)
-        html = loader.get_template(template).render(data)
+        html = loader.get_template(template).render(self._enrich(data))
         logger.debug("created html")
         # workaround for https://github.com/wkhtmltopdf/wkhtmltopdf/issues/4460
         pdf = pdfkit.from_string(
