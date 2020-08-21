@@ -23,7 +23,7 @@ from django.template import loader
 from django.conf import settings
 from rest_framework import renderers
 from rest_framework.request import HttpRequest
-import pdfkit
+from weasyprint import CSS, HTML
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +31,16 @@ logger = logging.getLogger(__name__)
 class DetailScanReport(renderers.BaseRenderer):
     def _template_based_on_request(self, request: HttpRequest) -> str:
         return (
-            'host_detailed_report.html'
+            'pdf_host_detail_scan_report.html'
             if request.GET.get('grouping') == 'host'
             else 'nvt_detailed_report.html'
         )
 
-    def _enrich(self, data: Dict) -> Dict:
+    def _enrich(self, data: Dict, request: HttpRequest) -> Dict:
         data['logo'] = settings.TEMPLATE_LOGO_ADDRESS
+        data['grouping'] = (
+            'host' if request.GET.get('grouping') == 'host' else 'nvt'
+        )
         return data
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
@@ -55,7 +58,7 @@ class DetailScanHTMLReport(DetailScanReport):
         renderer_context = renderer_context or {}  # to throw key error
         request = renderer_context['request']
         template = self._template_based_on_request(request)
-        return loader.get_template(template).render(self._enrich(data))
+        return loader.get_template(template).render(self._enrich(data, request))
 
 
 class DetailScanPDFReport(DetailScanReport):
@@ -67,11 +70,19 @@ class DetailScanPDFReport(DetailScanReport):
         renderer_context = renderer_context or {}  # to throw key error
         request = renderer_context['request']
         template = self._template_based_on_request(request)
-        html = loader.get_template(template).render(self._enrich(data))
+        html = loader.get_template(template).render(self._enrich(data, request))
         logger.debug("created html")
-        # workaround for https://github.com/wkhtmltopdf/wkhtmltopdf/issues/4460
-        pdf = pdfkit.from_string(
-            html, False, options={'enable-local-file-access': None}
+        css = loader.get_template('report.css').render(
+            {
+                'background_image': 'file://{}/Greenbone_Radar.png'.format(
+                    settings.STATIC_DIR
+                ),
+                'indicator': 'file://{}/heading.svg'.format(
+                    settings.STATIC_DIR
+                ),
+            }
         )
+
+        pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")
         return pdf
