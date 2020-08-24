@@ -13,6 +13,7 @@ Or in this case personification of a service to generate reports.
 - [Installation](#installation)
   - [Requirements](#requirements)
 - [Development](#development)
+- [API overview](#api-overview)
 - [Maintainer](#maintainer)
 - [Contributing](#contributing)
 - [License](#license)
@@ -76,7 +77,7 @@ first.
 
 Copyright (C) 2020 [Greenbone Networks GmbH][Greenbone Networks]
 
-Licensed under the [GNU General Public License v3.0 or later](LICENSE).
+Licensed under the [GNU Affero General Public License v3.0 or later](LICENSE).
 
 [Greenbone Networks]: https://www.greenbone.net/
 [poetry]: https://python-poetry.org/
