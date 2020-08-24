@@ -138,7 +138,8 @@ def transform(
     data: Dict[str, str], group_by: Callable = group_by_host
 ) -> Report:
     report = data.pop("report")
-    report = report.pop("report")
+    # sometimes gvmd reports have .report.report sometimes just .report
+    report = report.pop("report", None) or report
     del data
     logger.info("data transformation; grouped by %s.", group_by)
 
