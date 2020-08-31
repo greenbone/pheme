@@ -63,7 +63,7 @@ description = "Library for managing git hooks"
 name = "autohooks"
 optional = false
 python-versions = ">=3.5,<4.0"
-version = "2.1.0"
+version = "2.2.0"
 
 [package.dependencies]
 colorful = ">=0.5.4,<0.6.0"
@@ -821,7 +821,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "fdb8abe14b817f57d64b2637a80c61a89a4f7f0c6d372bb6db2d93eb182175c9"
+content-hash = "c4e131abd22272ab893d8eec7ffe85f7e414446989328e255773b0abb4c8087f"
 lock-version = "1.0"
 python-versions = "^3.7"
 
@@ -847,8 +847,8 @@ attrs = [
     {file = "attrs-20.1.0.tar.gz", hash = "sha256:0ef97238856430dcf9228e07f316aefc17e8939fc8507e18c6501b761ef1a42a"},
 ]
 autohooks = [
-    {file = "autohooks-2.1.0-py3-none-any.whl", hash = "sha256:b21863e4e47c612462cb8d5d6150072eb41ce8fc3eee687d56d1965b2f46c42b"},
-    {file = "autohooks-2.1.0.tar.gz", hash = "sha256:a9770c39ab80128ec9fbaf0584e6528837b2ea6ea5f2a156452d589cb3ba8b35"},
+    {file = "autohooks-2.2.0-py3-none-any.whl", hash = "sha256:9c7b1117ebace5f7edb3352ea7951dc09cfab8a1f8331ae4157da11cdf66f280"},
+    {file = "autohooks-2.2.0.tar.gz", hash = "sha256:44bc4675ae6eae0f0803e1f23f31405317ffc679b6a1873ee192999466e05cdd"},
 ]
 autohooks-plugin-black = [
     {file = "autohooks-plugin-black-1.2.0.tar.gz", hash = "sha256:e69a18209f3fd584da903e87faf0e3685caa4d51a9e870ddb3c2b1aef93387b8"},
