@@ -108,7 +108,10 @@ def gen_identifiable() -> dict:
 def gen_task() -> Dict:
     return {
         **gen_identifiable(),
-        'target': {**gen_identifiable(), 'trash': _random_text(2),},
+        'target': {
+            **gen_identifiable(),
+            'trash': _random_text(2),
+        },
         'progress': '100',
     }
 
