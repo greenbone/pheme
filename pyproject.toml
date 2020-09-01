@@ -34,7 +34,7 @@ pytest-django = "^3.9.0"
 weasyprint = "^51"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.4.4"
+pylint = "^2.6.0"
 autohooks = "^2.2.0"
 autohooks-plugin-pylint = "^1.2.0"
 autohooks-plugin-black = {version = "^1.2.0", python = "^3.6"}
