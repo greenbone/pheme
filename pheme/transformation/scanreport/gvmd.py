@@ -56,7 +56,10 @@ def group_by_host(first: Dict[str, HostResults], second: Dict[str, str]):
     )
     oid = nvt['oid']
     qod = (
-        QOD(second['qod']['value'], second['qod']['type'],)
+        QOD(
+            second['qod']['value'],
+            second['qod']['type'],
+        )
         if second.get('qod')
         else None
     )
@@ -106,7 +109,10 @@ def group_by_nvt(first: Dict[str, NVTResult], second: Dict[str, str]):
             else []
         )
         qod = (
-            QOD(second['qod']['value'], second['qod']['type'],)
+            QOD(
+                second['qod']['value'],
+                second['qod']['type'],
+            )
             if second.get('qod')
             else None
         )
