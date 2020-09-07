@@ -35,7 +35,10 @@ class Case:
     [
         Case('<data a="b"/>', {'data': {'a': 'b'}}),
         Case('<data><a>b</a></data>', {'data': {'a': 'b'}}),
-        Case('<data>a<b></b></data>', {'data': {'b': None, 'text': 'a'}},),
+        Case(
+            '<data>a<b></b></data>',
+            {'data': {'b': None, 'text': 'a'}},
+        ),
     ],
 )
 def test_parsing(xml):
