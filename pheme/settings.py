@@ -82,7 +82,9 @@ ROOT_URLCONF = 'pheme.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATE_DIR,],
+        'DIRS': [
+            TEMPLATE_DIR,
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,7 +142,10 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'console': {'class': 'logging.StreamHandler', 'formatter': 'standard',},
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
     },
     'formatters': {
         'standard': {

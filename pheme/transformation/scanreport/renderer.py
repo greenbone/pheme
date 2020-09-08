@@ -40,19 +40,12 @@ class DetailScanReport(renderers.BaseRenderer):
         )
 
     def _template_based_on_request(self, request: HttpRequest) -> str:
-        try:
-            sort = self.media_type[self.media_type.index('/') + 1 :]
-            return (
-                '{}_host_detail_scan_report.html'.format(sort)
-                if request.GET.get('grouping') == 'host'
-                else '{}_nvt_detail_scan_report.html'.format(sort)
-            )
-        except:
-            raise ValueError(
-                'Unable to identify template type based on {}'.format(
-                    self.media_type
-                )
-            )
+        sort = self.media_type[self.media_type.index('/') + 1 :]
+        return (
+            '{}_host_detail_scan_report.html'.format(sort)
+            if request.GET.get('grouping') == 'host'
+            else '{}_nvt_detail_scan_report.html'.format(sort)
+        )
 
     def _enrich(self, data: Dict, request: HttpRequest) -> Dict:
         data['logo'] = settings.TEMPLATE_LOGO_ADDRESS
