@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Report</title>
+    <meta name="description" content="Report example">
+</head>
+<style>
+{{ css }}
+</style>
+<body>
+    <article id="cover">
+        <h1>Report example</h1>
+        <address>
+            Greenbone Networks GmbH
+            Neumarkt 12
+            49074 Osnabrück Germany
+        </address>
+        <address>
+            support@greenbone.net
+            +49-541-760278-0
+            https://www.greenbone.net
+        </address>
+    </article>
+
+    <article id="finding">
+        <h2 id="finding-title">scan reports grouped by {{ grouping }}</h2>
+        {% for scan in results.scans %}
+        <h3>{{ scan.host }}</h3>
+        {% for detail in scan.results %}
+        <section class="{{ detail.threat }}">
+            <h4>OID: {{ detail.oid }}</h4>
+                <p>Family: {{ detail.family }}</p>
+                <p>Description: {{ detail.name }}</p>
+                {% if 'solution' in detail %}
+                <h5>{{ detail.solution.type }}:</h5>
+                <p>{{ detail.solution.text }}</p>
+                {% endif %}
+            </p>
+        </section>
+        {% endfor %}
+        <div class="pagebreak"/>
+        {% endfor %}
+    </article>
+
+</body>
+
+</html>

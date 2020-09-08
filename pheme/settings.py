@@ -38,6 +38,9 @@ TEMPLATE_DIR = BASE_DIR / 'template'
 TEMPLATE_LOGO_ADDRESS = os.environ.get(
     "TEMPLATE_LOGO_ADDRESS"
 ) or 'file://{}/logo.jpg'.format(STATIC_DIR)
+TEMPLATE_COVER_IMAGE_ADDRESS = os.environ.get(
+    "TEMPLATE_COVER_IMAGE_ADDRESS"
+) or 'file://{}/cover_image.png'.format(STATIC_DIR)
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 # Quick-start development settings - unsuitable for production
@@ -79,9 +82,7 @@ ROOT_URLCONF = 'pheme.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            TEMPLATE_DIR,
-        ],
+        'DIRS': [TEMPLATE_DIR,],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,10 +140,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard',
-        },
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'standard',},
     },
     'formatters': {
         'standard': {

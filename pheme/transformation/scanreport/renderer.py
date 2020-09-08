@@ -29,12 +29,30 @@ logger = logging.getLogger(__name__)
 
 
 class DetailScanReport(renderers.BaseRenderer):
-    def _template_based_on_request(self, request: HttpRequest) -> str:
-        return (
-            'pdf_host_detail_scan_report.html'
-            if request.GET.get('grouping') == 'host'
-            else 'nvt_detailed_report.html'
+    def _get_css(self, name: str) -> CSS:
+        return loader.get_template(name).render(
+            {
+                'background_image': settings.TEMPLATE_COVER_IMAGE_ADDRESS,
+                'indicator': 'file://{}/heading.svg'.format(
+                    settings.STATIC_DIR
+                ),
+            }
         )
+
+    def _template_based_on_request(self, request: HttpRequest) -> str:
+        try:
+            sort = self.media_type[self.media_type.index('/') + 1 :]
+            return (
+                '{}_host_detail_scan_report.html'.format(sort)
+                if request.GET.get('grouping') == 'host'
+                else '{}_nvt_detail_scan_report.html'.format(sort)
+            )
+        except:
+            raise ValueError(
+                'Unable to identify template type based on {}'.format(
+                    self.media_type
+                )
+            )
 
     def _enrich(self, data: Dict, request: HttpRequest) -> Dict:
         data['logo'] = settings.TEMPLATE_LOGO_ADDRESS
@@ -52,6 +70,11 @@ class DetailScanReport(renderers.BaseRenderer):
 class DetailScanHTMLReport(DetailScanReport):
     media_type = 'text/html'
     format = 'html'
+
+    def _enrich(self, data, request):
+        data = super()._enrich(data, request)
+        data['css'] = self._get_css('html_report.css')
+        return data
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         logger.debug("generating html template")
@@ -72,17 +95,7 @@ class DetailScanPDFReport(DetailScanReport):
         template = self._template_based_on_request(request)
         html = loader.get_template(template).render(self._enrich(data, request))
         logger.debug("created html")
-        css = loader.get_template('report.css').render(
-            {
-                'background_image': 'file://{}/Greenbone_Radar.png'.format(
-                    settings.STATIC_DIR
-                ),
-                'indicator': 'file://{}/heading.svg'.format(
-                    settings.STATIC_DIR
-                ),
-            }
-        )
-
+        css = self._get_css('pdf_report.css')
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")
         return pdf
