@@ -158,3 +158,10 @@ LOGGING = {
         'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
     },
 }
+# https://docs.djangoproject.com/en/3.1/topics/cache/
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',
+    }
+}

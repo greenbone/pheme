@@ -55,11 +55,38 @@ Validate the activated git hooks by running
 To get an overview of the API you can start this project
 
 ```
-python manage.py runserver
+poetry run python manage.py runserver
 ```
 
 and then go to [swagger](http://localhost:8000/docs/)
 
+## Usage
+
+In order to prepare the data structure the XML report data needs to be posted to `pheme` with a grouping indicator (either by host or nvt).
+
+E.g.:
+
+```
+> curl -X POST 'http://localhost:8000/transform?grouping=nvt'\
+    -H 'Content-Type: application/xml'\
+    -H 'Accept: application/json'\
+    -d @test_data/longer_report.xml
+  
+  "scanreport-nvt-9a233b0d-713c-4f22-9e15-f6e5090873e3"⏎
+```
+
+The returned identifier can be used to generate the actual report. 
+
+So far a report can be either in:
+- application/pdf
+- text/html
+- application/json
+
+E.g.
+
+```
+> curl -v 'http://localhost:8000/report/scanreport-nvt-9a233b0d-713c-4f22-9e15-f6e5090873e3' -H 'Accept: application/pdf'
+```
 
 ## Maintainer
 

@@ -19,6 +19,7 @@
 import logging
 from typing import Dict
 
+from django.core.cache import cache
 from django.template import loader
 from django.conf import settings
 from rest_framework import renderers
@@ -55,8 +56,24 @@ class DetailScanReport(renderers.BaseRenderer):
         return data
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
+        renderer_context = renderer_context or {}  # to throw key error
+        request = renderer_context['request']
+        name = data.get('internal_name')
+        cache_key = "{}/{}".format(self.media_type, name) if name else None
+        logger.debug("generating report %s", cache_key)
+
+        if cache_key:
+            cached = cache.get(cache_key)
+            if cached:
+                return cached
+        result = self.apply(data, request)
+        if cache_key:
+            cache.set(cache_key, result)
+        return result
+
+    def apply(self, data: Dict, request: HttpRequest):
         raise NotImplementedError(
-            'Renderer class requires .render() to be implemented'
+            'DetailScanReport class requires .apply() to be implemented'
         )
 
 
@@ -69,10 +86,7 @@ class DetailScanHTMLReport(DetailScanReport):
         data['css'] = self._get_css('html_report.css')
         return data
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        logger.debug("generating html template")
-        renderer_context = renderer_context or {}  # to throw key error
-        request = renderer_context['request']
+    def apply(self, data: Dict, request: HttpRequest):
         template = self._template_based_on_request(request)
         return loader.get_template(template).render(self._enrich(data, request))
 
@@ -81,10 +95,7 @@ class DetailScanPDFReport(DetailScanReport):
     media_type = 'application/pdf'
     format = 'binary'
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        logger.debug("generating html template")
-        renderer_context = renderer_context or {}  # to throw key error
-        request = renderer_context['request']
+    def apply(self, data: Dict, request: HttpRequest):
         template = self._template_based_on_request(request)
         html = loader.get_template(template).render(self._enrich(data, request))
         logger.debug("created html")

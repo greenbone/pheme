@@ -40,8 +40,10 @@ import pheme.version
 import pheme.views
 
 urlpatterns = [
-    path('template/', pheme.views.template),
-    path('report/', pheme.views.report),
+    path('transform', pheme.views.transform),
+    path('transform/', pheme.views.transform),
+    path('report/<str:name>', pheme.views.report),
+    path('report/<str:name>/', pheme.views.report),
     url(
         r'^openapi-schema',
         get_schema_view(
