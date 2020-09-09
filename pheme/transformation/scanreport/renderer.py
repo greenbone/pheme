@@ -19,6 +19,7 @@
 import logging
 from typing import Dict
 
+from django.core.cache import cache
 from django.template import loader
 from django.conf import settings
 from rest_framework import renderers
@@ -29,11 +30,22 @@ logger = logging.getLogger(__name__)
 
 
 class DetailScanReport(renderers.BaseRenderer):
+    def _get_css(self, name: str) -> CSS:
+        return loader.get_template(name).render(
+            {
+                'background_image': settings.TEMPLATE_COVER_IMAGE_ADDRESS,
+                'indicator': 'file://{}/heading.svg'.format(
+                    settings.STATIC_DIR
+                ),
+            }
+        )
+
     def _template_based_on_request(self, request: HttpRequest) -> str:
+        sort = self.media_type[self.media_type.index('/') + 1 :]
         return (
-            'pdf_host_detail_scan_report.html'
+            '{}_host_detail_scan_report.html'.format(sort)
             if request.GET.get('grouping') == 'host'
-            else 'nvt_detailed_report.html'
+            else '{}_nvt_detail_scan_report.html'.format(sort)
         )
 
     def _enrich(self, data: Dict, request: HttpRequest) -> Dict:
@@ -44,8 +56,24 @@ class DetailScanReport(renderers.BaseRenderer):
         return data
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
+        renderer_context = renderer_context or {}  # to throw key error
+        request = renderer_context['request']
+        name = data.get('internal_name')
+        cache_key = "{}/{}".format(self.media_type, name) if name else None
+        logger.debug("generating report %s", cache_key)
+
+        if cache_key:
+            cached = cache.get(cache_key)
+            if cached:
+                return cached
+        result = self.apply(data, request)
+        if cache_key:
+            cache.set(cache_key, result)
+        return result
+
+    def apply(self, data: Dict, request: HttpRequest):
         raise NotImplementedError(
-            'Renderer class requires .render() to be implemented'
+            'DetailScanReport class requires .apply() to be implemented'
         )
 
 
@@ -53,10 +81,12 @@ class DetailScanHTMLReport(DetailScanReport):
     media_type = 'text/html'
     format = 'html'
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        logger.debug("generating html template")
-        renderer_context = renderer_context or {}  # to throw key error
-        request = renderer_context['request']
+    def _enrich(self, data, request):
+        data = super()._enrich(data, request)
+        data['css'] = self._get_css('html_report.css')
+        return data
+
+    def apply(self, data: Dict, request: HttpRequest):
         template = self._template_based_on_request(request)
         return loader.get_template(template).render(self._enrich(data, request))
 
@@ -65,24 +95,11 @@ class DetailScanPDFReport(DetailScanReport):
     media_type = 'application/pdf'
     format = 'binary'
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        logger.debug("generating html template")
-        renderer_context = renderer_context or {}  # to throw key error
-        request = renderer_context['request']
+    def apply(self, data: Dict, request: HttpRequest):
         template = self._template_based_on_request(request)
         html = loader.get_template(template).render(self._enrich(data, request))
         logger.debug("created html")
-        css = loader.get_template('report.css').render(
-            {
-                'background_image': 'file://{}/Greenbone_Radar.png'.format(
-                    settings.STATIC_DIR
-                ),
-                'indicator': 'file://{}/heading.svg'.format(
-                    settings.STATIC_DIR
-                ),
-            }
-        )
-
+        css = self._get_css('pdf_report.css')
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")
         return pdf

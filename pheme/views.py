@@ -22,12 +22,7 @@ from rest_framework.decorators import api_view, parser_classes, renderer_classes
 from rest_framework.response import Response
 from pheme.parser.xml import XMLParser
 from pheme.transformation import scanreport
-
-
-@api_view(['POST'])
-@parser_classes([XMLParser])
-def report(request):
-    return Response(request.data)
+from pheme.storage import store, load
 
 
 @api_view(['POST'])
@@ -35,22 +30,30 @@ def report(request):
 @renderer_classes(
     [
         rest_framework.renderers.JSONRenderer,
+    ]
+)
+def transform(request):
+    grouping = request.GET.get('grouping')
+    grouping_function = scanreport.gvmd.group_by_host
+    if grouping == 'nvt':
+        grouping_function = scanreport.gvmd.group_by_nvt
+    name = store(
+        "scanreport-{}".format(grouping),
+        dataclasses.asdict(
+            scanreport.gvmd.transform(request.data, grouping_function)
+        ),
+    )
+
+    return Response(name)
+
+
+@api_view(['GET'])
+@renderer_classes(
+    [
+        rest_framework.renderers.JSONRenderer,
         scanreport.renderer.DetailScanHTMLReport,
         scanreport.renderer.DetailScanPDFReport,
     ]
 )
-def template(request):
-    input_flavour = request.GET.get('flavour', 'gvmd')
-    grouping = request.GET.get('grouping')
-    if input_flavour == 'gvmd':
-        if grouping == 'nvt':
-            grouping = scanreport.gvmd.group_by_nvt
-        else:
-            grouping = scanreport.gvmd.group_by_host
-
-        return Response(
-            dataclasses.asdict(
-                scanreport.gvmd.transform(request.data, grouping)
-            )
-        )
-    return Response(request.data)
+def report(request, name: str):
+    return Response(load(name))

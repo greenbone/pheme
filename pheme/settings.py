@@ -38,6 +38,9 @@ TEMPLATE_DIR = BASE_DIR / 'template'
 TEMPLATE_LOGO_ADDRESS = os.environ.get(
     "TEMPLATE_LOGO_ADDRESS"
 ) or 'file://{}/logo.jpg'.format(STATIC_DIR)
+TEMPLATE_COVER_IMAGE_ADDRESS = os.environ.get(
+    "TEMPLATE_COVER_IMAGE_ADDRESS"
+) or 'file://{}/cover_image.png'.format(STATIC_DIR)
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 # Quick-start development settings - unsuitable for production
@@ -154,4 +157,11 @@ LOGGING = {
         'handlers': ['console'],
         'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
     },
+}
+# https://docs.djangoproject.com/en/3.1/topics/cache/
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',
+    }
 }

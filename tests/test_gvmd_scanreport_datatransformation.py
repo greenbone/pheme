@@ -37,14 +37,22 @@ hosts = ['first', 'second']
 )
 def test_group_by_nvt(scan_result):
     data = {'report': scan_result}
-    result = transform(data, group_by=group_by_nvt)
-    assert len(result.results.scans) == len(oids)
+    report = transform(data, group_by=group_by_nvt)
+    assert len(report.results.scans) == len(oids)
 
 
 @pytest.mark.parametrize(
-    "scan_result", [gen_report(hosts, oids, with_optional=False)]
+    "expected",
+    [
+        (2, gen_report(hosts, oids, with_optional=False)),
+        (
+            0,
+            gen_report([], [], with_optional=False),
+        ),  # when a report has no results
+    ],
 )
-def test_group_by_host(scan_result):
-    data = {'report': {'report': scan_result}}
-    result = transform(data, group_by=group_by_host)
-    assert len(result.results.scans) == 2
+def test_group_by_host(expected):
+    amount_scans, scan_results = expected
+    data = {'report': {'report': scan_results}}
+    report = transform(data, group_by=group_by_host)
+    assert len(report.results.scans) == amount_scans

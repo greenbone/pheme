@@ -207,7 +207,7 @@ def transform(
         )
 
     original_results = report.pop('results')
-    grouped = reduce(group_by, original_results.pop("result"), {})
+    grouped = reduce(group_by, original_results.pop("result", []), {})
     result = Report(
         report.get('id'),
         may_create_version('gmp'),
