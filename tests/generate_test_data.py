@@ -152,7 +152,7 @@ def gen_report(
         'timezone': 'timezone_abbrev' if with_optional else None,
         'timezone_abbrev': 'UTC' if with_optional else None,
         'scan_end': '2020-07-01T21:00' if with_optional else None,
-        'erros': gen_count() if with_optional else None,
+        'errors': gen_count() if with_optional else None,
         'results': {
             'max': '{}'.format(random.randint(1, 1000))
             if with_optional
