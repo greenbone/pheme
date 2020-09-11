@@ -26,7 +26,6 @@ from pheme.transformation.scanreport.gvmd import (
 
 from tests.generate_test_data import gen_report
 
-
 oids = [uuid.uuid1().hex for _ in range(5)]
 hosts = ['first', 'second']
 
@@ -34,11 +33,9 @@ hosts = ['first', 'second']
 @pytest.mark.parametrize(
     "expected",
     [
+        (2, gen_report(hosts, oids, with_optional=True)),
         (2, gen_report(hosts, oids, with_optional=False)),
-        (
-            0,
-            gen_report([], [], with_optional=False),
-        ),  # when a report has no results
+        (0, gen_report([], [], with_optional=False)),
     ],
 )
 def test_group_by_host(expected):

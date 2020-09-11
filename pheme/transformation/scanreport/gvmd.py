@@ -36,6 +36,7 @@ from pheme.transformation.scanreport.model import (
     Ref,
     Report,
     Result,
+    Results,
     Scan,
     Solution,
     Summary,
@@ -113,19 +114,26 @@ def __create_nvt_top_ten(
 
 
 def __create_host_top_ten(result_series_df: DataFrame) -> TopTen:
-    threat = result_series_df[['host.text', 'host.hostname']]
+    threat = result_series_df.get(['host.text', 'host.hostname'])
+    if threat is None:
+        threat = result_series_df.get(['host.text'])
+    if threat is None:
+        return None
+
     counted = threat.value_counts()
     return TopTen(
         chart=None,
         top_ten=[
-            HostCount(ip=k[0], amount=v, name=k[1])
+            HostCount(ip=k[0], amount=v, name=k[1] if len(k) > 1 else None)
             for k, v in counted.head(10).to_dict().items()
         ],
     )
 
 
 def __create_port_top_ten(result_series_df: DataFrame) -> TopTen:
-    threat = result_series_df[['port']]
+    threat = result_series_df.get(['port'])
+    if threat is None:
+        return None
     counted = threat.value_counts()
     return TopTen(
         chart=None,
@@ -139,7 +147,9 @@ def __create_port_top_ten(result_series_df: DataFrame) -> TopTen:
 def __create_cvss_distribution_port_top_ten(
     result_series_df: DataFrame,
 ) -> TopTen:
-    threat = result_series_df[['port', 'nvt.cvss_base']]
+    threat = result_series_df.get(['port', 'nvt.cvss_base'])
+    if threat is None:
+        return None
     counted = threat.value_counts()
     return TopTen(
         chart=None,
@@ -153,7 +163,11 @@ def __create_cvss_distribution_port_top_ten(
 def __create_cvss_distribution_host_top_ten(
     result_series_df: DataFrame,
 ) -> TopTen:
-    threat = result_series_df[['host.text', 'host.hostname', 'nvt.cvss_base']]
+    threat = result_series_df.get(
+        ['host.text', 'host.hostname', 'nvt.cvss_base']
+    )
+    if threat is None:
+        return None
     counted = threat.value_counts()
     return TopTen(
         chart=None,
@@ -167,7 +181,9 @@ def __create_cvss_distribution_host_top_ten(
 def __create_cvss_distribution_nvt_top_ten(
     result_series_df: DataFrame,
 ) -> TopTen:
-    threat = result_series_df[['nvt.oid', 'nvt.cvss_base']]
+    threat = result_series_df.get(['nvt.oid', 'nvt.cvss_base'])
+    if threat is None:
+        return None
     counted = threat.value_counts()
     return TopTen(
         chart=None,
@@ -187,33 +203,32 @@ def __simple_data_frame_to_values(df: DataFrame) -> List:
 def __create_scan(
     report: DataFrame,
 ) -> Scan:
-    return Scan(
-        *__simple_data_frame_to_values(
-            report.get(
-                [
-                    'task.name',
-                    'scan_start',
-                    'scan_end',
-                    'hosts.count',
-                    'task.comment',
-                ]
-            )
-        )
+    scan = report.get(
+        [
+            'task.name',
+            'scan_start',
+            'scan_end',
+            'hosts.count',
+            'task.comment',
+        ]
     )
+    if scan is None:
+        return None
+    return Scan(*__simple_data_frame_to_values(scan))
 
 
 def __create_summary_report(report: DataFrame) -> SummaryReport:
-    return SummaryReport(
-        *__simple_data_frame_to_values(
-            report.get(['filters.term', 'filters.filter', 'timezone'])
-        )
-    )
+    filters = report.get(['filters.term', 'filters.filter', 'timezone'])
+    if filters is None:
+        return None
+    return SummaryReport(*__simple_data_frame_to_values(filters))
 
 
 def __create_summary_results(report: DataFrame) -> SummaryResults:
-    data = __simple_data_frame_to_values(
-        report.get(['result_count.full', 'result_count.filtered'])
-    )
+    counts = report.get(['result_count.full', 'result_count.filtered'])
+    if counts is None:
+        return None
+    data = __simple_data_frame_to_values(counts)
     if len(data) != 2:
         return None
     data += [None]  # append graph
@@ -231,13 +246,17 @@ def transform(
     results_series = n_df.get('results.result')
     # pylint: disable=W0108
     result_series_df = results_series.map(lambda x: pd.json_normalize(x)).all()
+    common_vulnerabilities = None
+    try:
+        group_by_threat = result_series_df.groupby('original_threat')
 
-    group_by_threat = result_series_df.groupby('original_threat')
-    common_vulnerabilities = CommonVulnerabilities(
-        __create_nvt_top_ten('High', group_by_threat),
-        __create_nvt_top_ten('Medium', group_by_threat),
-        __create_nvt_top_ten('Low', group_by_threat),
-    )
+        common_vulnerabilities = CommonVulnerabilities(
+            __create_nvt_top_ten('High', group_by_threat),
+            __create_nvt_top_ten('Medium', group_by_threat),
+            __create_nvt_top_ten('Low', group_by_threat),
+        )
+    except KeyError as e:
+        logger.debug('ignoring grouping exception, %s', e)
 
     vulnerabilities_overview = VulnerabilityOverview(
         __create_host_top_ten(result_series_df),
@@ -263,5 +282,5 @@ def transform(
         summary,
         common_vulnerabilities,
         vulnerabilities_overview,
-        grouped,
+        Results(0, 0, list(grouped.values())),
     )
