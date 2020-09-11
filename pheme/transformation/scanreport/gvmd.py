@@ -17,25 +17,32 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from functools import reduce
-from typing import Callable, Optional, Dict
+from typing import Callable, Dict, List
 import logging
 
-from .model import (
-    Count,
-    Filtered,
-    HostResult,
+import pandas as pd
+from pandas import DataFrame
+from pandas.core.groupby.generic import DataFrameGroupBy
+
+
+from pheme.transformation.scanreport.model import (
+    CommonVulnerabilities,
+    CVSSDistributionCount,
+    HostCount,
     HostResults,
-    HostSpecific,
-    NVTResult,
+    NVTCount,
+    PortCount,
     QOD,
     Ref,
     Report,
-    ResultCount,
-    Results,
+    Result,
+    Scan,
     Solution,
-    Target,
-    Task,
-    Version,
+    Summary,
+    SummaryReport,
+    SummaryResults,
+    TopTen,
+    VulnerabilityOverview,
 )
 
 
@@ -63,7 +70,7 @@ def group_by_host(first: Dict[str, HostResults], second: Dict[str, str]):
         if second.get('qod')
         else None
     )
-    shr = HostResult(
+    shr = Result(
         oid,
         nvt.get('type'),
         nvt.get('name'),
@@ -87,57 +94,130 @@ def group_by_host(first: Dict[str, HostResults], second: Dict[str, str]):
     return first
 
 
-def group_by_nvt(first: Dict[str, NVTResult], second: Dict[str, str]):
-    nvt = second.pop('nvt')
-    host = second.pop('host')
-    host = host if isinstance(host, str) else host["text"]
-    oid = nvt['oid']
-    nvt_result = first.get(oid)
-    hs = HostSpecific(host, second.get('description'))
-    if nvt_result:
-        nvt_result.hosts.append(hs)
-        first[oid] = nvt_result
-    else:
-        solution = (
-            Solution(nvt['solution']['type'], nvt['solution']['text'])
-            if nvt.get('solution')
-            else None
-        )
-        refs = (
-            [Ref(r['id'], r['type']) for r in nvt['refs']['ref']]
-            if nvt.get('refs')
-            else []
-        )
-        qod = (
-            QOD(
-                second['qod']['value'],
-                second['qod']['type'],
-            )
-            if second.get('qod')
-            else None
-        )
-        nvt_result = NVTResult(
-            oid,
-            nvt.get('type'),
-            nvt.get('name'),
-            nvt.get('family'),
-            nvt['cvss_base'],
-            nvt.get('tags'),
-            solution,
-            refs,
-            second.get('port'),
-            second.get('threat'),
-            second.get('severity'),
-            qod,
-            [hs],
-        )
-        first[oid] = nvt_result
-    del nvt
-
-    return first
-
-
 logger = logging.getLogger(__name__)
+
+
+def __create_nvt_top_ten(
+    threat: str, group_by_threat: DataFrameGroupBy
+) -> TopTen:
+    threat = group_by_threat.get_group(threat)
+    threat_nvts = threat[['nvt.oid', 'nvt.name']]
+    counted = threat_nvts.value_counts()
+    return TopTen(
+        chart=None,
+        top_ten=[
+            NVTCount(oid=k[0], amount=v, name=k[1])
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __create_host_top_ten(result_series_df: DataFrame) -> TopTen:
+    threat = result_series_df[['host.text', 'host.hostname']]
+    counted = threat.value_counts()
+    return TopTen(
+        chart=None,
+        top_ten=[
+            HostCount(ip=k[0], amount=v, name=k[1])
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __create_port_top_ten(result_series_df: DataFrame) -> TopTen:
+    threat = result_series_df[['port']]
+    counted = threat.value_counts()
+    return TopTen(
+        chart=None,
+        top_ten=[
+            PortCount(port=k, amount=v)
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __create_cvss_distribution_port_top_ten(
+    result_series_df: DataFrame,
+) -> TopTen:
+    threat = result_series_df[['port', 'nvt.cvss_base']]
+    counted = threat.value_counts()
+    return TopTen(
+        chart=None,
+        top_ten=[
+            CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __create_cvss_distribution_host_top_ten(
+    result_series_df: DataFrame,
+) -> TopTen:
+    threat = result_series_df[['host.text', 'host.hostname', 'nvt.cvss_base']]
+    counted = threat.value_counts()
+    return TopTen(
+        chart=None,
+        top_ten=[
+            CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __create_cvss_distribution_nvt_top_ten(
+    result_series_df: DataFrame,
+) -> TopTen:
+    threat = result_series_df[['nvt.oid', 'nvt.cvss_base']]
+    counted = threat.value_counts()
+    return TopTen(
+        chart=None,
+        top_ten=[
+            CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __simple_data_frame_to_values(df: DataFrame) -> List:
+    if df is None:
+        return []
+    return [v[0] for v in df.to_dict().values()]
+
+
+def __create_scan(
+    report: DataFrame,
+) -> Scan:
+    return Scan(
+        *__simple_data_frame_to_values(
+            report.get(
+                [
+                    'task.name',
+                    'scan_start',
+                    'scan_end',
+                    'hosts.count',
+                    'task.comment',
+                ]
+            )
+        )
+    )
+
+
+def __create_summary_report(report: DataFrame) -> SummaryReport:
+    return SummaryReport(
+        *__simple_data_frame_to_values(
+            report.get(['filters.term', 'filters.filter', 'timezone'])
+        )
+    )
+
+
+def __create_summary_results(report: DataFrame) -> SummaryResults:
+    data = __simple_data_frame_to_values(
+        report.get(['result_count.full', 'result_count.filtered'])
+    )
+    if len(data) != 2:
+        return None
+    data += [None]  # append graph
+    return SummaryResults(*data)
 
 
 def transform(
@@ -146,94 +226,42 @@ def transform(
     report = data.pop("report")
     # sometimes gvmd reports have .report.report sometimes just .report
     report = report.pop("report", None) or report
-    del data
-    logger.info("data transformation; grouped by %s.", group_by)
 
-    def may_create_version(key: str) -> Optional[Count]:
-        value = report.pop(key, None)
-        if not value:
-            return None
-        return Version(value.get('version'))
+    n_df = pd.json_normalize(report)
+    results_series = n_df.get('results.result')
+    # pylint: disable=W0108
+    result_series_df = results_series.map(lambda x: pd.json_normalize(x)).all()
 
-    def may_create_count(key: str) -> Optional[Count]:
-        value = report.pop(key, None)
-        if not value:
-            return None
-        return Count(value.get('count'))
+    group_by_threat = result_series_df.groupby('original_threat')
+    common_vulnerabilities = CommonVulnerabilities(
+        __create_nvt_top_ten('High', group_by_threat),
+        __create_nvt_top_ten('Medium', group_by_threat),
+        __create_nvt_top_ten('Low', group_by_threat),
+    )
 
-    def may_create_target(data: Dict[str, str]) -> Target:
-        target_dict = data.pop('target', None)
-        if not target_dict:
-            return None
-        return Target(
-            target_dict.get('id'),
-            target_dict.get('name'),
-            target_dict.get('comment'),
-            target_dict.get('trash'),
-        )
-
-    def may_create_task() -> Task:
-        task = report.pop('task', None)
-        if not task:
-            return None
-        return Task(
-            task.get('id'),
-            task.get('name'),
-            task.get('comment'),
-            may_create_target(task),
-            task.get('progress'),
-        )
-
-    def may_create_filtered(data: Dict[str, str], key: str) -> Filtered:
-        filtered = data.pop(key, None)
-        if not filtered:
-            return None
-        return Filtered(filtered.get('full'), filtered.get('filtered'))
-
-    def may_create_result_count() -> ResultCount:
-        result_count = report.pop('result_count', None)
-        if not result_count:
-            return None
-        return ResultCount(
-            result_count.get('full'),
-            result_count.get('filtered'),
-            may_create_filtered(result_count, 'debug'),
-            may_create_filtered(result_count, 'hole'),
-            may_create_filtered(result_count, 'info'),
-            may_create_filtered(result_count, 'log'),
-            may_create_filtered(result_count, 'warning'),
-            may_create_filtered(result_count, 'false_positive'),
-            result_count.get('text'),
-        )
-
+    vulnerabilities_overview = VulnerabilityOverview(
+        __create_host_top_ten(result_series_df),
+        None,
+        __create_port_top_ten(result_series_df),
+        __create_cvss_distribution_port_top_ten(result_series_df),
+        __create_cvss_distribution_host_top_ten(result_series_df),
+        __create_cvss_distribution_nvt_top_ten(result_series_df),
+    )
+    summary = Summary(
+        __create_scan(n_df),
+        __create_summary_report(n_df),
+        __create_summary_results(n_df),
+    )
+    # rewrite with pandas as well
     original_results = report.pop('results')
     grouped = reduce(group_by, original_results.pop("result", []), {})
-    result = Report(
+
+    logger.info("data transformation; grouped by %s.", group_by)
+
+    return Report(
         report.get('id'),
-        may_create_version('gmp'),
-        report.get('scan_run_status'),
-        may_create_count('hosts'),
-        may_create_count('closed_cves'),
-        may_create_count('vulns'),
-        may_create_count('os'),
-        may_create_count('apps'),
-        may_create_count('ssl_certs'),
-        may_create_task(),
-        report.get('timestamp'),
-        report.get('scan_start'),
-        report.get('timezone'),
-        report.get('timezone_abbrev'),
-        report.get('scan_end'),
-        may_create_count('errors'),
-        Results(
-            original_results.get('max'),
-            original_results.get('start'),
-            list(grouped.values()),
-        ),
-        may_create_filtered(report, 'severity'),
-        may_create_result_count(),
+        summary,
+        common_vulnerabilities,
+        vulnerabilities_overview,
+        grouped,
     )
-    del grouped
-    del original_results
-    del report
-    return result

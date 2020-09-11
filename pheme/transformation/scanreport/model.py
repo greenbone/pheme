@@ -22,16 +22,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Version:
-    version: str
-
-
-@dataclass
-class Count:
-    count: str
-
-
-@dataclass
 class Identifiable:
     id: str
     name: str
@@ -41,34 +31,6 @@ class Identifiable:
 @dataclass
 class Target(Identifiable):
     trash: str
-
-
-@dataclass
-class Task(Identifiable):
-    progress: str
-    target: Target
-
-
-@dataclass
-class Scan:
-    task: Task
-
-
-@dataclass
-class Filtered:
-    full: str
-    filtered: str
-
-
-@dataclass
-class ResultCount(Filtered):
-    debug: Filtered
-    hole: Filtered
-    info: Filtered
-    log: Filtered
-    warning: Filtered
-    false_positive: Filtered
-    text: str
 
 
 @dataclass
@@ -102,60 +64,117 @@ class NVT:
 
 
 @dataclass
-class HostSpecific:
-    name: str
-    description: str
-
-
-@dataclass
 class Result(NVT):
     port: str
     threat: str
     severity: str
     qod: QOD
-
-
-@dataclass
-class NVTResult(Result):
-    hosts: List[HostSpecific]
-
-
-@dataclass
-class HostResult(Result):
     description: str
 
 
 @dataclass
 class HostResults:
     host: str
-    results: List[HostResult]
+    results: List[Result]
 
 
 @dataclass
 class Results:
     max: str
     start: str
-    scans: List[Union[NVTResult, HostResults]]
+    scans: List[HostResults]
+
+
+@dataclass
+class Scan:
+    name: str
+    start: str
+    duration: str
+    hosts_scanned: str
+    comment: str
+
+
+@dataclass
+class SummaryReport:
+    applied_filter: str
+    severities: List[str]
+    timezone: str
+
+
+@dataclass
+class B64Chart:
+    format: str  # png, jpg, ...
+    chart: str  # b64 encoded binary, xml (on svg) content
+
+
+@dataclass
+class SummaryResults:
+    available: int
+    included: int
+    chart: B64Chart  # base64,png
+
+
+@dataclass
+class Summary:
+    scan: Scan
+    report: SummaryReport
+    results: SummaryResults
+
+
+@dataclass
+class NVTCount:
+    oid: str
+    amount: int
+    name: str
+
+
+@dataclass
+class HostCount:
+    ip: str
+    amount: int
+    name: str
+
+
+@dataclass
+class CVSSDistributionCount:
+    identifier: str
+    amount: int
+    cvss: str
+
+
+@dataclass
+class PortCount:
+    port: str
+    amount: int
+
+
+@dataclass
+class TopTen:
+    chart: B64Chart
+    top_ten: List[Union[CVSSDistributionCount, NVTCount, HostCount, PortCount]]
+
+
+@dataclass
+class CommonVulnerabilities:
+    high: TopTen
+    medium: TopTen
+    low: TopTen
+
+
+@dataclass
+class VulnerabilityOverview:
+    hosts: TopTen
+    network_topology: TopTen  # not there yet
+    ports: TopTen
+    cvss_distribution_ports: TopTen
+    cvss_distribution_hosts: TopTen
+    cvss_distribution_vulnerabilities: TopTen
 
 
 @dataclass
 class Report:
     id: str
-    gmp: Version
-    scan_run_status: str
-    hosts: Count
-    closed_cves: Count
-    vulns: Count
-    os: Count
-    apps: Count
-    ssl_certs: Count
-    task: Task
-    timestamp: str
-    scan_start: str
-    timezone: str
-    timezone_abbrev: str
-    scan_end: str
-    errors: Count
+    summary: Summary
+    common_vulnerabilities: CommonVulnerabilities
+    Vulnerability_overview: CommonVulnerabilities
     results: Results
-    severity: Filtered
-    result_count: ResultCount

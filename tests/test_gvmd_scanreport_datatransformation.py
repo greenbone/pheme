@@ -21,7 +21,6 @@ import uuid
 import pytest
 from pheme.transformation.scanreport.gvmd import (
     transform,
-    group_by_nvt,
     group_by_host,
 )
 
@@ -30,15 +29,6 @@ from tests.generate_test_data import gen_report
 
 oids = [uuid.uuid1().hex for _ in range(5)]
 hosts = ['first', 'second']
-
-
-@pytest.mark.parametrize(
-    "scan_result", [gen_report(hosts, oids, with_optional=True)]
-)
-def test_group_by_nvt(scan_result):
-    data = {'report': scan_result}
-    report = transform(data, group_by=group_by_nvt)
-    assert len(report.results.scans) == len(oids)
 
 
 @pytest.mark.parametrize(
