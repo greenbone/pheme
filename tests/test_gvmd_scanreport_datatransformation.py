@@ -21,7 +21,6 @@ import uuid
 import pytest
 from pheme.transformation.scanreport.gvmd import (
     transform,
-    group_by_host,
 )
 
 from tests.generate_test_data import gen_report
@@ -38,8 +37,10 @@ hosts = ['first', 'second']
         (0, gen_report([], [], with_optional=False)),
     ],
 )
-def test_group_by_host(expected):
+def test_report_generation(expected):
     amount_scans, scan_results = expected
     data = {'report': {'report': scan_results}}
-    report = transform(data, group_by=group_by_host)
+    report = transform(data)
+    if amount_scans > 0:
+        assert len(report.common_vulnerabilities) == 3
     assert len(report.results.scans) == amount_scans

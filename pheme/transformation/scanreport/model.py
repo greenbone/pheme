@@ -17,32 +17,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=W0614,W0511,W0401,C0103
-from typing import List, Union
+from typing import Dict, List, Union
 from dataclasses import dataclass
-
-
-@dataclass
-class Identifiable:
-    id: str
-    name: str
-    comment: str
-
-
-@dataclass
-class Target(Identifiable):
-    trash: str
-
-
-@dataclass
-class Solution:
-    type: str
-    text: str
-
-
-@dataclass
-class Ref:
-    id: str
-    type: str
 
 
 @dataclass
@@ -52,26 +28,9 @@ class QOD:
 
 
 @dataclass
-class Result:
-    oid: str
-    type: str
-    name: str
-    family: str
-    cvss_base: str
-    tags: str
-    solution: Solution
-    refs: List[Ref]
-    port: str
-    threat: str
-    severity: str
-    qod: QOD
-    description: str
-
-
-@dataclass
 class HostResults:
     host: str
-    results: List[Result]
+    results: List[Dict]
 
 
 @dataclass
@@ -145,32 +104,26 @@ class PortCount:
 
 
 @dataclass
-class TopTen:
+class CountGraph:
+    name: str
     chart: B64Chart
-    top_ten: List[Union[CVSSDistributionCount, NVTCount, HostCount, PortCount]]
-
-
-@dataclass
-class CommonVulnerabilities:
-    high: TopTen
-    medium: TopTen
-    low: TopTen
+    counts: List[Union[CVSSDistributionCount, NVTCount, HostCount, PortCount]]
 
 
 @dataclass
 class VulnerabilityOverview:
-    hosts: TopTen
-    network_topology: TopTen  # not there yet
-    ports: TopTen
-    cvss_distribution_ports: TopTen
-    cvss_distribution_hosts: TopTen
-    cvss_distribution_vulnerabilities: TopTen
+    hosts: CountGraph
+    network_topology: CountGraph  # not there yet
+    ports: CountGraph
+    cvss_distribution_ports: CountGraph
+    cvss_distribution_hosts: CountGraph
+    cvss_distribution_vulnerabilities: CountGraph
 
 
 @dataclass
 class Report:
     id: str
     summary: Summary
-    common_vulnerabilities: CommonVulnerabilities
-    Vulnerability_overview: CommonVulnerabilities
+    common_vulnerabilities: List[CountGraph]
+    vulnerability_overview: VulnerabilityOverview
     results: Results

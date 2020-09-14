@@ -73,7 +73,7 @@ def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
     }
 
 
-threats = ['Log', 'Medium', 'High']
+threats = ['Low', 'Medium', 'High']
 
 
 def gen_result(hostname: str, oid: str, with_optional: bool = True) -> Dict:
