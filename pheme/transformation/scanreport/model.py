@@ -52,7 +52,7 @@ class QOD:
 
 
 @dataclass
-class NVT:
+class Result:
     oid: str
     type: str
     name: str
@@ -61,10 +61,6 @@ class NVT:
     tags: str
     solution: Solution
     refs: List[Ref]
-
-
-@dataclass
-class Result(NVT):
     port: str
     threat: str
     severity: str

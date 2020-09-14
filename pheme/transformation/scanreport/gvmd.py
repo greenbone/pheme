@@ -16,14 +16,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from functools import reduce
-from typing import Callable, Dict, List
+from typing import Dict, List
 import logging
 
 import pandas as pd
 from pandas import DataFrame
 from pandas.core.groupby.generic import DataFrameGroupBy
-
+import numpy as np
 
 from pheme.transformation.scanreport.model import (
     CommonVulnerabilities,
@@ -36,7 +35,6 @@ from pheme.transformation.scanreport.model import (
     Ref,
     Report,
     Result,
-    Results,
     Scan,
     Solution,
     Summary,
@@ -235,12 +233,55 @@ def __create_summary_results(report: DataFrame) -> SummaryResults:
     return SummaryResults(*data)
 
 
-def transform(
-    data: Dict[str, str], group_by: Callable = group_by_host
-) -> Report:
-    report = data.pop("report")
+def __create_results(report: DataFrame) -> List[Dict]:
+    try:
+        grouped_host = report.groupby('host.text')
+        wanted_columns = [
+            'nvt.oid',
+            'nvt.type',
+            'nvt.name',
+            'nvt.family',
+            'nvt.cvss_base',
+            'nvt.tags',
+            'nvt.refs.ref',
+            'nvt.solution.type',
+            'nvt.solution.text',
+            'port',
+            'threat',
+            'severity',
+            'qod.value',
+            'qod.type',
+            'description',
+        ]
+        results = []
+        for host_text in grouped_host.groups.keys():
+            host_df = grouped_host.get_group(host_text)
+            columns = [x for x in host_df.columns if x in wanted_columns]
+            if len(wanted_columns) != len(columns):
+                logger.warning(
+                    "report for %s -> missing keys: %s",
+                    host_text,
+                    np.setdiff1d(wanted_columns, columns),
+                )
+            flat_results = host_df[columns]
+            result = []
+            for key, series in flat_results.items():
+                for i, value in enumerate(series):
+                    if len(result) < i + 1:
+                        result.append({})
+                    if not (isinstance(value, float) and np.isnan(value)):
+                        result[i][key] = value
+            results.append(HostResults(host_text, result))
+        return results
+    except KeyError as e:
+        logger.warning('report does not contain host.text returning []; %s', e)
+        return None
+
+
+def transform(data: Dict[str, str]) -> Report:
+    report = data.get("report")
     # sometimes gvmd reports have .report.report sometimes just .report
-    report = report.pop("report", None) or report
+    report = report.get("report") or report
 
     n_df = pd.json_normalize(report)
     results_series = n_df.get('results.result')
@@ -256,7 +297,7 @@ def transform(
             __create_nvt_top_ten('Low', group_by_threat),
         )
     except KeyError as e:
-        logger.debug('ignoring grouping exception, %s', e)
+        logger.warning('ignoring original_threat missing: %s', e)
 
     vulnerabilities_overview = VulnerabilityOverview(
         __create_host_top_ten(result_series_df),
@@ -271,16 +312,14 @@ def transform(
         __create_summary_report(n_df),
         __create_summary_results(n_df),
     )
-    # rewrite with pandas as well
-    original_results = report.pop('results')
-    grouped = reduce(group_by, original_results.pop("result", []), {})
+    results = __create_results(result_series_df)
 
-    logger.info("data transformation; grouped by %s.", group_by)
+    logger.info("data transformation")
 
     return Report(
         report.get('id'),
         summary,
         common_vulnerabilities,
         vulnerabilities_overview,
-        Results(0, 0, list(grouped.values())),
+        results,
     )
