@@ -53,19 +53,10 @@ class DetailScanReport(renderers.BaseRenderer):
             }
         )
 
-    def _template_based_on_request(self, name: str) -> str:
-        sort = self.media_type[self.media_type.index('/') + 1 :]
-        return (
-            '{}_host_detail_scan_report.html'.format(sort)
-            if name.startswith('scanreport-host')
-            else '{}_nvt_detail_scan_report.html'.format(sort)
-        )
-
     def _enrich(self, name: str, data: Dict) -> Dict:
         data['logo'] = settings.TEMPLATE_LOGO_ADDRESS
-        data['grouping'] = (
-            'host' if name.startswith('scanreport-host') else 'nvt'
-        )
+        data['grouping'] = 'host'
+        data['internal_name'] = name
         return data
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
@@ -91,6 +82,7 @@ class DetailScanReport(renderers.BaseRenderer):
 
 
 class DetailScanHTMLReport(DetailScanReport):
+    __template = 'scan_report.html'
     media_type = 'text/html'
     format = 'html'
 
@@ -100,18 +92,21 @@ class DetailScanHTMLReport(DetailScanReport):
         return data
 
     def apply(self, name: str, data: Dict):
-        template = self._template_based_on_request(name)
-        return loader.get_template(template).render(self._enrich(name, data))
+        return loader.get_template(self.__template).render(
+            self._enrich(name, data)
+        )
 
 
 class DetailScanPDFReport(DetailScanReport):
+    __template = 'scan_report.html'
     media_type = 'application/pdf'
     format = 'binary'
 
     def apply(self, name: str, data: Dict):
-        template = self._template_based_on_request(name)
-        logger.debug("got template: %s", template)
-        html = loader.get_template(template).render(self._enrich(name, data))
+        logger.debug("got template: %s", self.__template)
+        html = loader.get_template(self.__template).render(
+            self._enrich(name, data)
+        )
         logger.debug("created html")
         css = self._get_css('pdf_report.css')
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])

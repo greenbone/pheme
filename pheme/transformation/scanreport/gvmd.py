@@ -212,6 +212,10 @@ def __create_results(report: DataFrame) -> List[Dict]:
             'description',
         ]
         results = []
+
+        def normalize_key(key: str) -> str:
+            return key.replace('.', '_')
+
         for host_text in grouped_host.groups.keys():
             host_df = grouped_host.get_group(host_text)
             columns = [x for x in host_df.columns if x in wanted_columns]
@@ -228,7 +232,7 @@ def __create_results(report: DataFrame) -> List[Dict]:
                     if len(result) < i + 1:
                         result.append({})
                     if not (isinstance(value, float) and np.isnan(value)):
-                        result[i][key] = value
+                        result[i][normalize_key(key)] = value
             results.append(HostResults(host_text, result))
         return results
     except KeyError as e:
