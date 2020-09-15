@@ -57,16 +57,10 @@ class SummaryReport:
 
 
 @dataclass
-class B64Chart:
-    format: str  # png, jpg, ...
-    chart: str  # b64 encoded binary, xml (on svg) content
-
-
-@dataclass
 class SummaryResults:
     available: int
     included: int
-    chart: B64Chart  # base64,png
+    chart: str  # base64,png
 
 
 @dataclass
@@ -106,7 +100,7 @@ class PortCount:
 @dataclass
 class CountGraph:
     name: str
-    chart: B64Chart
+    chart: str
     counts: List[Union[CVSSDistributionCount, NVTCount, HostCount, PortCount]]
 
 
