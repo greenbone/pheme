@@ -165,3 +165,10 @@ CACHES = {
         'LOCATION': '/tmp/django_cache',
     }
 }
+
+# testing
+REST_FRAMEWORK = {
+    'TEST_REQUEST_RENDERER_CLASSES': [
+        'pheme.renderer.XMLRenderer',
+    ]
+}

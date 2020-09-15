@@ -10,19 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - transformation for [gvmd] scan results to host grouped template data [#5](https://github.com/greenbone/pheme/pull/5)
 ```
 curl -X POST\
-    'http://localhost:8000/template/?grouping=host'\
+    'http://localhost:8000/transform'\
      -H 'Content-Type: application/xml'\
      -H 'Accept: application/json; indent=2'\
      -d @path_to/scanreport.xml
 ```
-- transformation for [gvmd] scan results to nvt grouped template data [#5](https://github.com/greenbone/pheme/pull/5)
+- report generation for pdf
 ```
-curl -X POST\
-    'http://localhost:8000/template/?grouping=nvt'\
+curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: application/pdf'
+```
+- report generation for html
+```
+curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: text/html'
+```
+- rudimentary chart support
+- endpoint to get the xml as json
+```
+curl -X POST 'http://localhost:8000/unmodified'\
      -H 'Content-Type: application/xml'\
-     -H 'Accept: application/json; indent=2'\
+     -H 'Accept: application/json'\
      -d @path_to/scanreport.xml
 ```
+
 ### Changed
 ### Deprecated
 ### Removed

@@ -77,6 +77,7 @@ threats = ['Low', 'Medium', 'High']
 
 
 def gen_result(hostname: str, oid: str, with_optional: bool = True) -> Dict:
+
     return {
         'host': gen_host(hostname),
         'nvt': generate_nvt(oid),
@@ -132,6 +133,13 @@ def gen_result_count() -> Dict:
         'warning': gen_filtered(),
         'false_positive': gen_filtered(),
         'text': _random_text(25),
+    }
+
+
+def generate_result_count(full: int, filtered: int) -> Dict:
+    return {
+        'full': str(full),
+        'filtered': str(filtered),
     }
 
 
