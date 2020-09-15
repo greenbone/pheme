@@ -27,7 +27,9 @@ from pandas import DataFrame
 from pandas.core.groupby.generic import DataFrameGroupBy
 from pandas.core.series import Series
 import numpy as np
-import matplotlib.pyplot as plt
+
+from matplotlib.figure import Figure
+
 
 from pheme.transformation.scanreport.model import (
     CVSSDistributionCount,
@@ -50,18 +52,16 @@ logger = logging.getLogger(__name__)
 
 
 def __create_chart(set_plot: Callable) -> Optional[str]:
-    # warning this method will fail on mac osx due to wrongfully GUI usage
-    # in _matplotlib/core.py on savefig
     try:
-        set_plot()
-
-        fig = plt.gcf()
+        # https://matplotlib.org/faq/howto_faq.html#how-to-use-matplotlib-in-a-web-application-server
+        fig = Figure()
+        ax = fig.subplots()
+        set_plot(ax)
         buf = io.BytesIO()
         fig.savefig(buf, format='png')
         buf.seek(0)
         base64_fig = base64.b64encode(buf.read())
         uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
-        plt.clf()
         return uri
     # pylint: disable=W0703
     except Exception as e:
@@ -70,8 +70,8 @@ def __create_chart(set_plot: Callable) -> Optional[str]:
 
 
 def __create_bar_h_chart(series: Series) -> Optional[str]:
-    def set_plot():
-        series.plot.barh()
+    def set_plot(ax):
+        series.plot.barh(ax=ax)
 
     if len(series) < 1:
         return None
@@ -79,8 +79,8 @@ def __create_bar_h_chart(series: Series) -> Optional[str]:
 
 
 def __create_pie_chart(series: Series) -> Optional[str]:
-    def set_plot():
-        series.plot.pie()
+    def set_plot(ax):
+        series.plot.pie(ax=ax)
 
     if len(series) < 1:
         return None
