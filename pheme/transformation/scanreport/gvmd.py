@@ -16,224 +16,281 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from functools import reduce
-from typing import Callable, Optional, Dict
+from typing import Dict, List
 import logging
 
-from .model import (
-    Count,
-    Filtered,
-    HostResult,
+import pandas as pd
+from pandas import DataFrame
+from pandas.core.groupby.generic import DataFrameGroupBy
+import numpy as np
+
+from pheme.transformation.scanreport.model import (
+    CVSSDistributionCount,
+    HostCount,
     HostResults,
-    HostSpecific,
-    NVTResult,
-    QOD,
-    Ref,
+    NVTCount,
+    PortCount,
     Report,
-    ResultCount,
     Results,
-    Solution,
-    Target,
-    Task,
-    Version,
+    Scan,
+    Summary,
+    SummaryReport,
+    SummaryResults,
+    CountGraph,
+    VulnerabilityOverview,
 )
-
-
-def group_by_host(first: Dict[str, HostResults], second: Dict[str, str]):
-    host = second.pop('host')
-    host = host if isinstance(host, str) else host.pop("text")
-    hr: HostResults = first.get(host)
-    nvt = second.pop('nvt')
-    solution = (
-        Solution(nvt['solution']['type'], nvt['solution']['text'])
-        if nvt.get('solution')
-        else None
-    )
-    refs = (
-        [Ref(r['id'], r['type']) for r in nvt['refs']['ref']]
-        if nvt.get('refs')
-        else []
-    )
-    oid = nvt['oid']
-    qod = (
-        QOD(
-            second['qod']['value'],
-            second['qod']['type'],
-        )
-        if second.get('qod')
-        else None
-    )
-    shr = HostResult(
-        oid,
-        nvt.get('type'),
-        nvt.get('name'),
-        nvt.get('family'),
-        nvt.get('cvss_base'),
-        nvt.get('tags'),
-        solution,
-        refs,
-        second.get('port'),
-        second.get('threat'),
-        second.get('severity'),
-        qod,
-        second.get('description'),
-    )
-    if hr:
-        hr.results.append(shr)
-        first[host] = hr
-    else:
-        first[host] = HostResults(host, [shr])
-    del nvt
-    return first
-
-
-def group_by_nvt(first: Dict[str, NVTResult], second: Dict[str, str]):
-    nvt = second.pop('nvt')
-    host = second.pop('host')
-    host = host if isinstance(host, str) else host["text"]
-    oid = nvt['oid']
-    nvt_result = first.get(oid)
-    hs = HostSpecific(host, second.get('description'))
-    if nvt_result:
-        nvt_result.hosts.append(hs)
-        first[oid] = nvt_result
-    else:
-        solution = (
-            Solution(nvt['solution']['type'], nvt['solution']['text'])
-            if nvt.get('solution')
-            else None
-        )
-        refs = (
-            [Ref(r['id'], r['type']) for r in nvt['refs']['ref']]
-            if nvt.get('refs')
-            else []
-        )
-        qod = (
-            QOD(
-                second['qod']['value'],
-                second['qod']['type'],
-            )
-            if second.get('qod')
-            else None
-        )
-        nvt_result = NVTResult(
-            oid,
-            nvt.get('type'),
-            nvt.get('name'),
-            nvt.get('family'),
-            nvt['cvss_base'],
-            nvt.get('tags'),
-            solution,
-            refs,
-            second.get('port'),
-            second.get('threat'),
-            second.get('severity'),
-            qod,
-            [hs],
-        )
-        first[oid] = nvt_result
-    del nvt
-
-    return first
 
 
 logger = logging.getLogger(__name__)
 
 
-def transform(
-    data: Dict[str, str], group_by: Callable = group_by_host
-) -> Report:
-    report = data.pop("report")
-    # sometimes gvmd reports have .report.report sometimes just .report
-    report = report.pop("report", None) or report
-    del data
-    logger.info("data transformation; grouped by %s.", group_by)
-
-    def may_create_version(key: str) -> Optional[Count]:
-        value = report.pop(key, None)
-        if not value:
-            return None
-        return Version(value.get('version'))
-
-    def may_create_count(key: str) -> Optional[Count]:
-        value = report.pop(key, None)
-        if not value:
-            return None
-        return Count(value.get('count'))
-
-    def may_create_target(data: Dict[str, str]) -> Target:
-        target_dict = data.pop('target', None)
-        if not target_dict:
-            return None
-        return Target(
-            target_dict.get('id'),
-            target_dict.get('name'),
-            target_dict.get('comment'),
-            target_dict.get('trash'),
+def __create_nvt_top_ten(
+    threat_level: str, group_by_threat: DataFrameGroupBy
+) -> CountGraph:
+    try:
+        threat = group_by_threat.get_group(threat_level)
+        threat_nvts = threat[['nvt.oid', 'nvt.name']]
+        counted = threat_nvts.value_counts()
+        return CountGraph(
+            name=threat_level,
+            chart=None,
+            counts=[
+                NVTCount(oid=k[0], amount=v, name=k[1])
+                for k, v in counted.head(10).to_dict().items()
+            ],
         )
+    except KeyError:
+        logger.warning('Threat: %s not found', threat_level)
+        return None
 
-    def may_create_task() -> Task:
-        task = report.pop('task', None)
-        if not task:
-            return None
-        return Task(
-            task.get('id'),
-            task.get('name'),
-            task.get('comment'),
-            may_create_target(task),
-            task.get('progress'),
-        )
 
-    def may_create_filtered(data: Dict[str, str], key: str) -> Filtered:
-        filtered = data.pop(key, None)
-        if not filtered:
-            return None
-        return Filtered(filtered.get('full'), filtered.get('filtered'))
+def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
+    threat = result_series_df.get(['host.text', 'host.hostname'])
+    if threat is None:
+        threat = result_series_df.get(['host.text'])
+    if threat is None:
+        return None
 
-    def may_create_result_count() -> ResultCount:
-        result_count = report.pop('result_count', None)
-        if not result_count:
-            return None
-        return ResultCount(
-            result_count.get('full'),
-            result_count.get('filtered'),
-            may_create_filtered(result_count, 'debug'),
-            may_create_filtered(result_count, 'hole'),
-            may_create_filtered(result_count, 'info'),
-            may_create_filtered(result_count, 'log'),
-            may_create_filtered(result_count, 'warning'),
-            may_create_filtered(result_count, 'false_positive'),
-            result_count.get('text'),
-        )
-
-    original_results = report.pop('results')
-    grouped = reduce(group_by, original_results.pop("result", []), {})
-    result = Report(
-        report.get('id'),
-        may_create_version('gmp'),
-        report.get('scan_run_status'),
-        may_create_count('hosts'),
-        may_create_count('closed_cves'),
-        may_create_count('vulns'),
-        may_create_count('os'),
-        may_create_count('apps'),
-        may_create_count('ssl_certs'),
-        may_create_task(),
-        report.get('timestamp'),
-        report.get('scan_start'),
-        report.get('timezone'),
-        report.get('timezone_abbrev'),
-        report.get('scan_end'),
-        may_create_count('errors'),
-        Results(
-            original_results.get('max'),
-            original_results.get('start'),
-            list(grouped.values()),
-        ),
-        may_create_filtered(report, 'severity'),
-        may_create_result_count(),
+    counted = threat.value_counts()
+    return CountGraph(
+        name="host_top_ten",
+        chart=None,
+        counts=[
+            HostCount(ip=k[0], amount=v, name=k[1] if len(k) > 1 else None)
+            for k, v in counted.head(10).to_dict().items()
+        ],
     )
-    del grouped
-    del original_results
-    del report
-    return result
+
+
+def __create_port_top_ten(result_series_df: DataFrame) -> CountGraph:
+    threat = result_series_df.get(['port'])
+    if threat is None:
+        return None
+    counted = threat.value_counts()
+    return CountGraph(
+        name="port_top_ten",
+        chart=None,
+        counts=[
+            PortCount(port=k, amount=v)
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __create_cvss_distribution_port_top_ten(
+    result_series_df: DataFrame,
+) -> CountGraph:
+    threat = result_series_df.get(['port', 'nvt.cvss_base'])
+    if threat is None:
+        return None
+    counted = threat.value_counts()
+    return CountGraph(
+        name="cvss_distribution_ports_top_ten",
+        chart=None,
+        counts=[
+            CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __create_cvss_distribution_host_top_ten(
+    result_series_df: DataFrame,
+) -> CountGraph:
+    threat = result_series_df.get(
+        ['host.text', 'host.hostname', 'nvt.cvss_base']
+    )
+    if threat is None:
+        return None
+    counted = threat.value_counts()
+    return CountGraph(
+        name="cvss_distribution_host_top_ten",
+        chart=None,
+        counts=[
+            CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __create_cvss_distribution_nvt_top_ten(
+    result_series_df: DataFrame,
+) -> CountGraph:
+    threat = result_series_df.get(['nvt.oid', 'nvt.cvss_base'])
+    if threat is None:
+        return None
+    counted = threat.value_counts()
+    return CountGraph(
+        name="cvss_distribution_nvt_top_ten",
+        chart=None,
+        counts=[
+            CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
+            for k, v in counted.head(10).to_dict().items()
+        ],
+    )
+
+
+def __simple_data_frame_to_values(df: DataFrame) -> List:
+    if df is None:
+        return []
+    return [v[0] for v in df.to_dict().values()]
+
+
+def __create_scan(
+    report: DataFrame,
+) -> Scan:
+    scan = report.get(
+        [
+            'task.name',
+            'scan_start',
+            'scan_end',
+            'hosts.count',
+            'task.comment',
+        ]
+    )
+    if scan is None:
+        return None
+    return Scan(*__simple_data_frame_to_values(scan))
+
+
+def __create_summary_report(report: DataFrame) -> SummaryReport:
+    filters = report.get(['filters.term', 'filters.filter', 'timezone'])
+    if filters is None:
+        return None
+    return SummaryReport(*__simple_data_frame_to_values(filters))
+
+
+def __create_summary_results(report: DataFrame) -> SummaryResults:
+    counts = report.get(['result_count.full', 'result_count.filtered'])
+    if counts is None:
+        return None
+    data = __simple_data_frame_to_values(counts)
+    if len(data) != 2:
+        return None
+    data += [None]  # append graph
+    return SummaryResults(*data)
+
+
+def __create_results(report: DataFrame) -> List[Dict]:
+    try:
+        grouped_host = report.groupby('host.text')
+        wanted_columns = [
+            'nvt.oid',
+            'nvt.type',
+            'nvt.name',
+            'nvt.family',
+            'nvt.cvss_base',
+            'nvt.tags',
+            'nvt.refs.ref',
+            'nvt.solution.type',
+            'nvt.solution.text',
+            'port',
+            'threat',
+            'severity',
+            'qod.value',
+            'qod.type',
+            'description',
+        ]
+        results = []
+
+        def normalize_key(key: str) -> str:
+            return key.replace('.', '_')
+
+        for host_text in grouped_host.groups.keys():
+            host_df = grouped_host.get_group(host_text)
+            columns = [x for x in host_df.columns if x in wanted_columns]
+            if len(wanted_columns) != len(columns):
+                logger.warning(
+                    "report for %s -> missing keys: %s",
+                    host_text,
+                    np.setdiff1d(wanted_columns, columns),
+                )
+            flat_results = host_df[columns]
+            result = []
+            for key, series in flat_results.items():
+                for i, value in enumerate(series):
+                    if len(result) < i + 1:
+                        result.append({})
+                    if not (isinstance(value, float) and np.isnan(value)):
+                        result[i][normalize_key(key)] = value
+            results.append(HostResults(host_text, result))
+        return results
+    except KeyError as e:
+        logger.warning('report does not contain host.text returning []; %s', e)
+        return []
+
+
+def transform(data: Dict[str, str]) -> Report:
+    report = data.get("report")
+    # sometimes gvmd reports have .report.report sometimes just .report
+    report = report.get("report") or report
+
+    n_df = pd.json_normalize(report)
+    results_series = n_df.get('results.result')
+    # pylint: disable=W0108
+    result_series_df = results_series.map(lambda x: pd.json_normalize(x)).all()
+    common_vulnerabilities = None
+    try:
+        group_by_threat = result_series_df.groupby('original_threat')
+
+        common_vulnerabilities = [
+            __create_nvt_top_ten('High', group_by_threat),
+            __create_nvt_top_ten('Medium', group_by_threat),
+            __create_nvt_top_ten('Low', group_by_threat),
+        ]
+    except KeyError as e:
+        logger.warning('ignoring original_threat missing: %s', e)
+
+    vulnerabilities_overview = VulnerabilityOverview(
+        __create_host_top_ten(result_series_df),
+        None,
+        __create_port_top_ten(result_series_df),
+        __create_cvss_distribution_port_top_ten(result_series_df),
+        __create_cvss_distribution_host_top_ten(result_series_df),
+        __create_cvss_distribution_nvt_top_ten(result_series_df),
+    )
+    summary = Summary(
+        __create_scan(n_df),
+        __create_summary_report(n_df),
+        __create_summary_results(n_df),
+    )
+    results = __create_results(result_series_df)
+
+    def get_single_result(key: str):
+        value = n_df.get(key)
+        if value is not None:
+            return value.all()
+        return None
+
+    logger.info("data transformation")
+    return Report(
+        report.get('id'),
+        summary,
+        common_vulnerabilities,
+        vulnerabilities_overview,
+        Results(
+            get_single_result('results.max'),
+            get_single_result('results.start'),
+            results,
+        ),
+    )

@@ -33,15 +33,14 @@ from pheme.storage import store, load
     ]
 )
 def transform(request):
-    grouping = request.GET.get('grouping')
-    grouping_function = scanreport.gvmd.group_by_host
-    if grouping == 'nvt':
-        grouping_function = scanreport.gvmd.group_by_nvt
     name = store(
-        "scanreport-{}".format(grouping),
-        dataclasses.asdict(
-            scanreport.gvmd.transform(request.data, grouping_function)
-        ),
+        "original",
+        request.data,
+    )
+
+    name = store(
+        "scanreport",
+        dataclasses.asdict(scanreport.gvmd.transform(request.data)),
     )
 
     return Response(name)

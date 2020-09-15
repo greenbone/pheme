@@ -18,12 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 from typing import Dict
+from pathlib import Path
+import urllib
+import base64
 
 from django.core.cache import cache
 from django.template import loader
 from django.conf import settings
 from rest_framework import renderers
-from rest_framework.request import HttpRequest
 from weasyprint import CSS, HTML
 
 logger = logging.getLogger(__name__)
@@ -31,28 +33,30 @@ logger = logging.getLogger(__name__)
 
 class DetailScanReport(renderers.BaseRenderer):
     def _get_css(self, name: str) -> CSS:
+
+        background_image = urllib.parse.quote(
+            base64.b64encode(
+                Path(settings.TEMPLATE_COVER_IMAGE_ADDRESS).read_bytes()
+            )
+        )
+
+        indicator_image = urllib.parse.quote(
+            base64.b64encode(
+                Path('/{}/heading.svg'.format(settings.STATIC_DIR)).read_bytes()
+            )
+        )
+
         return loader.get_template(name).render(
             {
-                'background_image': settings.TEMPLATE_COVER_IMAGE_ADDRESS,
-                'indicator': 'file://{}/heading.svg'.format(
-                    settings.STATIC_DIR
-                ),
+                'background_image': 'data:image/png;base64,' + background_image,
+                'indicator': 'data:image/svg+xml;base64,' + indicator_image,
             }
         )
 
-    def _template_based_on_request(self, request: HttpRequest) -> str:
-        sort = self.media_type[self.media_type.index('/') + 1 :]
-        return (
-            '{}_host_detail_scan_report.html'.format(sort)
-            if request.GET.get('grouping') == 'host'
-            else '{}_nvt_detail_scan_report.html'.format(sort)
-        )
-
-    def _enrich(self, data: Dict, request: HttpRequest) -> Dict:
+    def _enrich(self, name: str, data: Dict) -> Dict:
         data['logo'] = settings.TEMPLATE_LOGO_ADDRESS
-        data['grouping'] = (
-            'host' if request.GET.get('grouping') == 'host' else 'nvt'
-        )
+        data['grouping'] = 'host'
+        data['internal_name'] = name
         return data
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
@@ -66,38 +70,43 @@ class DetailScanReport(renderers.BaseRenderer):
             cached = cache.get(cache_key)
             if cached:
                 return cached
-        result = self.apply(data, request)
+        result = self.apply(name, data)
         if cache_key:
             cache.set(cache_key, result)
         return result
 
-    def apply(self, data: Dict, request: HttpRequest):
+    def apply(self, name: str, data: Dict):
         raise NotImplementedError(
             'DetailScanReport class requires .apply() to be implemented'
         )
 
 
 class DetailScanHTMLReport(DetailScanReport):
+    __template = 'scan_report.html'
     media_type = 'text/html'
     format = 'html'
 
-    def _enrich(self, data, request):
-        data = super()._enrich(data, request)
+    def _enrich(self, name: str, data: Dict) -> Dict:
+        data = super()._enrich(name, data)
         data['css'] = self._get_css('html_report.css')
         return data
 
-    def apply(self, data: Dict, request: HttpRequest):
-        template = self._template_based_on_request(request)
-        return loader.get_template(template).render(self._enrich(data, request))
+    def apply(self, name: str, data: Dict):
+        return loader.get_template(self.__template).render(
+            self._enrich(name, data)
+        )
 
 
 class DetailScanPDFReport(DetailScanReport):
+    __template = 'scan_report.html'
     media_type = 'application/pdf'
     format = 'binary'
 
-    def apply(self, data: Dict, request: HttpRequest):
-        template = self._template_based_on_request(request)
-        html = loader.get_template(template).render(self._enrich(data, request))
+    def apply(self, name: str, data: Dict):
+        logger.debug("got template: %s", self.__template)
+        html = loader.get_template(self.__template).render(
+            self._enrich(name, data)
+        )
         logger.debug("created html")
         css = self._get_css('pdf_report.css')
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])

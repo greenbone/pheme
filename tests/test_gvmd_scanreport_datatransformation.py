@@ -21,38 +21,26 @@ import uuid
 import pytest
 from pheme.transformation.scanreport.gvmd import (
     transform,
-    group_by_nvt,
-    group_by_host,
 )
 
 from tests.generate_test_data import gen_report
-
 
 oids = [uuid.uuid1().hex for _ in range(5)]
 hosts = ['first', 'second']
 
 
 @pytest.mark.parametrize(
-    "scan_result", [gen_report(hosts, oids, with_optional=True)]
-)
-def test_group_by_nvt(scan_result):
-    data = {'report': scan_result}
-    report = transform(data, group_by=group_by_nvt)
-    assert len(report.results.scans) == len(oids)
-
-
-@pytest.mark.parametrize(
     "expected",
     [
+        (2, gen_report(hosts, oids, with_optional=True)),
         (2, gen_report(hosts, oids, with_optional=False)),
-        (
-            0,
-            gen_report([], [], with_optional=False),
-        ),  # when a report has no results
+        (0, gen_report([], [], with_optional=False)),
     ],
 )
-def test_group_by_host(expected):
+def test_report_generation(expected):
     amount_scans, scan_results = expected
     data = {'report': {'report': scan_results}}
-    report = transform(data, group_by=group_by_host)
+    report = transform(data)
+    if amount_scans > 0:
+        assert len(report.common_vulnerabilities) == 3
     assert len(report.results.scans) == amount_scans

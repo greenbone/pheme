@@ -39,9 +39,10 @@ def gen_solution() -> Dict:
     }
 
 
-def gen_host(hostname='localhorst') -> Dict:
+def gen_host(hostname='localhost') -> Dict:
     return {
         'text': hostname,
+        'hostname': hostname,
     }
 
 
@@ -72,7 +73,7 @@ def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
     }
 
 
-threats = ['Log', 'Medium', 'High']
+threats = ['Low', 'Medium', 'High']
 
 
 def gen_result(hostname: str, oid: str, with_optional: bool = True) -> Dict:
@@ -83,6 +84,7 @@ def gen_result(hostname: str, oid: str, with_optional: bool = True) -> Dict:
         if with_optional
         else None,
         'threat': random.choice(threats) if with_optional else None,
+        'original_threat': random.choice(threats),
         'severity': '4.3' if with_optional else None,
         'qod': gen_qod() if with_optional else None,
         'description': _random_text(254) if with_optional else None,
