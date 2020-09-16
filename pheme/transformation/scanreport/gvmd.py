@@ -51,14 +51,17 @@ from pheme.transformation.scanreport.model import (
 logger = logging.getLogger(__name__)
 
 
-def __create_chart(set_plot: Callable) -> Optional[str]:
+# pylint: disable=W0108
+def __create_chart(
+    set_plot: Callable, create_figure: Callable = lambda: Figure()
+) -> Optional[str]:
     try:
         # https://matplotlib.org/faq/howto_faq.html#how-to-use-matplotlib-in-a-web-application-server
-        fig = Figure()
+        fig = create_figure()
         ax = fig.subplots()
         set_plot(ax)
         buf = io.BytesIO()
-        fig.savefig(buf, format='png')
+        fig.savefig(buf, format='png', dpi=100)
         buf.seek(0)
         base64_fig = base64.b64encode(buf.read())
         uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
@@ -71,16 +74,25 @@ def __create_chart(set_plot: Callable) -> Optional[str]:
 
 def __create_bar_h_chart(series: Series) -> Optional[str]:
     def set_plot(ax):
-        series.plot.barh(ax=ax)
+        series.plot.barh(
+            ax=ax,
+            tick_label='string',
+        )
+
+    def create_figure():
+        # cm to inch
+        fig = Figure(figsize=(6 * 2.54, 2 * 2.54))
+        fig.subplots_adjust(left=0.4)
+        return fig
 
     if len(series) < 1:
         return None
-    return __create_chart(set_plot)
+    return __create_chart(set_plot, create_figure)
 
 
-def __create_pie_chart(series: Series) -> Optional[str]:
+def __create_pie_chart(series: Series, colors=None) -> Optional[str]:
     def set_plot(ax):
-        series.plot.pie(ax=ax)
+        series.plot.pie(ax=ax, colors=colors)
 
     if len(series) < 1:
         return None
@@ -239,7 +251,14 @@ def __create_summary_results(
         data += [None]
     else:
         threat_distribution = ot.value_counts()
-        data += [__create_pie_chart(threat_distribution)]  # append graph
+
+        colors = {'High': 'tab:red', 'Medium': 'tab:orange', 'Low': 'tab:blue'}
+        data += [
+            __create_pie_chart(
+                threat_distribution,
+                colors=[colors.get(v) for v in threat_distribution.keys()],
+            )
+        ]  # append graph
     return SummaryResults(*data)
 
 

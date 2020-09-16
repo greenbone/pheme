@@ -28,7 +28,7 @@
         <p>Severities: {{ summary.report.severities }}</p>
         <p>Timezone: {{ summary.report.timezone }}</p>
         <h3>Results</h3>
-        <img src="{{ summary.results.chart }}"/>
+        <img src="{{ summary.results.chart }}" />
         <p>available: {{ summary.results.available}}</p>
         <p>included: {{ summary.results.included}}</p>
     </article>
@@ -36,7 +36,7 @@
         <h2>Common Vulnerabilities</h2>
         {% for cv in common_vulnerabilities %}
         <h3>{{ cv.name }}</h3>
-        <img src="{{ cv.chart }}"/>
+        <img src="{{ cv.chart }}" />
         <table id="{{ cv.name }}_cv_top_ten">
             <tr>
                 <th>OID</th>
@@ -56,7 +56,7 @@
     <article id="vulnerability_overview">
         <h2>Vulnerability Overview</h2>
         <h3>Hosts</h3>
-        <img src="{{ vulnerability_overview.hosts.chart }}"/>
+        <img src="{{ vulnerability_overview.hosts.chart }}" />
         <table id="hosts_top_ten">
             <tr>
                 <th>hostname</th>
@@ -72,7 +72,7 @@
             {% endfor %}
         </table>
         <h3>Ports</h3>
-        <img src="{{ vulnerability_overview.ports.chart }}"/>
+        <img src="{{ vulnerability_overview.ports.chart }}" />
         <table id="ports_top_ten">
             <tr>
                 <th>port</th>
@@ -86,7 +86,7 @@
             {% endfor %}
         </table>
         <h3>CVSS distribution / port</h3>
-        <img src="{{ vulnerability_overview.cvss_distribution_ports.chart }}"/>
+        <img src="{{ vulnerability_overview.cvss_distribution_ports.chart }}" />
         <table class="cvss_distribution">
             <tr>
                 <th>port</th>
@@ -102,7 +102,7 @@
             {% endfor %}
         </table>
         <h3>CVSS distribution / host</h3>
-        <img src="{{ vulnerability_overview.cvss_distribution_hosts.chart }}"/>
+        <img src="{{ vulnerability_overview.cvss_distribution_hosts.chart }}" />
         <table class="cvss_distribution">
             <tr>
                 <th>host</th>
@@ -118,7 +118,7 @@
             {% endfor %}
         </table>
         <h3>CVSS distribution / vulnerability</h3>
-        <img src="{{ vulnerability_overview.cvss_distribution_vulnerabilities.chart }}"/>
+        <img src="{{ vulnerability_overview.cvss_distribution_vulnerabilities.chart }}" />
         <table class="cvss_distribution">
             <tr>
                 <th>nvt/oid</th>
@@ -138,7 +138,7 @@
     <article id="finding">
         <h2 id="finding-title">scan reports grouped by {{ grouping }}</h2>
         {% for scan in results.scans %}
-        <h3>{{ scan.host }}</h3>
+        <h3 class="host-title">{{ scan.host }}</h3>
         {% for detail in scan.results %}
         <section class="{{ detail.threat }}">
             <h4>OID: {{ detail.nvt_oid }}</h4>
@@ -151,7 +151,6 @@
             </p>
         </section>
         {% endfor %}
-        <div class="pagebreak" />
         {% endfor %}
     </article>
 
