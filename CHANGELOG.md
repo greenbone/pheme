@@ -15,16 +15,19 @@ curl -X POST\
      -H 'Accept: application/json; indent=2'\
      -d @path_to/scanreport.xml
 ```
-- report generation for pdf
+- report generation for pdf [#24](https://github.com/greenbone/pheme/pull/24)
+
 ```
 curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: application/pdf'
 ```
-- report generation for html
+- report generation for html [#24](https://github.com/greenbone/pheme/pull/24)
+
 ```
 curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: text/html'
 ```
-- rudimentary chart support
-- endpoint to get the xml as json
+- rudimentary chart support [#30](https://github.com/greenbone/pheme/pull/30)
+- endpoint to get the xml as json [#30](https://github.com/greenbone/pheme/pull/30)
+
 ```
 curl -X POST 'http://localhost:8000/unmodified'\
      -H 'Content-Type: application/xml'\
