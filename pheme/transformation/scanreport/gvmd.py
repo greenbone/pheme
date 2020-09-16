@@ -16,37 +16,36 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from typing import Dict, List, Optional, Callable
-import logging
-import io
-import urllib
 import base64
+import io
+import logging
+import urllib
+from typing import Callable, Dict, List, Optional
 
+import numpy as np
 import pandas as pd
+from matplotlib.figure import Figure
 from pandas import DataFrame
 from pandas.core.groupby.generic import DataFrameGroupBy
 from pandas.core.series import Series
-import numpy as np
-
-from matplotlib.figure import Figure
-
 
 from pheme.transformation.scanreport.model import (
+    CountGraph,
     CVSSDistributionCount,
     HostCount,
+    HostOverview,
     HostResults,
     NVTCount,
     PortCount,
     Report,
     Results,
     Scan,
+    SeverityCount,
     Summary,
     SummaryReport,
     SummaryResults,
-    CountGraph,
     VulnerabilityOverview,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -307,6 +306,30 @@ def __create_results(report: DataFrame) -> List[Dict]:
         return []
 
 
+def __create_host_overviews(report: DataFrame):
+    def to_host_overview(host: str, group: Series):
+        severity_counts = []
+        highest_severity = ''
+        severity_weight = {'High': 2, 'Medium': 1, 'Low': 0}
+
+        def get_weight(severity: str):
+            return severity_weight.get(severity) or -1
+
+        for (severity, amount) in (
+            group.groupby('original_threat').value_counts().keys()
+        ):
+            if get_weight(severity) > get_weight(highest_severity):
+                highest_severity = severity
+            severity_counts.append(SeverityCount(severity, amount))
+        return HostOverview(host, highest_severity, severity_counts)
+
+    host_ot = report.get(['host.text', 'original_threat'])
+    if host_ot is None:
+        return None
+    grouped = host_ot.value_counts().groupby('host.text')
+    return [to_host_overview(host, group) for (host, group) in grouped]
+
+
 def transform(data: Dict[str, str]) -> Report:
     report = data.get("report")
     # sometimes gvmd reports have .report.report sometimes just .report
@@ -355,6 +378,7 @@ def transform(data: Dict[str, str]) -> Report:
         summary,
         common_vulnerabilities,
         vulnerabilities_overview,
+        __create_host_overviews(result_series_df),
         Results(
             get_single_result('results.max'),
             get_single_result('results.start'),

@@ -115,9 +115,23 @@ class VulnerabilityOverview:
 
 
 @dataclass
+class SeverityCount:
+    severity: str
+    amount: int
+
+
+@dataclass
+class HostOverview:
+    host: str
+    highest_severity: str
+    counts: List[SeverityCount]
+
+
+@dataclass
 class Report:
     id: str
     summary: Summary
     common_vulnerabilities: List[CountGraph]
     vulnerability_overview: VulnerabilityOverview
+    host_overviews: List[HostOverview]
     results: Results
