@@ -16,13 +16,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from typing import Dict, List
+from typing import Dict, List, Optional, Callable
 import logging
+import io
+import urllib
+import base64
 
 import pandas as pd
 from pandas import DataFrame
 from pandas.core.groupby.generic import DataFrameGroupBy
+from pandas.core.series import Series
 import numpy as np
+
+from matplotlib.figure import Figure
+
 
 from pheme.transformation.scanreport.model import (
     CVSSDistributionCount,
@@ -44,6 +51,50 @@ from pheme.transformation.scanreport.model import (
 logger = logging.getLogger(__name__)
 
 
+def __create_chart(set_plot: Callable, fig: Figure = Figure()) -> Optional[str]:
+    try:
+        # https://matplotlib.org/faq/howto_faq.html#how-to-use-matplotlib-in-a-web-application-server
+        ax = fig.subplots()
+        set_plot(ax)
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', dpi=100)
+        buf.seek(0)
+        base64_fig = base64.b64encode(buf.read())
+        uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
+        return uri
+    # pylint: disable=W0703
+    except Exception as e:
+        logger.warning("returning None due to exception: %e", e)
+        return None
+
+
+def __create_bar_h_chart(series: Series) -> Optional[str]:
+    def set_plot(ax):
+        series.plot.barh(
+            ax=ax,
+            tick_label='string',
+        )
+
+    def create_figure():
+        # cm to inch
+        fig = Figure(figsize=(6 * 2.54, 2 * 2.54))
+        fig.subplots_adjust(left=0.4)
+        return fig
+
+    if len(series) < 1:
+        return None
+    return __create_chart(set_plot, create_figure())
+
+
+def __create_pie_chart(series: Series, colors=None) -> Optional[str]:
+    def set_plot(ax):
+        series.plot.pie(ax=ax, colors=colors)
+
+    if len(series) < 1:
+        return None
+    return __create_chart(set_plot)
+
+
 def __create_nvt_top_ten(
     threat_level: str, group_by_threat: DataFrameGroupBy
 ) -> CountGraph:
@@ -51,12 +102,13 @@ def __create_nvt_top_ten(
         threat = group_by_threat.get_group(threat_level)
         threat_nvts = threat[['nvt.oid', 'nvt.name']]
         counted = threat_nvts.value_counts()
+        top_ten = counted.head(10)
         return CountGraph(
             name=threat_level,
-            chart=None,
+            chart=__create_bar_h_chart(top_ten),
             counts=[
                 NVTCount(oid=k[0], amount=v, name=k[1])
-                for k, v in counted.head(10).to_dict().items()
+                for k, v in top_ten.to_dict().items()
             ],
         )
     except KeyError:
@@ -71,13 +123,13 @@ def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
     if threat is None:
         return None
 
-    counted = threat.value_counts()
+    counted = threat.value_counts().head(10)
     return CountGraph(
         name="host_top_ten",
-        chart=None,
+        chart=__create_bar_h_chart(counted),
         counts=[
             HostCount(ip=k[0], amount=v, name=k[1] if len(k) > 1 else None)
-            for k, v in counted.head(10).to_dict().items()
+            for k, v in counted.to_dict().items()
         ],
     )
 
@@ -86,13 +138,12 @@ def __create_port_top_ten(result_series_df: DataFrame) -> CountGraph:
     threat = result_series_df.get(['port'])
     if threat is None:
         return None
-    counted = threat.value_counts()
+    counted = threat.value_counts().head(10)
     return CountGraph(
         name="port_top_ten",
-        chart=None,
+        chart=__create_bar_h_chart(counted),
         counts=[
-            PortCount(port=k, amount=v)
-            for k, v in counted.head(10).to_dict().items()
+            PortCount(port=k, amount=v) for k, v in counted.to_dict().items()
         ],
     )
 
@@ -103,13 +154,13 @@ def __create_cvss_distribution_port_top_ten(
     threat = result_series_df.get(['port', 'nvt.cvss_base'])
     if threat is None:
         return None
-    counted = threat.value_counts()
+    counted = threat.value_counts().head(10)
     return CountGraph(
         name="cvss_distribution_ports_top_ten",
-        chart=None,
+        chart=__create_bar_h_chart(counted),
         counts=[
             CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
-            for k, v in counted.head(10).to_dict().items()
+            for k, v in counted.to_dict().items()
         ],
     )
 
@@ -122,13 +173,13 @@ def __create_cvss_distribution_host_top_ten(
     )
     if threat is None:
         return None
-    counted = threat.value_counts()
+    counted = threat.value_counts().head(10)
     return CountGraph(
         name="cvss_distribution_host_top_ten",
-        chart=None,
+        chart=__create_bar_h_chart(counted),
         counts=[
             CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
-            for k, v in counted.head(10).to_dict().items()
+            for k, v in counted.to_dict().items()
         ],
     )
 
@@ -139,13 +190,13 @@ def __create_cvss_distribution_nvt_top_ten(
     threat = result_series_df.get(['nvt.oid', 'nvt.cvss_base'])
     if threat is None:
         return None
-    counted = threat.value_counts()
+    counted = threat.value_counts().head(10)
     return CountGraph(
         name="cvss_distribution_nvt_top_ten",
-        chart=None,
+        chart=__create_bar_h_chart(counted),
         counts=[
             CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
-            for k, v in counted.head(10).to_dict().items()
+            for k, v in counted.to_dict().items()
         ],
     )
 
@@ -180,14 +231,30 @@ def __create_summary_report(report: DataFrame) -> SummaryReport:
     return SummaryReport(*__simple_data_frame_to_values(filters))
 
 
-def __create_summary_results(report: DataFrame) -> SummaryResults:
+def __create_summary_results(
+    report: DataFrame,
+) -> SummaryResults:
     counts = report.get(['result_count.full', 'result_count.filtered'])
     if counts is None:
-        return None
+        logger.warning('result_count is missing, defaulting to None')
+        counts = pd.DataFrame({'full': '0', 'filtered': '0'}, index=[0])
     data = __simple_data_frame_to_values(counts)
     if len(data) != 2:
         return None
-    data += [None]  # append graph
+    ot = report.get('original_threat')
+    if ot is None:
+        logger.warning('No original_threat found')
+        data += [None]
+    else:
+        threat_distribution = ot.value_counts()
+
+        colors = {'High': 'tab:red', 'Medium': 'tab:orange', 'Low': 'tab:blue'}
+        data += [
+            __create_pie_chart(
+                threat_distribution,
+                colors=[colors.get(v) for v in threat_distribution.keys()],
+            )
+        ]  # append graph
     return SummaryResults(*data)
 
 
@@ -272,7 +339,7 @@ def transform(data: Dict[str, str]) -> Report:
     summary = Summary(
         __create_scan(n_df),
         __create_summary_report(n_df),
-        __create_summary_results(n_df),
+        __create_summary_results(result_series_df),
     )
     results = __create_results(result_series_df)
 

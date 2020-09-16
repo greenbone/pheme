@@ -34,16 +34,21 @@ from pheme.storage import store, load
 )
 def transform(request):
     name = store(
-        "original",
-        request.data,
-    )
-
-    name = store(
         "scanreport",
         dataclasses.asdict(scanreport.gvmd.transform(request.data)),
     )
-
     return Response(name)
+
+
+@api_view(['POST'])
+@parser_classes([XMLParser])
+@renderer_classes(
+    [
+        rest_framework.renderers.JSONRenderer,
+    ]
+)
+def unmodified(request):
+    return Response(request.data)
 
 
 @api_view(['GET'])
