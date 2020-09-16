@@ -41,8 +41,15 @@ def gen_solution() -> Dict:
 
 def gen_host(hostname='localhost') -> Dict:
     return {
-        'text': hostname,
-        'hostname': hostname,
+        'text': "{}.{}.{}.{}".format(
+            random.randint(1, 254),
+            random.randint(1, 254),
+            random.randint(1, 254),
+            random.randint(1, 254),
+        ),
+        'hostname': "{}.{}.org".format(
+            hostname, _random_text(random.randint(10, 70))
+        ),
     }
 
 
@@ -66,7 +73,7 @@ def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
         'solution': gen_solution() if with_optional else None,
         'refs': gen_refs(10) if with_optional else None,
         'type': _random_text(15) if with_optional else None,
-        'name': _random_text(15) if with_optional else None,
+        'name': "faked example {}".format(oid) if with_optional else None,
         'family': _random_text(15) if with_optional else None,
         'cvss_base': _random_text(15) if with_optional else None,
         'tags': _random_text(150) if with_optional else None,
@@ -76,9 +83,10 @@ def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
 threats = ['Low', 'Medium', 'High']
 
 
-def gen_result(hostname: str, oid: str, with_optional: bool = True) -> Dict:
+def gen_result(host: dict, oid: str, with_optional: bool = True) -> Dict:
+
     return {
-        'host': gen_host(hostname),
+        'host': host,
         'nvt': generate_nvt(oid),
         'port': '{}/tcp'.format(random.randint(80, 1001))
         if with_optional
@@ -135,9 +143,17 @@ def gen_result_count() -> Dict:
     }
 
 
+def generate_result_count(full: int, filtered: int) -> Dict:
+    return {
+        'full': str(full),
+        'filtered': str(filtered),
+    }
+
+
 def gen_report(
     hosts: List[str], oids: List[str], with_optional: bool = True
 ) -> Dict:
+    hosts = [gen_host(v) for v in hosts]
     return {
         'id': uuid.uuid1().hex if with_optional else None,
         'gmp': gen_gmp() if with_optional else None,
@@ -162,7 +178,11 @@ def gen_report(
             'start': '{}'.format(random.randint(0, 1000))
             if with_optional
             else None,
-            'result': [gen_result(host, oid) for host in hosts for oid in oids],
+            'result': [
+                gen_result(host, oids[random.randint(0, len(oids) - 1)])
+                for host in hosts
+                for _ in range(1, len(oids) * 2)
+            ],
         },
         'severity': gen_filtered() if with_optional else None,
         'result_count': gen_result_count() if with_optional else None,
@@ -172,17 +192,16 @@ def gen_report(
 if __name__ == '__main__':
     own_path = Path(__file__).absolute()
     directory = own_path.__str__()[0 : (len(own_path.name) * -1)]
-    number_of_hosts = 10000
-    number_of_oids = 10
+    number_of_hosts = 40
     print("generating {} hostnames".format(number_of_hosts))
     hosts = ["host_{}".format(i) for i in range(number_of_hosts)]
-    print("generating {} oid for nvts".format(number_of_oids))
-    oids = ["oid_{}".format(i) for i in range(number_of_oids)]
+    print("generating oid for nvts")
+    oids = ["oid_{}".format(i) for i in range(100)]
     print("generating report data")
     data = {'report': {'report': gen_report(hosts, oids, True)}}
     path = Path(
         '{}../test_data/artifical_{}_hosts_{}_oid_per_host.xml'.format(
-            directory, number_of_hosts, number_of_oids
+            directory, number_of_hosts, len(oids)
         )
     )
     print("writing report data")

@@ -54,6 +54,12 @@
   @top-right {
     content: none; } }
 
+img {
+    width: 100%
+}
+.host-title{
+    break-before: always;
+}
 html {
   color: #393939;
   font-family: Fira Sans;

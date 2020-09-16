@@ -32,19 +32,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.conf.urls import url
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 import pheme.version
 import pheme.views
 
 urlpatterns = [
-    path('transform', pheme.views.transform),
+    path('unmodified', pheme.views.unmodified, name='unmodified'),
+    path('transform', pheme.views.transform, name='transform'),
     path('transform/', pheme.views.transform),
-    path('report/<str:name>', pheme.views.report),
+    path('report/<str:name>', pheme.views.report, name='report'),
     path('report/<str:name>/', pheme.views.report),
-    url(
+    re_path(
         r'^openapi-schema',
         get_schema_view(
             title="Pheme",
