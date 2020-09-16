@@ -51,13 +51,9 @@ from pheme.transformation.scanreport.model import (
 logger = logging.getLogger(__name__)
 
 
-# pylint: disable=W0108
-def __create_chart(
-    set_plot: Callable, create_figure: Callable = lambda: Figure()
-) -> Optional[str]:
+def __create_chart(set_plot: Callable, fig: Figure = Figure()) -> Optional[str]:
     try:
         # https://matplotlib.org/faq/howto_faq.html#how-to-use-matplotlib-in-a-web-application-server
-        fig = create_figure()
         ax = fig.subplots()
         set_plot(ax)
         buf = io.BytesIO()
@@ -87,7 +83,7 @@ def __create_bar_h_chart(series: Series) -> Optional[str]:
 
     if len(series) < 1:
         return None
-    return __create_chart(set_plot, create_figure)
+    return __create_chart(set_plot, create_figure())
 
 
 def __create_pie_chart(series: Series, colors=None) -> Optional[str]:
