@@ -75,10 +75,13 @@ def __create_chart(
         return None
 
 
-def __create_bar_h_chart(series: Series) -> Optional[str]:
+def __create_bar_h_chart(
+    series: Series, *, stacked: bool = False
+) -> Optional[str]:
     def set_plot(ax):
         series.plot.barh(
             ax=ax,
+            stacked=stacked,
         )
 
     def create_figure():
@@ -120,7 +123,7 @@ def __create_nvt_top_ten(
         threat = group_by_threat.get_group(threat_level)
         threat_nvts = threat[['nvt.oid', 'nvt.name']]
         counted = threat_nvts.value_counts()
-        top_ten = counted.head(10)
+        top_ten = counted.head(10).fillna(0)
         return CountGraph(
             name=threat_level,
             chart=__create_bar_h_chart(top_ten),
@@ -153,16 +156,15 @@ def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
 
 
 def __create_port_top_ten(result_series_df: DataFrame) -> CountGraph:
-    threat = result_series_df.get(['port'])
-    if threat is None:
+    ports_per_threat = result_series_df.get(['port', 'threat'])
+    if ports_per_threat is None:
         return None
-    counted = threat.value_counts().head(10)
+    counted = ports_per_threat.value_counts().head(10)
+    ports = result_series_df.get(['port']).value_counts().head(10)
     return CountGraph(
         name="port_top_ten",
-        chart=__create_bar_h_chart(counted),
-        counts=[
-            PortCount(port=k, amount=v) for k, v in counted.to_dict().items()
-        ],
+        chart=__create_bar_h_chart(counted.unstack('threat'), stacked=True),
+        counts=[PortCount(port=k[0], amount=v) for k, v in ports.items()],
     )
 
 

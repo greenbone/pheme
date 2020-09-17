@@ -34,7 +34,7 @@ curl -X POST 'http://localhost:8000/unmodified'\
      -H 'Accept: application/json'\
      -d @path_to/scanreport.xml
 ```
-
+- add stack bar chart possibility
 ### Changed
 ### Deprecated
 ### Removed
