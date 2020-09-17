@@ -25,6 +25,7 @@ import base64
 from django.core.cache import cache
 from django.template import loader
 from django.conf import settings
+from rest_framework.request import Request
 from rest_framework import renderers
 from weasyprint import CSS, HTML
 
@@ -61,7 +62,15 @@ class DetailScanReport(renderers.BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         renderer_context = renderer_context or {}  # to throw key error
-        request = renderer_context['request']
+        request: Request = renderer_context['request']
+        if not data:
+            resp = renderer_context['response']
+            resp.status_code = 404
+            # pylint: disable=W0212
+            path = request._request.path
+            report_id = path[path.rfind('/') + 1 :]
+            return '"not data found for %s"' % report_id
+
         name = data.get('internal_name')
         cache_key = "{}/{}".format(self.media_type, name) if name else None
         logger.debug("generating report %s", cache_key)
