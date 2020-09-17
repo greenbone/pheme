@@ -91,8 +91,7 @@ def gen_result(host: dict, oid: str, with_optional: bool = True) -> Dict:
         'port': '{}/tcp'.format(random.randint(80, 1001))
         if with_optional
         else None,
-        'threat': random.choice(threats) if with_optional else None,
-        'original_threat': random.choice(threats),
+        'threat': random.choice(threats),
         'severity': '4.3' if with_optional else None,
         'qod': gen_qod() if with_optional else None,
         'description': _random_text(254) if with_optional else None,

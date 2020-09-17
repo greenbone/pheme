@@ -20,7 +20,7 @@ import base64
 import io
 import logging
 import urllib
-from typing import Callable, Dict, List, Optional
+from typing import Union, Callable, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -50,16 +50,24 @@ from pheme.transformation.scanreport.model import (
 logger = logging.getLogger(__name__)
 
 
-def __create_chart(set_plot: Callable, fig: Figure = Figure()) -> Optional[str]:
+def __create_default_figure():
+    return Figure()
+
+
+def __create_chart(
+    set_plot: Callable, fig: Union[Figure, Callable] = __create_default_figure
+) -> Optional[str]:
     try:
+        fig = fig() if callable(fig) else fig
         # https://matplotlib.org/faq/howto_faq.html#how-to-use-matplotlib-in-a-web-application-server
         ax = fig.subplots()
         set_plot(ax)
         buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=100)
+        fig.savefig(buf, format='svg')
         buf.seek(0)
         base64_fig = base64.b64encode(buf.read())
-        uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
+        uri = 'data:image/svg;base64,' + urllib.parse.quote(base64_fig)
+        del fig
         return uri
     # pylint: disable=W0703
     except Exception as e:
@@ -71,7 +79,6 @@ def __create_bar_h_chart(series: Series) -> Optional[str]:
     def set_plot(ax):
         series.plot.barh(
             ax=ax,
-            tick_label='string',
         )
 
     def create_figure():
@@ -83,6 +90,18 @@ def __create_bar_h_chart(series: Series) -> Optional[str]:
     if len(series) < 1:
         return None
     return __create_chart(set_plot, create_figure())
+
+
+def __create_bar_chart(series: Series) -> Optional[str]:
+    def set_plot(ax):
+        series.plot.bar(
+            ax=ax,
+            tick_label='string',
+        )
+
+    if len(series) < 1:
+        return None
+    return __create_chart(set_plot)
 
 
 def __create_pie_chart(series: Series, colors=None) -> Optional[str]:
@@ -156,7 +175,7 @@ def __create_cvss_distribution_port_top_ten(
     counted = threat.value_counts().head(10)
     return CountGraph(
         name="cvss_distribution_ports_top_ten",
-        chart=__create_bar_h_chart(counted),
+        chart=__create_bar_chart(counted),
         counts=[
             CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
             for k, v in counted.to_dict().items()
@@ -175,7 +194,7 @@ def __create_cvss_distribution_host_top_ten(
     counted = threat.value_counts().head(10)
     return CountGraph(
         name="cvss_distribution_host_top_ten",
-        chart=__create_bar_h_chart(counted),
+        chart=__create_bar_chart(counted),
         counts=[
             CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
             for k, v in counted.to_dict().items()
@@ -192,7 +211,7 @@ def __create_cvss_distribution_nvt_top_ten(
     counted = threat.value_counts().head(10)
     return CountGraph(
         name="cvss_distribution_nvt_top_ten",
-        chart=__create_bar_h_chart(counted),
+        chart=__create_bar_chart(counted),
         counts=[
             CVSSDistributionCount(identifier=k[0], amount=v, cvss=k[1])
             for k, v in counted.to_dict().items()
@@ -240,9 +259,9 @@ def __create_summary_results(
     data = __simple_data_frame_to_values(counts)
     if len(data) != 2:
         return None
-    ot = report.get('original_threat')
+    ot = report.get('threat')
     if ot is None:
-        logger.warning('No original_threat found')
+        logger.warning('No threat found')
         data += [None]
     else:
         threat_distribution = ot.value_counts()
@@ -315,15 +334,13 @@ def __create_host_overviews(report: DataFrame):
         def get_weight(severity: str):
             return severity_weight.get(severity) or -1
 
-        for (severity, amount) in (
-            group.groupby('original_threat').value_counts().keys()
-        ):
+        for (severity, amount) in group.groupby('threat').value_counts().keys():
             if get_weight(severity) > get_weight(highest_severity):
                 highest_severity = severity
             severity_counts.append(SeverityCount(severity, amount))
         return HostOverview(host, highest_severity, severity_counts)
 
-    host_ot = report.get(['host.text', 'original_threat'])
+    host_ot = report.get(['host.text', 'threat'])
     if host_ot is None:
         return None
     grouped = host_ot.value_counts().groupby('host.text')
@@ -341,7 +358,7 @@ def transform(data: Dict[str, str]) -> Report:
     result_series_df = results_series.map(lambda x: pd.json_normalize(x)).all()
     common_vulnerabilities = None
     try:
-        group_by_threat = result_series_df.groupby('original_threat')
+        group_by_threat = result_series_df.groupby('threat')
 
         common_vulnerabilities = [
             __create_nvt_top_ten('High', group_by_threat),
@@ -349,7 +366,7 @@ def transform(data: Dict[str, str]) -> Report:
             __create_nvt_top_ten('Low', group_by_threat),
         ]
     except KeyError as e:
-        logger.warning('ignoring original_threat missing: %s', e)
+        logger.warning('ignoring threat missing: %s', e)
 
     vulnerabilities_overview = VulnerabilityOverview(
         __create_host_top_ten(result_series_df),
