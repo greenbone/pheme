@@ -34,7 +34,7 @@ curl -X POST 'http://localhost:8000/unmodified'\
      -H 'Accept: application/json'\
      -d @path_to/scanreport.xml
 ```
-- add stack bar chart possibility
+- add stack bar chart possibility [#33](https://github.com/greenbone/pheme/pull/33/)
 ### Changed
 ### Deprecated
 ### Removed
