@@ -137,6 +137,25 @@
 
     <article id="finding">
         <h2 id="finding-title">scan reports grouped by {{ grouping }}</h2>
+        <table class="host_overview">
+            <tr>
+                <th>Host</th>
+                <th>Highest Severity</th>
+                <th>Amount of severities</th>
+            </tr>
+            {% for overview in host_overviews %}
+            <tr>
+                <td>{{ overview.host}}</td>
+                <td>{{ overview.highest_severity }}</td>
+                <td>
+                    {% for count in overview.counts %}
+                    {{ count.severity}}:{{ count.amount}},
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
         {% for scan in results.scans %}
         <h3 class="host-title">{{ scan.host }}</h3>
         {% for detail in scan.results %}

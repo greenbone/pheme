@@ -334,7 +334,7 @@ def __create_host_overviews(report: DataFrame):
         severity_weight = {'High': 2, 'Medium': 1, 'Low': 0}
 
         def get_weight(severity: str):
-            return severity_weight.get(severity) or -1
+            return severity_weight.get(severity, -1)
 
         for (severity, amount) in group.groupby('threat').value_counts().keys():
             if get_weight(severity) > get_weight(highest_severity):
