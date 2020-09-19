@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from uuid import uuid4
 from typing import List
 
 from rest_framework.test import APIClient
@@ -27,14 +26,18 @@ from django.core.cache import cache
 from tests.generate_test_data import gen_report
 
 
-def generate(amount: int) -> List[str]:
-    return ["%s" % uuid4() for _ in range(amount)]
+def generate(prefix: str, amount: int) -> List[str]:
+    return ["{}_{}".format(prefix, i) for i in range(amount)]
 
 
 def test_report_contains_charts():
     client = APIClient()
     url = reverse('transform')
-    report = {'report': {'report': gen_report(generate(10), generate(5))}}
+    report = {
+        'report': {
+            'report': gen_report(generate('host', 10), generate('oid', 5))
+        }
+    }
     response = client.post(url, data=report, format='xml')
     assert response.status_code == 200
     result = cache.get(response.data)

@@ -34,7 +34,7 @@ def _random_text(length: int) -> str:
 
 def gen_solution() -> Dict:
     return {
-        'type': _random_text(15),
+        'type': "Maybe a mitigration, maybe not",
         'text': _random_text(250),
     }
 
@@ -48,7 +48,7 @@ def gen_host(hostname='localhost') -> Dict:
             random.randint(1, 254),
         ),
         'hostname': "{}.{}.org".format(
-            hostname, _random_text(random.randint(10, 70))
+            hostname, _random_text(random.randint(1, 10))
         ),
     }
 
@@ -75,7 +75,9 @@ def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
         'type': _random_text(15) if with_optional else None,
         'name': "faked example {}".format(oid) if with_optional else None,
         'family': _random_text(15) if with_optional else None,
-        'cvss_base': _random_text(15) if with_optional else None,
+        'cvss_base': "{}".format(float(oid[4:]) / 10)
+        if with_optional
+        else None,
         'tags': _random_text(150) if with_optional else None,
     }
 
@@ -84,15 +86,15 @@ threats = ['Low', 'Medium', 'High']
 
 
 def gen_result(host: dict, oid: str, with_optional: bool = True) -> Dict:
-
+    allowed_ports = [80, 8080, 443, 20, 25, 21, 23, 143, 22, 67, 68]
     return {
         'host': host,
         'nvt': generate_nvt(oid),
-        'port': '{}/tcp'.format(random.randint(80, 1001))
+        'port': '{}/tcp'.format(random.choice(allowed_ports))
         if with_optional
         else None,
         'threat': random.choice(threats),
-        'severity': '4.3' if with_optional else None,
+        'severity': "{}".format(float(oid[4:]) / 10) if with_optional else None,
         'qod': gen_qod() if with_optional else None,
         'description': _random_text(254) if with_optional else None,
     }
@@ -180,7 +182,7 @@ def gen_report(
             'result': [
                 gen_result(host, oids[random.randint(0, len(oids) - 1)])
                 for host in hosts
-                for _ in range(1, len(oids) * 2)
+                for _ in range(1, random.randint(1, len(oids) * 2))
             ],
         },
         'severity': gen_filtered() if with_optional else None,
@@ -191,7 +193,7 @@ def gen_report(
 if __name__ == '__main__':
     own_path = Path(__file__).absolute()
     directory = own_path.__str__()[0 : (len(own_path.name) * -1)]
-    number_of_hosts = 40
+    number_of_hosts = 10
     print("generating {} hostnames".format(number_of_hosts))
     hosts = ["host_{}".format(i) for i in range(number_of_hosts)]
     print("generating oid for nvts")

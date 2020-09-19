@@ -16,7 +16,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import uuid
 
 import pytest
 from pheme.transformation.scanreport.gvmd import (
@@ -25,7 +24,7 @@ from pheme.transformation.scanreport.gvmd import (
 
 from tests.generate_test_data import gen_report
 
-oids = [uuid.uuid1().hex for _ in range(5)]
+oids = ['oid_{}'.format(i) for i in range(5)]
 hosts = ['first', 'second']
 
 

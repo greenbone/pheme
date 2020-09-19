@@ -63,10 +63,10 @@ def __create_chart(
         ax = fig.subplots()
         set_plot(ax)
         buf = io.BytesIO()
-        fig.savefig(buf, format='svg')
+        fig.savefig(buf, format='png')
         buf.seek(0)
         base64_fig = base64.b64encode(buf.read())
-        uri = 'data:image/svg;base64,' + urllib.parse.quote(base64_fig)
+        uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
         del fig
         return uri
     # pylint: disable=W0703
@@ -334,7 +334,7 @@ def __create_host_overviews(report: DataFrame):
         severity_weight = {'High': 2, 'Medium': 1, 'Low': 0}
 
         def get_weight(severity: str):
-            return severity_weight.get(severity) or -1
+            return severity_weight.get(severity, -1)
 
         for (severity, amount) in group.groupby('threat').value_counts().keys():
             if get_weight(severity) > get_weight(highest_severity):
