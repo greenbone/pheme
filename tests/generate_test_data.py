@@ -155,6 +155,10 @@ def gen_report(
     hosts: List[str], oids: List[str], with_optional: bool = True
 ) -> Dict:
     hosts = [gen_host(v) for v in hosts]
+    result = []
+    for h in hosts:
+        for _ in range(random.randint(1, len(oids) + 2)):
+            result.append(gen_result(h, oids[random.randint(0, len(oids) - 1)]))
     return {
         'id': uuid.uuid1().hex if with_optional else None,
         'gmp': gen_gmp() if with_optional else None,
@@ -179,11 +183,7 @@ def gen_report(
             'start': '{}'.format(random.randint(0, 1000))
             if with_optional
             else None,
-            'result': [
-                gen_result(host, oids[random.randint(0, len(oids) - 1)])
-                for host in hosts
-                for _ in range(1, random.randint(1, len(oids) * 2))
-            ],
+            'result': result,
         },
         'severity': gen_filtered() if with_optional else None,
         'result_count': gen_result_count() if with_optional else None,
