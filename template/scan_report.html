@@ -10,164 +10,55 @@
 <body>
     <article id="cover">
         <h1>{{ summary.scan.name }}</h1>
-        <address>
-            Greenbone Networks GmbH
-            Neumarkt 12
-            49074 Osnabrück Germany
-        </address>
-        <address>
-            support@greenbone.net
-            +49-541-760278-0
-            https://www.greenbone.net
-        </address>
     </article>
-    <article id="summary">
-        <h2>Summary</h2>
-        <h3>Report</h3>
-        <p>Applied filters: {{ summary.report.applied_filter }}</p>
-        <p>Severities: {{ summary.report.severities }}</p>
-        <p>Timezone: {{ summary.report.timezone }}</p>
-        <h3>Results</h3>
-        <img src="{{ summary.results.chart }}" />
-        <p>available: {{ summary.results.available}}</p>
-        <p>included: {{ summary.results.included}}</p>
+    <article id="ovierview">
+        <h2>Main Report</h2>
+        <h3>Vulnerable Equipment</h3>
+        <img src="{{ overview.vulnerable_equipment.chart }}" />
+        <h3>Total NVT</h3>
+        <img src="{{ overview.nvts.chart }}" />
+        <h3>Top 10 Hosts</h3>
+        <img src="{{ overview.hosts.chart }}" />
     </article>
-    <article id="common_vulnerabilities">
-        <h2>Common Vulnerabilities</h2>
-        {% for cv in common_vulnerabilities %}
-        <h3>{{ cv.name }}</h3>
-        <img src="{{ cv.chart }}" />
-        <table id="{{ cv.name }}_cv_top_ten">
-            <tr>
-                <th>OID</th>
-                <th>amount</th>
-                <th>name</th>
-            </tr>
-            {% for count in cv.counts %}
-            <tr>
-                <td>{{ count.oid }}</td>
-                <td>{{ count.amount }}</td>
-                <td>{{ count.name }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% endfor %}
-    </article>
-    <article id="vulnerability_overview">
-        <h2>Vulnerability Overview</h2>
-        <h3>Hosts</h3>
-        <img src="{{ vulnerability_overview.hosts.chart }}" />
-        <table id="hosts_top_ten">
-            <tr>
-                <th>hostname</th>
-                <th>IP</th>
-                <th>amount</th>
-            </tr>
-            {% for count in vulnerability_overview.hosts.counts %}
-            <tr>
-                <td>{{ count.name }}</td>
-                <td>{{ count.ip }}</td>
-                <td>{{ count.amount }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        <h3>Ports</h3>
-        <img src="{{ vulnerability_overview.ports.chart }}" />
-        <table id="ports_top_ten">
-            <tr>
-                <th>port</th>
-                <th>amount</th>
-            </tr>
-            {% for count in vulnerability_overview.ports.counts %}
-            <tr>
-                <td>{{ count.port}}</td>
-                <td>{{ count.amount }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        <h3>CVSS distribution / port</h3>
-        <img src="{{ vulnerability_overview.cvss_distribution_ports.chart }}" />
-        <table class="cvss_distribution">
-            <tr>
-                <th>port</th>
-                <th>amount</th>
-                <th>cvss</th>
-            </tr>
-            {% for count in vulnerability_overview.cvss_distribution_ports.counts %}
-            <tr>
-                <td>{{ count.identifier}}</td>
-                <td>{{ count.amount }}</td>
-                <td>{{ count.cvss}}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        <h3>CVSS distribution / host</h3>
-        <img src="{{ vulnerability_overview.cvss_distribution_hosts.chart }}" />
-        <table class="cvss_distribution">
-            <tr>
-                <th>host</th>
-                <th>amount</th>
-                <th>cvss</th>
-            </tr>
-            {% for count in vulnerability_overview.cvss_distribution_hosts.counts %}
-            <tr>
-                <td>{{ count.identifier}}</td>
-                <td>{{ count.amount }}</td>
-                <td>{{ count.cvss}}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        <h3>CVSS distribution / vulnerability</h3>
-        <img src="{{ vulnerability_overview.cvss_distribution_vulnerabilities.chart }}" />
-        <table class="cvss_distribution">
-            <tr>
-                <th>nvt/oid</th>
-                <th>amount</th>
-                <th>cvss</th>
-            </tr>
-            {% for count in vulnerability_overview.cvss_distribution_vulnerabilities.counts %}
-            <tr>
-                <td>{{ count.identifier}}</td>
-                <td>{{ count.amount }}</td>
-                <td>{{ count.cvss}}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </article>
-
     <article id="finding">
-        <h2 id="finding-title">scan reports grouped by {{ grouping }}</h2>
-        <table class="host_overview">
-            <tr>
-                <th>Host</th>
-                <th>Highest Severity</th>
-                <th>Amount of severities</th>
-            </tr>
-            {% for overview in host_overviews %}
-            <tr>
-                <td>{{ overview.host}}</td>
-                <td>{{ overview.highest_severity }}</td>
-                <td>
-                    {% for count in overview.counts %}
-                    {{ count.severity}}:{{ count.amount}},
-                    {% endfor %}
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-
-        {% for scan in results.scans %}
+        {% for scan in results%}
         <h3 class="host-title">{{ scan.host }}</h3>
+        <p>score: {{ severity }}</p>
+        <p>cpu:</p>
+        <p>o/s:</p>
+        <p>Memory:</p>
+        <p>Ports open:</p>
         {% for detail in scan.results %}
         <section class="{{ detail.threat }}">
-            <h4>OID: {{ detail.nvt_oid }}</h4>
-            <p>Family: {{ detail.nvt_family }}</p>
-            <p>Description: {{ detail.nvt_name }}</p>
-            {% if 'nvt_solution_text' in detail %}
-            <h5>{{ detail.nvt_solution_type }}:</h5>
-            <p>{{ detail.nvt_solution_text }}</p>
+            <h4>{{ detail.nvt_name }}</h4>
+            <p>{{ detail.port }} {{ detail.nvt_oid }}</p>
+            {% if 'summary' in detail.nvt_tags_interpreted %}
+            <h5>Summary</h5>
+            <p>{{ detail.nvt_tags_interpreted.summary }} </p>
             {% endif %}
+            {% if 'impact' in detail.nvt_tags_interpreted %}
+            <h5>Impact</h5>
+            <p>{{ detail.nvt_tags_interpreted.impact }} </p>
+            {% endif %}
+            {% if 'insight' in detail.nvt_tags_interpreted %}
+            <h5>Vulnerability Insight</h5>
+            <p>{{ detail.nvt_tags_interpreted.insight }} </p>
+            {% endif %}
+            {% if 'solution' in detail.nvt_tags_interpreted %}
+            <h5>Solution</h5>
+            <p>{{ detail.nvt_tags_interpreted.solution_type}} </p>
+            <p>{{ detail.nvt_tags_interpreted.solution}} </p>
+            {% endif %}
+            {% if 'nvt_refs_ref' in detail%}
+            <h5>References</h5>
+            {% for key, refs in detail.nvt_refs_ref.items %}
+            <p>{{ key }}:
+            {% for r in refs %}
+            {{ r }}, 
+            {% endfor %}
             </p>
+            {% endfor %}
+            {% endif %}
         </section>
         {% endfor %}
         {% endfor %}

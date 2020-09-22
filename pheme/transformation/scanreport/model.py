@@ -22,52 +22,22 @@ from typing import Dict, List, Union
 
 
 @dataclass
-class QOD:
-    value: str
-    type: str
+class NVTThreatCount:
+    level: str
+    count: int
+
+
+@dataclass
+class Equipment:
+    os: str  # search for host.text and refs than os-detection
+    ports: List[str]  # ports port host and ports port text
 
 
 @dataclass
 class HostResults:
     host: str
+    equipment: Equipment
     results: List[Dict]
-
-
-@dataclass
-class Results:
-    max: str
-    start: str
-    scans: List[HostResults]
-
-
-@dataclass
-class Scan:
-    name: str
-    start: str
-    duration: str
-    hosts_scanned: str
-    comment: str
-
-
-@dataclass
-class SummaryReport:
-    applied_filter: str
-    severities: List[str]
-    timezone: str
-
-
-@dataclass
-class SummaryResults:
-    available: int
-    included: int
-    chart: str  # base64,png
-
-
-@dataclass
-class Summary:
-    scan: Scan
-    report: SummaryReport
-    results: SummaryResults
 
 
 @dataclass
@@ -85,33 +55,10 @@ class HostCount:
 
 
 @dataclass
-class CVSSDistributionCount:
-    identifier: str
-    amount: int
-    cvss: str
-
-
-@dataclass
-class PortCount:
-    port: str
-    amount: int
-
-
-@dataclass
 class CountGraph:
     name: str
     chart: str
-    counts: List[Union[CVSSDistributionCount, NVTCount, HostCount, PortCount]]
-
-
-@dataclass
-class VulnerabilityOverview:
-    hosts: CountGraph
-    network_topology: CountGraph  # not there yet
-    ports: CountGraph
-    cvss_distribution_ports: CountGraph
-    cvss_distribution_hosts: CountGraph
-    cvss_distribution_vulnerabilities: CountGraph
+    counts: List[Union[NVTCount, HostCount]]
 
 
 @dataclass
@@ -121,177 +68,48 @@ class SeverityCount:
 
 
 @dataclass
-class HostOverview:
-    host: str
-    highest_severity: str
-    counts: List[SeverityCount]
+class Overview:
+    hosts: CountGraph
+    nvts: CountGraph
+    vulnerable_equipment: CountGraph
 
 
 @dataclass
 class Report:
     id: str
-    summary: Summary
-    common_vulnerabilities: List[CountGraph]
-    vulnerability_overview: VulnerabilityOverview
-    host_overviews: List[HostOverview]
-    results: Results
+    version: str
+    overview: Overview
+    results: List[HostResults]
 
 
 def descripe():
     return Report(
         id="str; identifier of a report",
-        summary=Summary(
-            scan=Scan(
-                name="str; name of the scan",
-                start="str; start date",
-                duration="str; end date (needs to be renamend)",
-                hosts_scanned="str; number of scanned hosts",
-                comment="str; comment of a report",
-            ),
-            report=SummaryReport(
-                applied_filter="str; applied filter of reports",
-                severities=[
-                    "str; High",
-                    "str; Medium",
-                    "str; Low",
-                ],
-                timezone="str; the timezone of the report",
-            ),
-            results=None,
-        ),
-        common_vulnerabilities=[
-            CountGraph(
-                name="High",
-                chart="str; link to chart image (base64 encoded datalink)",
-                counts=[
-                    NVTCount(
-                        oid="str; oid of nvt",
-                        amount="int; amount of nvts with severity high",
-                        name="str; name of nvt",
-                    )
-                ],
-            ),
-            CountGraph(
-                name="Medium",
-                chart="str; link to chart image (base64 encoded datalink)",
-                counts=[
-                    NVTCount(
-                        oid="str; oid of nvt",
-                        amount="int; amount of nvts within severityh",
-                        name="str; name of nvt",
-                    )
-                ],
-            ),
-            CountGraph(
-                name="Low",
-                chart="str; link to chart image (base64 encoded datalink)",
-                counts=[
-                    NVTCount(
-                        oid="str; oid of nvt",
-                        amount="int; amount of nvts within severityh",
-                        name="str; name of nvt",
-                    )
-                ],
-            ),
-        ],
-        vulnerability_overview=VulnerabilityOverview(
-            hosts=CountGraph(
-                name="str; hosts",
-                chart="str; link to chart image (base64 encoded datalink)",
-                counts=[
-                    HostCount(
-                        ip="str; IP Address of the host",
-                        amount="int; amount of found security breaches",
-                        name="str; hostname",
-                    )
-                ],
-            ),
-            network_topology=None,
-            ports=CountGraph(
-                name="str; ports",
-                chart="str; link to chart image (base64 encoded datalink)",
-                counts=[
-                    PortCount(
-                        port="str; port (e.g. tcp/20)",
-                        amount="int; amount of found security breaches",
-                    )
-                ],
-            ),
-            cvss_distribution_ports=CountGraph(
-                name="str; cvss distribution ports",
-                chart="str; link to chart image (base64 encoded datalink)",
-                counts=[
-                    CVSSDistributionCount(
-                        identifier="ports",
-                        amount="int; amount of cvss across ports in report",
-                        cvss="str; cvss",
-                    ),
-                ],
-            ),
-            cvss_distribution_hosts=CountGraph(
-                name="str; cvss distribution hosts",
-                chart="str; link to chart image (base64 encoded datalink)",
-                counts=[
-                    CVSSDistributionCount(
-                        identifier="hosts",
-                        amount="int; amount of cvss across hosts in report",
-                        cvss="str; cvss",
-                    ),
-                ],
-            ),
-            cvss_distribution_vulnerabilities=CountGraph(
-                name="str; cvss distribution hosts",
-                chart="str; link to chart image (base64 encoded datalink)",
-                counts=[
-                    CVSSDistributionCount(
-                        identifier="ports",
-                        amount="int; amount of cvss across hosts in report",
-                        cvss="str; cvss",
-                    ),
-                ],
-            ),
-        ),
-        host_overviews=[
-            HostOverview(
-                host="str; ip address of the host",
-                highest_severity="str; highest severity of the host",
-                counts=[
-                    SeverityCount(
-                        severity="str; High", amount="int; amount of severity"
-                    ),
-                    SeverityCount(
-                        severity="str; Medium", amount="int; amount of severity"
-                    ),
-                    SeverityCount(
-                        severity="str; Low", amount="int; amount of severity"
-                    ),
-                ],
+        version="str; version of gvmd",
+        overview=None,  # TODO
+        results=[
+            HostResults(
+                host="str; ip address of host",
+                equipment=Equipment(
+                    os="str; operating system", ports=["str; open ports"]
+                ),
+                results={
+                    'nvt.oid': 'str; nvt.oid; optional',
+                    'nvt.type': 'str; nvt.type; optional',
+                    'nvt.name': 'str; nvt.name; optional',
+                    'nvt.family': 'str; nvt.family; optional',
+                    'nvt.cvss_base': 'str; nvt.cvss_base; optional',
+                    'nvt.tags': 'str; nvt.tags; optional',
+                    'nvt.refs.ref': 'str; nvt.refs.ref; optional',
+                    'nvt.solution.type': 'str; nvt.solution.type; optional',
+                    'nvt.solution.text': 'str; nvt.solution.text; optional',
+                    'port': 'str; port; optional',
+                    'threat': 'str; threat; optional',
+                    'severity': 'str; severity; optional',
+                    'qod.value': 'str; qod.value; optional',
+                    'qod.type': 'str; qod.type; optional',
+                    'description': 'str; description; optional',
+                },
             )
         ],
-        results=Results(
-            max="str; max results",
-            start="str; start of results",
-            scans=[
-                HostResults(
-                    host="str; ip address of host",
-                    results={
-                        'nvt.oid': 'str; nvt.oid; optional',
-                        'nvt.type': 'str; nvt.type; optional',
-                        'nvt.name': 'str; nvt.name; optional',
-                        'nvt.family': 'str; nvt.family; optional',
-                        'nvt.cvss_base': 'str; nvt.cvss_base; optional',
-                        'nvt.tags': 'str; nvt.tags; optional',
-                        'nvt.refs.ref': 'str; nvt.refs.ref; optional',
-                        'nvt.solution.type': 'str; nvt.solution.type; optional',
-                        'nvt.solution.text': 'str; nvt.solution.text; optional',
-                        'port': 'str; port; optional',
-                        'threat': 'str; threat; optional',
-                        'severity': 'str; severity; optional',
-                        'qod.value': 'str; qod.value; optional',
-                        'qod.type': 'str; qod.type; optional',
-                        'description': 'str; description; optional',
-                    },
-                )
-            ],
-        ),
     )
