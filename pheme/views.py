@@ -23,6 +23,8 @@ from rest_framework.response import Response
 from pheme.parser.xml import XMLParser
 from pheme.transformation import scanreport
 from pheme.storage import store, load
+from pheme.renderer import MarkDownTableRenderer
+from pheme.transformation.scanreport import model
 
 
 @api_view(['POST'])
@@ -61,3 +63,14 @@ def unmodified(request):
 )
 def report(request, name: str):
     return Response(load(name))
+
+
+@api_view(['GET'])
+@renderer_classes(
+    [
+        rest_framework.renderers.JSONRenderer,
+        MarkDownTableRenderer,
+    ]
+)
+def scanreport_data_description(request):
+    return Response(dataclasses.asdict(model.descripe()))
