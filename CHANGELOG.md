@@ -35,7 +35,7 @@ curl -X POST 'http://localhost:8000/unmodified'\
      -d @path_to/scanreport.xml
 ```
 - add stack bar chart possibility [#33](https://github.com/greenbone/pheme/pull/33/)
-- create a markdown table description of scanreport model
+- create a markdown table description of scanreport model [#37](https://github.com/greenbone/pheme/pull/37/)
 ```
 curl -H 'accept: text/markdown+table' localhost:8000/scanreport/data/description
 ```
