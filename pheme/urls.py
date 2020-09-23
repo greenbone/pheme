@@ -42,6 +42,11 @@ urlpatterns = [
     path('unmodified', pheme.views.unmodified, name='unmodified'),
     path('transform', pheme.views.transform, name='transform'),
     path('transform/', pheme.views.transform),
+    path(
+        'scanreport/data/description',
+        pheme.views.scanreport_data_description,
+        name='scanreport_data_description',
+    ),
     path('report/<str:name>', pheme.views.report, name='report'),
     path('report/<str:name>/', pheme.views.report),
     re_path(
