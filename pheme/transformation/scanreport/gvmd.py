@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import base64
-import sys
 import io
 import logging
 import urllib
@@ -60,7 +59,7 @@ def __create_chart(
         if modify_fig:
             modify_fig(fig)
         buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=120)
+        fig.savefig(buf, format='png', dpi=300)
         buf.seek(0)
         base64_fig = base64.b64encode(buf.read())
         uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
@@ -99,8 +98,7 @@ def __create_tree_chart(values, labels, *, colors=None) -> Optional[str]:
             ax.set_axis_off()
 
     def create_fig():
-        # 245000x120000
-        fig = Figure(figsize=(10, 4))
+        fig = Figure(figsize=(33, 12))
         return fig
 
     return __create_chart(set_plot, fig=create_fig, modify_fig=modify_fig)
@@ -245,35 +243,27 @@ def __create_results(report: DataFrame, os_lookup: DataFrame) -> List[Dict]:
 
 def __create_vulnerable_equipment(report: DataFrame) -> CountGraph:
     df = report.get(['host.text', 'threat'])
-    if df is None:
-        return None
 
-    threat_weight_lookup = {'High': 1, 'Medium': 2, 'Low': 3}
-    higest_to_color = {1: 'red', 2: 'orange', 3: 'blue'}
-
-    def create_color_values(item):
-        highest = sys.maxsize
-        total = 0
-        for i in item.items():
-            weight = threat_weight_lookup.get(i[0])
-            if weight and weight < highest:
-                highest = weight
-            total += i[1]
-        return (higest_to_color.get(highest, 'yellow'), total)
-
-    temp = (
-        df.value_counts()
-        .head(80)
-        .unstack('host.text')
-        .apply(create_color_values)
-    )
     values = []
     labels = []
     colors = []
-    for item in temp.items():
-        labels.append(item[0])
-        values.append(item[1][1])
-        colors.append(item[1][0])
+    max_count_nvt = df.groupby('host.text').count().count().item()
+
+    def return_highest(items):
+        if 'High' in items:
+            return 'red'
+        if 'Medium' in items:
+            return 'orange'
+        if 'Low' in items:
+            return 'blue'
+        return 'white'
+
+    for host, df in df.groupby('host.text'):
+        count_nvt = len(df)
+        until = round(len(host) * count_nvt / max_count_nvt)
+        labels.append(host[0:until] if until else "")
+        values.append(count_nvt)
+        colors.append(return_highest(df.groupby('threat').groups.keys()))
 
     return CountGraph(
         name="vulnerable_equipment",
