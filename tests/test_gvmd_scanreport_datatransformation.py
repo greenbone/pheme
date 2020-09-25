@@ -40,6 +40,4 @@ def test_report_generation(expected):
     amount_scans, scan_results = expected
     data = {'report': {'report': scan_results}}
     report = transform(data)
-    if amount_scans > 0:
-        assert len(report.common_vulnerabilities) == 3
-    assert len(report.results.scans) == amount_scans
+    assert len(report.results) == amount_scans

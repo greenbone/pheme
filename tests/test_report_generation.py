@@ -41,25 +41,7 @@ def test_report_contains_charts():
     response = client.post(url, data=report, format='xml')
     assert response.status_code == 200
     result = cache.get(response.data)
-    assert result['summary'] is not None
-    assert result['summary']['results'] is not None
-    assert result['summary']['results']['chart'] is not None
-    assert len(result['common_vulnerabilities']) is 3
-    for cv in result['common_vulnerabilities']:
-        assert cv['chart'] is not None
-    assert result['vulnerability_overview']['hosts']['chart'] is not None
-    assert result['vulnerability_overview']['ports']['chart'] is not None
-    assert (
-        result['vulnerability_overview']['cvss_distribution_ports']['chart']
-        is not None
-    )
-    assert (
-        result['vulnerability_overview']['cvss_distribution_hosts']['chart']
-        is not None
-    )
-    assert (
-        result['vulnerability_overview']['cvss_distribution_vulnerabilities'][
-            'chart'
-        ]
-        is not None
-    )
+    assert result['overview'] is not None
+    assert result['overview']['hosts'] is not None
+    assert result['overview']['nvts'] is not None
+    assert result['overview']['vulnerable_equipment'] is not None
