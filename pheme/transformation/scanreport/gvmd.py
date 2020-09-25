@@ -40,6 +40,12 @@ from pheme.transformation.scanreport.model import (
 
 logger = logging.getLogger(__name__)
 
+__severity_class_colors = {
+    'High': 'tab:red',
+    'Medium': 'tab:orange',
+    'Low': 'tab:blue',
+}
+
 
 def __create_default_figure():
     return Figure()
@@ -128,8 +134,7 @@ def __create_pie_chart(
 
 
 def __severity_class_to_color(severity_classes: List[str]):
-    colors = {'High': 'tab:red', 'Medium': 'tab:orange', 'Low': 'tab:blue'}
-    return [colors.get(v) for v in severity_classes]
+    return [__severity_class_colors.get(v, 'white') for v in severity_classes]
 
 
 def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
@@ -138,13 +143,12 @@ def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
         return None
 
     counted = threat.value_counts().head(10)
-    colors = {'High': 'tab:red', 'Medium': 'tab:orange', 'Low': 'tab:blue'}
     return CountGraph(
         name="host_top_ten",
         chart=__create_bar_h_chart(
             counted.unstack('threat'),
             stacked=True,
-            colors=colors,
+            colors=__severity_class_colors,
         ),
         counts=[
             HostCount(ip=k[0], amount=v, name=None)
@@ -243,20 +247,22 @@ def __create_results(report: DataFrame, os_lookup: DataFrame) -> List[Dict]:
 
 def __create_vulnerable_equipment(report: DataFrame) -> CountGraph:
     df = report.get(['host.text', 'threat'])
+    if df is None:
+        return None
+
+    def return_highest(item):
+        if 'High' in item:
+            return __severity_class_colors.get('High')
+        if 'Medium' in item:
+            return __severity_class_colors.get('Medium')
+        if 'Medium' in item:
+            return __severity_class_colors.get('Low')
+        return "white"
 
     values = []
     labels = []
     colors = []
     max_count_nvt = df.groupby('host.text').count().count().item()
-
-    def return_highest(items):
-        if 'High' in items:
-            return 'red'
-        if 'Medium' in items:
-            return 'orange'
-        if 'Low' in items:
-            return 'blue'
-        return 'white'
 
     for host, df in df.groupby('host.text'):
         count_nvt = len(df)
