@@ -155,7 +155,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
     },
 }
 # https://docs.djangoproject.com/en/3.1/topics/cache/

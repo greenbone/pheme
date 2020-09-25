@@ -156,9 +156,20 @@ def gen_report(
 ) -> Dict:
     hosts = [gen_host(v) for v in hosts]
     result = []
+    host_details = []
     for h in hosts:
         for _ in range(random.randint(1, len(oids) + 2)):
-            result.append(gen_result(h, oids[random.randint(0, len(oids) - 1)]))
+            res = gen_result(h, oids[random.randint(0, len(oids) - 1)])
+            host_details.append(
+                {
+                    "ip": res['host']['text'],
+                    "detail": [
+                        {"name": "best_os_cpe", "value": "rusty kernel"},
+                        {"name": "something else", "value": "hum"},
+                    ],
+                }
+            )
+            result.append(res)
     return {
         'id': uuid.uuid1().hex if with_optional else None,
         'gmp': gen_gmp() if with_optional else None,
@@ -187,6 +198,7 @@ def gen_report(
         },
         'severity': gen_filtered() if with_optional else None,
         'result_count': gen_result_count() if with_optional else None,
+        'host': host_details,
     }
 
 
