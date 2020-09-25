@@ -86,7 +86,23 @@ def descripe():
     return Report(
         id="str; identifier of a report",
         version="str; version of gvmd",
-        overview=None,  # TODO
+        overview=Overview(
+            hosts=CountGraph(
+                name="host_top_ten",
+                chart="str; link to chart image (base64 encoded datalink)",
+                counts=[],
+            ),
+            nvts=CountGraph(
+                name="nvt_overview",
+                chart="str; link to chart image (base64 encoded datalink)",
+                counts=[],
+            ),
+            vulnerable_equipment=CountGraph(
+                name="vulnerable_equipment",
+                chart="str; link to chart image (base64 encoded datalink)",
+                counts=[],
+            ),
+        ),
         results=[
             HostResults(
                 host="str; ip address of host",

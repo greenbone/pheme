@@ -162,7 +162,7 @@ def __create_nvt(result_series_df: DataFrame) -> CountGraph:
 
     counted = threat.value_counts()
     return CountGraph(
-        name="host_top_ten",
+        name="nvt_overview",
         chart=__create_pie_chart(
             counted,
             colors=__severity_class_to_color(counted.keys()),
