@@ -77,7 +77,10 @@ class Overview:
 @dataclass
 class Report:
     id: str
+    name: str
+    comment: str
     version: str
+    start: str
     overview: Overview
     results: List[HostResults]
 
@@ -85,7 +88,10 @@ class Report:
 def descripe():
     return Report(
         id="str; identifier of a report",
+        name="str; name of the scan",
+        comment="str; comment of the scan",
         version="str; version of gvmd",
+        start="str; datetime of a scan start",
         overview=Overview(
             hosts=CountGraph(
                 name="host_top_ten",

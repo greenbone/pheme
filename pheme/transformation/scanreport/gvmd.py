@@ -20,11 +20,11 @@ import base64
 import io
 import logging
 import urllib
-from typing import Any, Union, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
-import squarify
 import pandas as pd
+import squarify
 from matplotlib.figure import Figure
 from pandas import DataFrame
 from pandas.core.series import Series
@@ -174,7 +174,9 @@ def __create_nvt(result_series_df: DataFrame) -> CountGraph:
     )
 
 
-def __create_results(report: DataFrame, os_lookup: DataFrame) -> List[Dict]:
+def __create_results(
+    report: DataFrame, os_lookup: DataFrame, ports_lookup: DataFrame
+) -> List[Dict]:
     try:
         grouped_host = report.groupby('host.text')
         wanted_columns = [
@@ -218,6 +220,12 @@ def __create_results(report: DataFrame, os_lookup: DataFrame) -> List[Dict]:
                     os_lookup['ip'] == host_text, 'detail'
                 ].values
                 os = may_os[0].value.all() if len(may_os) > 0 else None
+            ports = []
+            if ports_lookup is not None:
+                ports = ports_lookup.query(
+                    'host == "{}"'.format(host_text)
+                ).get('text')
+                ports = ports.values.tolist() if ports is not None else []
             for key, series in flat_results.items():
                 for i, value in enumerate(series):
                     if not (isinstance(value, float) and np.isnan(value)):
@@ -235,7 +243,7 @@ def __create_results(report: DataFrame, os_lookup: DataFrame) -> List[Dict]:
             results.append(
                 HostResults(
                     host=host_text,
-                    equipment=Equipment(os=os, ports=[]),
+                    equipment=Equipment(os=os, ports=ports),
                     results=result,
                 )
             )
@@ -313,12 +321,20 @@ def transform(data: Dict[str, str]) -> Report:
         host_df = host_df.get(['ip', 'detail'])
         if host_df is not None:
             host_df = host_df.applymap(__filter_os_based_on_name)
-    results = __create_results(result_series_df, host_df)
+    ports = n_df.get('ports.port')
+    if ports is not None:
+        ports = ports.map(pd.json_normalize).all()
 
+    results = __create_results(result_series_df, host_df, ports)
+    task = report.get('task') or {}
+    gmp = report.get('gmp') or {}
     logger.info("data transformation")
     return Report(
         report.get('id'),
-        None,
+        task.get('name'),
+        task.get('comment'),
+        gmp.get('version'),
+        report.get('scan_start'),
         Overview(
             hosts=__create_host_top_ten(result_series_df),
             nvts=__create_nvt(result_series_df),
