@@ -39,7 +39,7 @@
     content: none; } }
 
 @page :first {
-  background: url({{ background_image }}) no-repeat;
+  background: url({{ cover_image}}) no-repeat;
   background-color: #e6e6e6;
   background-size: cover;
   margin: 0; }

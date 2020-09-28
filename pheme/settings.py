@@ -37,7 +37,7 @@ STATIC_DIR = BASE_DIR / 'static'
 TEMPLATE_DIR = BASE_DIR / 'template'
 TEMPLATE_LOGO_ADDRESS = os.environ.get(
     "TEMPLATE_LOGO_ADDRESS"
-) or 'file://{}/logo.jpg'.format(STATIC_DIR)
+) or '//{}/logo.jpg'.format(STATIC_DIR)
 TEMPLATE_COVER_IMAGE_ADDRESS = os.environ.get(
     "TEMPLATE_COVER_IMAGE_ADDRESS"
 ) or '//{}/cover_image.png'.format(STATIC_DIR)

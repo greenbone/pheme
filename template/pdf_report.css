@@ -114,7 +114,7 @@ html body h4 {
 }
 
 html body article#cover {
-    background: url({{ background_image }}) no-repeat;
+    background: url({{ cover_image}}) no-repeat;
     background-size: 100%;
     align-content: space-between;
     height: 297mm;
