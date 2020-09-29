@@ -170,5 +170,6 @@ CACHES = {
 REST_FRAMEWORK = {
     'TEST_REQUEST_RENDERER_CLASSES': [
         'pheme.renderer.XMLRenderer',
+        'rest_framework.renderers.JSONRenderer',
     ]
 }

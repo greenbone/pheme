@@ -108,17 +108,17 @@ def gen_count(count: int = random.randint(1, 100)) -> Dict:
     return {'count': count}
 
 
-def gen_identifiable() -> dict:
+def gen_identifiable(name: str = None) -> dict:
     return {
         'id': uuid.uuid1().hex,
-        'name': _random_text(10),
+        'name': name or _random_text(10),
         'comment': _random_text(150),
     }
 
 
-def gen_task() -> Dict:
+def gen_task(name: str = None) -> Dict:
     return {
-        **gen_identifiable(),
+        **gen_identifiable(name),
         'target': {
             **gen_identifiable(),
             'trash': _random_text(2),
@@ -152,7 +152,10 @@ def generate_result_count(full: int, filtered: int) -> Dict:
 
 
 def gen_report(
-    hosts: List[str], oids: List[str], with_optional: bool = True
+    hosts: List[str],
+    oids: List[str],
+    with_optional: bool = True,
+    name: str = None,
 ) -> Dict:
     hosts = [gen_host(v) for v in hosts]
     result = []
@@ -180,7 +183,7 @@ def gen_report(
         'os': gen_count() if with_optional else None,
         'apps': gen_count() if with_optional else None,
         'ssl_certs': gen_count() if with_optional else None,
-        'task': gen_task() if with_optional else None,
+        'task': gen_task(name) if with_optional else None,
         'timestamp': '2342' if with_optional else None,
         'scan_start': '2020-07-01T21:00' if with_optional else None,
         'timezone': 'timezone_abbrev' if with_optional else None,

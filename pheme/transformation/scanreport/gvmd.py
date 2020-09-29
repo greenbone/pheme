@@ -358,6 +358,8 @@ def __json_normalize(item) -> DataFrame:
 
 
 def transform(data: Dict[str, str]) -> Report:
+    if not data:
+        raise ValueError("Need data to process")
     report = data.get("report")
     # sometimes gvmd reports have .report.report sometimes just .report
     report = report.get("report", report)

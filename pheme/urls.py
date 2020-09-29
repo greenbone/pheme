@@ -39,6 +39,8 @@ import pheme.version
 import pheme.views
 
 urlpatterns = [
+    path('cache/<str:key>', pheme.views.load_cache, name='load_cache'),
+    path('cache', pheme.views.store_cache, name='store_cache'),
     path('unmodified', pheme.views.unmodified, name='unmodified'),
     path('transform', pheme.views.transform, name='transform'),
     path('transform/', pheme.views.transform),
@@ -48,7 +50,11 @@ urlpatterns = [
         name='scanreport_data_description',
     ),
     path('report/<str:name>', pheme.views.report, name='report'),
-    path('report/<str:name>/', pheme.views.report),
+    path(
+        'template/elements/<str:name>',
+        pheme.views.template_elements,
+        name='template_elements',
+    ),
     re_path(
         r'^openapi-schema',
         get_schema_view(
