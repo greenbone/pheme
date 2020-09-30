@@ -33,30 +33,30 @@ logger = logging.getLogger(__name__)
 
 
 class DetailScanReport(renderers.BaseRenderer):
+    def _load_design_elemets(self):
+        def as_datalink(location: str, *, file_format: str = None) -> str:
+            if not file_format:
+                file_format = location.split('.')[-1]
+                if file_format == 'svg':
+                    file_format += '+xml'
+            img = urllib.parse.quote(
+                base64.b64encode(Path(location).read_bytes())
+            )
+            return 'data:image/{};base64,{}'.format(file_format, img)
+
+        return {
+            'logo': as_datalink(settings.TEMPLATE_LOGO_ADDRESS),
+            'cover_image': as_datalink(settings.TEMPLATE_COVER_IMAGE_ADDRESS),
+            'indicator': as_datalink(
+                '/{}/heading.svg'.format(settings.STATIC_DIR)
+            ),
+        }
+
     def _get_css(self, name: str) -> CSS:
 
-        background_image = urllib.parse.quote(
-            base64.b64encode(
-                Path(settings.TEMPLATE_COVER_IMAGE_ADDRESS).read_bytes()
-            )
-        )
-
-        indicator_image = urllib.parse.quote(
-            base64.b64encode(
-                Path('/{}/heading.svg'.format(settings.STATIC_DIR)).read_bytes()
-            )
-        )
-
-        return loader.get_template(name).render(
-            {
-                'background_image': 'data:image/png;base64,' + background_image,
-                'indicator': 'data:image/svg+xml;base64,' + indicator_image,
-            }
-        )
+        return loader.get_template(name).render(self._load_design_elemets())
 
     def _enrich(self, name: str, data: Dict) -> Dict:
-        data['logo'] = settings.TEMPLATE_LOGO_ADDRESS
-        data['grouping'] = 'host'
         data['internal_name'] = name
         return data
 

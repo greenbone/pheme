@@ -12,7 +12,7 @@
         <h1>Security Report</h1>
         <p>Scan Name: {{ name }}</p>
         <p>Scan Comment: {{ comment }}</p>
-        <p>Scan Date: {{ date }}</p>
+        <p>Scan Date: {{ start }}</p>
         <p>Hosts scanned: {{ hosts_amount }}</p>
 
     </article>
@@ -28,11 +28,8 @@
     <article id="finding">
         {% for scan in results%}
         <h3 class="host-title">{{ scan.host }}</h3>
-        <p>score: {{ severity }}</p>
-        <p>cpu:</p>
-        <p>o/s:</p>
-        <p>Memory:</p>
-        <p>Ports open:</p>
+        <p>o/s: {{ scan.equipment.os }}</p>
+        <p>Ports open:{{ scan.equipment.ports }}</p>
         {% for detail in scan.results %}
         <section class="{{ detail.threat }}">
             <h4>{{ detail.nvt_name }}</h4>

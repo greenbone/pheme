@@ -77,7 +77,10 @@ class Overview:
 @dataclass
 class Report:
     id: str
+    name: str
+    comment: str
     version: str
+    start: str
     overview: Overview
     results: List[HostResults]
 
@@ -85,7 +88,10 @@ class Report:
 def descripe():
     return Report(
         id="str; identifier of a report",
+        name="str; name of the scan",
+        comment="str; comment of the scan",
         version="str; version of gvmd",
+        start="str; datetime of a scan start",
         overview=Overview(
             hosts=CountGraph(
                 name="host_top_ten",
@@ -115,12 +121,20 @@ def descripe():
                     'nvt.name': 'str; nvt.name; optional',
                     'nvt.family': 'str; nvt.family; optional',
                     'nvt.cvss_base': 'str; nvt.cvss_base; optional',
-                    'nvt.tags': 'str; nvt.tags; optional',
-                    'nvt.refs.ref': 'str; nvt.refs.ref; optional',
+                    'nvt.tags_interpreted': {
+                        'name_of_tag': 'str; value of a tag ()',
+                        'may_contain_multiple_tags': 'str; depends on xml',
+                        'solution': 'str; solution the fix the problem',
+                        'solution_type': 'str; solution type',
+                        'insight': 'str; insight into the problem',
+                        'vuldetect': 'str; ',
+                        'cvss_base_vector': 'str, cvss base vector',
+                    },
+                    'nvt.refs.ref': [{'name_of_ref': ["str; ref_vallue"]}],
                     'nvt.solution.type': 'str; nvt.solution.type; optional',
                     'nvt.solution.text': 'str; nvt.solution.text; optional',
                     'port': 'str; port; optional',
-                    'threat': 'str; threat; optional',
+                    'threat': 'str; severity class of nvt',
                     'severity': 'str; severity; optional',
                     'qod.value': 'str; qod.value; optional',
                     'qod.type': 'str; qod.type; optional',

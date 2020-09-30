@@ -20,11 +20,11 @@ import base64
 import io
 import logging
 import urllib
-from typing import Any, Union, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
-import squarify
 import pandas as pd
+import squarify
 from matplotlib.figure import Figure
 from pandas import DataFrame
 from pandas.core.series import Series
@@ -32,7 +32,6 @@ from pandas.core.series import Series
 from pheme.transformation.scanreport.model import (
     CountGraph,
     Equipment,
-    HostCount,
     HostResults,
     Overview,
     Report,
@@ -95,6 +94,56 @@ def __create_bar_h_chart(
     return __create_chart(set_plot)
 
 
+def __create_distribution_chart(results: DataFrame):
+    def set_plot(ax):
+        labels = results.index.values.tolist()
+        data = results.values
+        data_cum = data.cumsum(axis=1)
+        ax.invert_yaxis()
+        ax.xaxis.set_visible(False)
+        ax.set_xlim(0, np.sum(data, axis=1).max())
+        # guardian when results does not contain all severity classes
+        col_colors = [
+            (k, __severity_class_colors.get(k, 'tab:white'))
+            for k in results.columns
+        ]
+
+        for i, (colname, color) in enumerate(col_colors):
+            widths = data[:, i]
+            starts = data_cum[:, i] - widths
+            ax.barh(
+                labels,
+                widths,
+                left=starts,
+                height=0.5,
+                label=colname,
+                color=color,
+            )
+            xcenters = starts + widths / 2
+            text_color = 'white'
+            for y_scalar, (x_scalar, count) in enumerate(zip(xcenters, widths)):
+                ax.text(
+                    x_scalar,
+                    y_scalar,
+                    str(int(count)),
+                    ha='center',
+                    va='center',
+                    color=text_color,
+                )
+        ax.legend(
+            ncol=len(__severity_class_colors.items()),
+            bbox_to_anchor=(0, 1),
+            loc='lower left',
+            fontsize='small',
+        )
+
+    def create_fig():
+        fig = Figure(figsize=(9.2, 5))
+        return fig
+
+    return __create_chart(set_plot, fig=create_fig)
+
+
 def __create_tree_chart(values, labels, *, colors=None) -> Optional[str]:
     def set_plot(ax):
         squarify.plot(sizes=values, label=labels, color=colors, pad=True, ax=ax)
@@ -138,22 +187,24 @@ def __severity_class_to_color(severity_classes: List[str]):
 
 
 def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
-    threat = result_series_df.get(['host.text', 'threat'])
-    if threat is None:
-        return None
 
-    counted = threat.value_counts().head(10)
+    host_threat = result_series_df.get(['host.text', 'threat'])
+    if host_threat is None:
+        return None
+    host_threat = host_threat.value_counts().unstack('threat').fillna(0)
+    host_threat['sum'] = host_threat.sum(axis=1)
+    host_threat = (
+        host_threat.sort_values(by='sum', ascending=False)
+        .head(10)
+        .loc[:, host_threat.columns != 'sum']
+    )
+
     return CountGraph(
         name="host_top_ten",
-        chart=__create_bar_h_chart(
-            counted.unstack('threat'),
-            stacked=True,
-            colors=__severity_class_colors,
+        chart=__create_distribution_chart(
+            host_threat,
         ),
-        counts=[
-            HostCount(ip=k[0], amount=v, name=None)
-            for k, v in counted.to_dict().items()
-        ],
+        counts=[],
     )
 
 
@@ -174,7 +225,9 @@ def __create_nvt(result_series_df: DataFrame) -> CountGraph:
     )
 
 
-def __create_results(report: DataFrame, os_lookup: DataFrame) -> List[Dict]:
+def __create_results(
+    report: DataFrame, os_lookup: DataFrame, ports_lookup: DataFrame
+) -> List[Dict]:
     try:
         grouped_host = report.groupby('host.text')
         wanted_columns = [
@@ -218,6 +271,12 @@ def __create_results(report: DataFrame, os_lookup: DataFrame) -> List[Dict]:
                     os_lookup['ip'] == host_text, 'detail'
                 ].values
                 os = may_os[0].value.all() if len(may_os) > 0 else None
+            ports = []
+            if ports_lookup is not None:
+                ports = ports_lookup.query(
+                    'host == "{}"'.format(host_text)
+                ).get('text')
+                ports = ports.values.tolist() if ports is not None else []
             for key, series in flat_results.items():
                 for i, value in enumerate(series):
                     if not (isinstance(value, float) and np.isnan(value)):
@@ -235,7 +294,7 @@ def __create_results(report: DataFrame, os_lookup: DataFrame) -> List[Dict]:
             results.append(
                 HostResults(
                     host=host_text,
-                    equipment=Equipment(os=os, ports=[]),
+                    equipment=Equipment(os=os, ports=ports),
                     results=result,
                 )
             )
@@ -313,12 +372,20 @@ def transform(data: Dict[str, str]) -> Report:
         host_df = host_df.get(['ip', 'detail'])
         if host_df is not None:
             host_df = host_df.applymap(__filter_os_based_on_name)
-    results = __create_results(result_series_df, host_df)
+    ports = n_df.get('ports.port')
+    if ports is not None:
+        ports = ports.map(pd.json_normalize).all()
 
+    results = __create_results(result_series_df, host_df, ports)
+    task = report.get('task') or {}
+    gmp = report.get('gmp') or {}
     logger.info("data transformation")
     return Report(
         report.get('id'),
-        None,
+        task.get('name'),
+        task.get('comment'),
+        gmp.get('version'),
+        report.get('scan_start'),
         Overview(
             hosts=__create_host_top_ten(result_series_df),
             nvts=__create_nvt(result_series_df),
