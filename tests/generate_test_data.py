@@ -157,10 +157,10 @@ def gen_report(
     with_optional: bool = True,
     name: str = None,
 ) -> Dict:
-    hosts = [gen_host(v) for v in hosts]
+    g_hosts = [gen_host(v) for v in hosts or []]
     result = []
-    host_details = []
-    for h in hosts:
+    host_details = [] if hosts is not None else None
+    for h in g_hosts:
         for _ in range(random.randint(1, len(oids) + 2)):
             res = gen_result(h, oids[random.randint(0, len(oids) - 1)])
             host_details.append(
@@ -173,6 +173,15 @@ def gen_report(
                 }
             )
             result.append(res)
+
+    results = {
+        'max': '{}'.format(random.randint(1, 1000)) if with_optional else None,
+        'start': '{}'.format(random.randint(0, 1000))
+        if with_optional
+        else None,
+    }
+    if hosts is not None:
+        results['result'] = result
     return {
         'id': uuid.uuid1().hex if with_optional else None,
         'gmp': gen_gmp() if with_optional else None,
@@ -190,16 +199,8 @@ def gen_report(
         'timezone_abbrev': 'UTC' if with_optional else None,
         'scan_end': '2020-07-01T21:00' if with_optional else None,
         'errors': gen_count() if with_optional else None,
-        'results': {
-            'max': '{}'.format(random.randint(1, 1000))
-            if with_optional
-            else None,
-            'start': '{}'.format(random.randint(0, 1000))
-            if with_optional
-            else None,
-            'result': result,
-        },
         'severity': gen_filtered() if with_optional else None,
+        'results': results,
         'result_count': gen_result_count() if with_optional else None,
         'host': host_details,
     }
