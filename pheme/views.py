@@ -144,4 +144,4 @@ def report(request: Request, name: str):
     ]
 )
 def scanreport_data_description(request):
-    return Response(dataclasses.asdict(model.descripe()))
+    return Response(dataclasses.asdict(model.describe()))
