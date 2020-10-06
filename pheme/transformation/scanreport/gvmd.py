@@ -20,7 +20,7 @@ import base64
 import io
 import logging
 import urllib
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, Tuple
 
 import numpy as np
 import pandas as pd
@@ -238,8 +238,6 @@ def __create_results(
             'nvt.cvss_base',
             'nvt.tags_interpreted',
             'nvt.refs.ref',
-            'nvt.solution.type',
-            'nvt.solution.text',
             'port',
             'threat',
             'severity',
@@ -353,33 +351,43 @@ def __filter_os_based_on_name(item: Union[Any, List]) -> Union[Any, Series]:
     return item
 
 
-def __json_normalize(item) -> DataFrame:
-    return pd.json_normalize(item)
+def __result_report(
+    report: DataFrame,
+) -> Tuple[CountGraph, CountGraph, CountGraph, List[HostResults]]:
+    result_series_df = report.get('results.result')
+    if result_series_df is None:
+        return None, None, None, None
+    result_series_df = result_series_df.map(pd.json_normalize).all()
+    tags = result_series_df.get('nvt.tags')
+    hosts = __create_host_top_ten(result_series_df)
+    nvts = __create_nvt(result_series_df)
+    vulnerable_equipment = __create_vulnerable_equipment(result_series_df)
+    if tags is not None:
+        result_series_df['nvt.tags_interpreted'] = tags.map(__tansform_tags)
+    host_df = report.get('host')
+    if host_df is not None:
+        host_df = host_df.map(pd.json_normalize).all()
+        host_df = host_df.get(['ip', 'detail'])
+        if host_df is not None:
+            host_df = host_df.applymap(__filter_os_based_on_name)
+    ports = report.get('ports.port')
+    if ports is not None:
+        ports = ports.map(pd.json_normalize).all()
+    results = __create_results(result_series_df, host_df, ports)
+    return hosts, nvts, vulnerable_equipment, results
 
 
 def transform(data: Dict[str, str]) -> Report:
+    if not data:
+        raise ValueError("Need data to process")
     report = data.get("report")
     # sometimes gvmd reports have .report.report sometimes just .report
     report = report.get("report", report)
     n_df = pd.json_normalize(report)
-    result_series_df = n_df.get('results.result').map(__json_normalize).all()
-    tags = result_series_df.get('nvt.tags')
-    if tags is not None:
-        result_series_df['nvt.tags_interpreted'] = tags.map(__tansform_tags)
-    host_df = n_df.get('host')
-    if host_df is not None:
-        host_df = host_df.map(__json_normalize).all()
-        host_df = host_df.get(['ip', 'detail'])
-        if host_df is not None:
-            host_df = host_df.applymap(__filter_os_based_on_name)
-    ports = n_df.get('ports.port')
-    if ports is not None:
-        ports = ports.map(pd.json_normalize).all()
-
-    results = __create_results(result_series_df, host_df, ports)
     task = report.get('task') or {}
     gmp = report.get('gmp') or {}
     logger.info("data transformation")
+    hosts, nvts, vulnerable_equipment, results = __result_report(n_df)
     return Report(
         report.get('id'),
         task.get('name'),
@@ -387,11 +395,9 @@ def transform(data: Dict[str, str]) -> Report:
         gmp.get('version'),
         report.get('scan_start'),
         Overview(
-            hosts=__create_host_top_ten(result_series_df),
-            nvts=__create_nvt(result_series_df),
-            vulnerable_equipment=__create_vulnerable_equipment(
-                result_series_df
-            ),
+            hosts=hosts,
+            nvts=nvts,
+            vulnerable_equipment=vulnerable_equipment,
         ),
         results,
     )

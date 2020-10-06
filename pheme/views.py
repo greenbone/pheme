@@ -20,15 +20,47 @@ import dataclasses
 import rest_framework.renderers
 from rest_framework.decorators import api_view, parser_classes, renderer_classes
 from rest_framework.response import Response
-from pheme.parser.xml import XMLParser
+from rest_framework.request import Request
+
+
+from pheme.parser.xml import XMLFormParser, XMLParser
 from pheme.transformation import scanreport
 from pheme.storage import store, load
 from pheme.renderer import MarkDownTableRenderer
 from pheme.transformation.scanreport import model
 
 
+@api_view(['GET'])
+@renderer_classes(
+    [
+        rest_framework.renderers.JSONRenderer,
+    ]
+)
+def load_cache(request, key):
+    return Response(load(key))
+
+
 @api_view(['POST'])
-@parser_classes([XMLParser])
+@parser_classes([rest_framework.parsers.JSONParser])
+@renderer_classes(
+    [
+        rest_framework.renderers.JSONRenderer,
+    ]
+)
+def store_cache(request):
+    key = request.data.get("key", "unknown")
+    data = request.data.get('value')
+    if request.data.get('append'):
+        if isinstance(data, dict):
+            cached = load(key) or {}
+            cached[data.get('name', 'unknown')] = data.get('content')
+            data = cached
+    name = store(key, data, id_generator=str)
+    return Response(name)
+
+
+@api_view(['POST'])
+@parser_classes([XMLParser, XMLFormParser])
 @renderer_classes(
     [
         rest_framework.renderers.JSONRenderer,
@@ -57,11 +89,50 @@ def unmodified(request):
 @renderer_classes(
     [
         rest_framework.renderers.JSONRenderer,
+    ]
+)
+def template_elements(request: Request, name: str):
+    def load_value_of(key) -> str:
+        may_val = load(key) or {}
+        return may_val
+
+    images = load_value_of("{}images".format(name))
+    return Response(
+        {
+            "template": load_value_of("{}html_template".format(name)),
+            "pdf_css": load_value_of("{}pdf_css".format(name)),
+            "html_css": load_value_of("{}html_css".format(name)),
+            "images": images,
+        }
+    )
+
+
+@api_view(['GET'])
+@renderer_classes(
+    [
+        rest_framework.renderers.JSONRenderer,
+        scanreport.renderer.ReportFormatPDFReport,
+        scanreport.renderer.ReportFormatHTMLReport,
         scanreport.renderer.DetailScanHTMLReport,
         scanreport.renderer.DetailScanPDFReport,
     ]
 )
-def report(request, name: str):
+def report(request: Request, name: str):
+    def load_value_of(key) -> str:
+        may_val = load(key) or {}
+        return may_val
+
+    if "report_format_editor" in request.accepted_media_type:
+        images = load_value_of("{}images".format(name))
+        return Response(
+            {
+                "template": load_value_of("{}html_template".format(name)),
+                "scan_report": load(name),
+                "pdf_css": load_value_of("{}pdf_css".format(name)),
+                "html_css": load_value_of("{}html_css".format(name)),
+                "images": images,
+            }
+        )
     return Response(load(name))
 
 
