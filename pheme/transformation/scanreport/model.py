@@ -85,7 +85,7 @@ class Report:
     results: List[HostResults]
 
 
-def descripe():
+def describe():
     return Report(
         id="str; identifier of a report",
         name="str; name of the scan",
