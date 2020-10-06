@@ -39,6 +39,10 @@ curl -X POST 'http://localhost:8000/unmodified'\
 ```
 curl -H 'accept: text/markdown+table' localhost:8000/scanreport/data/description
 ```
+- Report Format Editor [#51](https://github.com/greenbone/pheme/pull/51)
+```
+http://localhost:8000/static/report_format_editor.html
+```
 ### Changed
 ### Deprecated
 ### Removed

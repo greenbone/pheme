@@ -108,17 +108,17 @@ def gen_count(count: int = random.randint(1, 100)) -> Dict:
     return {'count': count}
 
 
-def gen_identifiable() -> dict:
+def gen_identifiable(name: str = None) -> dict:
     return {
         'id': uuid.uuid1().hex,
-        'name': _random_text(10),
+        'name': name or _random_text(10),
         'comment': _random_text(150),
     }
 
 
-def gen_task() -> Dict:
+def gen_task(name: str = None) -> Dict:
     return {
-        **gen_identifiable(),
+        **gen_identifiable(name),
         'target': {
             **gen_identifiable(),
             'trash': _random_text(2),
@@ -152,12 +152,15 @@ def generate_result_count(full: int, filtered: int) -> Dict:
 
 
 def gen_report(
-    hosts: List[str], oids: List[str], with_optional: bool = True
+    hosts: List[str],
+    oids: List[str],
+    with_optional: bool = True,
+    name: str = None,
 ) -> Dict:
-    hosts = [gen_host(v) for v in hosts]
+    g_hosts = [gen_host(v) for v in hosts or []]
     result = []
-    host_details = []
-    for h in hosts:
+    host_details = [] if hosts is not None else None
+    for h in g_hosts:
         for _ in range(random.randint(1, len(oids) + 2)):
             res = gen_result(h, oids[random.randint(0, len(oids) - 1)])
             host_details.append(
@@ -170,6 +173,15 @@ def gen_report(
                 }
             )
             result.append(res)
+
+    results = {
+        'max': '{}'.format(random.randint(1, 1000)) if with_optional else None,
+        'start': '{}'.format(random.randint(0, 1000))
+        if with_optional
+        else None,
+    }
+    if hosts is not None:
+        results['result'] = result
     return {
         'id': uuid.uuid1().hex if with_optional else None,
         'gmp': gen_gmp() if with_optional else None,
@@ -180,23 +192,15 @@ def gen_report(
         'os': gen_count() if with_optional else None,
         'apps': gen_count() if with_optional else None,
         'ssl_certs': gen_count() if with_optional else None,
-        'task': gen_task() if with_optional else None,
+        'task': gen_task(name) if with_optional else None,
         'timestamp': '2342' if with_optional else None,
         'scan_start': '2020-07-01T21:00' if with_optional else None,
         'timezone': 'timezone_abbrev' if with_optional else None,
         'timezone_abbrev': 'UTC' if with_optional else None,
         'scan_end': '2020-07-01T21:00' if with_optional else None,
         'errors': gen_count() if with_optional else None,
-        'results': {
-            'max': '{}'.format(random.randint(1, 1000))
-            if with_optional
-            else None,
-            'start': '{}'.format(random.randint(0, 1000))
-            if with_optional
-            else None,
-            'result': result,
-        },
         'severity': gen_filtered() if with_optional else None,
+        'results': results,
         'result_count': gen_result_count() if with_optional else None,
         'host': host_details,
     }

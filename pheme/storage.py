@@ -30,12 +30,23 @@ def __default_load_handler(name: str) -> Dict:
     return cache.get(name)
 
 
+def __default_id_generator(prefix: str) -> str:
+    return "{}-{}".format(prefix, uuid4())
+
+
 def load(name: str, *, handler=__default_load_handler) -> Dict:
     return handler(name)
 
 
-def store(prefix: str, value: Dict, *, handler=__default_store_handler):
-    name = "{}-{}".format(prefix, uuid4())
-    value['internal_name'] = name
+def store(
+    prefix: str,
+    value: Dict,
+    *,
+    handler=__default_store_handler,
+    id_generator=__default_id_generator
+):
+    name = id_generator(prefix)
+    if isinstance(value, dict):
+        value['internal_name'] = name
     handler(name, value)
     return name

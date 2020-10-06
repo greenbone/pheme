@@ -16,60 +16,75 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import logging
-from typing import Dict
-from pathlib import Path
-import urllib
 import base64
+import logging
+import urllib
+from pathlib import Path
+from typing import Dict
 
-from django.core.cache import cache
-from django.template import loader
+
 from django.conf import settings
-from rest_framework.request import Request
+from django.core.cache import cache
+from django.template import Template, Context, loader
 from rest_framework import renderers
+from rest_framework.request import Request
 from weasyprint import CSS, HTML
 
 logger = logging.getLogger(__name__)
 
 
+def as_datalink(data: bytes, file_format: str) -> str:
+    img = urllib.parse.quote(base64.b64encode(data))
+    return 'data:image/{};base64,{}'.format(file_format, img)
+
+
+def file_as_datalink(location: str) -> str:
+    file_format = location.split('.')[-1]
+    if file_format == 'svg':
+        file_format += '+xml'
+    return as_datalink(Path(location).read_bytes(), file_format=file_format)
+
+
+def _load_design_elemets():
+    return {
+        'logo': file_as_datalink(settings.TEMPLATE_LOGO_ADDRESS),
+        'cover_image': file_as_datalink(settings.TEMPLATE_COVER_IMAGE_ADDRESS),
+        'indicator': file_as_datalink(
+            '/{}/heading.svg'.format(settings.STATIC_DIR)
+        ),
+    }
+
+
+def _get_css(name: str) -> CSS:
+    return loader.get_template(name).render(_load_design_elemets())
+
+
+def _enrich(name: str, data: Dict) -> Dict:
+    data['internal_name'] = name
+    return data
+
+
+def _get_request(renderer_context: Dict) -> Request:
+    renderer_context = renderer_context or {}  # to throw key error
+    return renderer_context['request']
+
+
+def _default_not_found_response(
+    renderer_context: Dict, request: Request
+) -> str:
+    resp = renderer_context['response']
+    resp.status_code = 404
+    # pylint: disable=W0212
+    path = request._request.path
+    report_id = path[path.rfind('/') + 1 :]
+    return '"not data found for %s"' % report_id
+
+
 class DetailScanReport(renderers.BaseRenderer):
-    def _load_design_elemets(self):
-        def as_datalink(location: str, *, file_format: str = None) -> str:
-            if not file_format:
-                file_format = location.split('.')[-1]
-                if file_format == 'svg':
-                    file_format += '+xml'
-            img = urllib.parse.quote(
-                base64.b64encode(Path(location).read_bytes())
-            )
-            return 'data:image/{};base64,{}'.format(file_format, img)
-
-        return {
-            'logo': as_datalink(settings.TEMPLATE_LOGO_ADDRESS),
-            'cover_image': as_datalink(settings.TEMPLATE_COVER_IMAGE_ADDRESS),
-            'indicator': as_datalink(
-                '/{}/heading.svg'.format(settings.STATIC_DIR)
-            ),
-        }
-
-    def _get_css(self, name: str) -> CSS:
-
-        return loader.get_template(name).render(self._load_design_elemets())
-
-    def _enrich(self, name: str, data: Dict) -> Dict:
-        data['internal_name'] = name
-        return data
-
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        renderer_context = renderer_context or {}  # to throw key error
-        request: Request = renderer_context['request']
+        request = _get_request(renderer_context)
         if not data:
-            resp = renderer_context['response']
-            resp.status_code = 404
-            # pylint: disable=W0212
-            path = request._request.path
-            report_id = path[path.rfind('/') + 1 :]
-            return '"not data found for %s"' % report_id
+            return _default_not_found_response(renderer_context, request)
 
         name = data.get('internal_name')
         cache_key = "{}/{}".format(self.media_type, name) if name else None
@@ -96,14 +111,12 @@ class DetailScanHTMLReport(DetailScanReport):
     format = 'html'
 
     def _enrich(self, name: str, data: Dict) -> Dict:
-        data = super()._enrich(name, data)
-        data['css'] = self._get_css('html_report.css')
+        data = _enrich(name, data)
+        data['css'] = _get_css('html_report.css')
         return data
 
     def apply(self, name: str, data: Dict):
-        return loader.get_template(self.__template).render(
-            self._enrich(name, data)
-        )
+        return loader.get_template(self.__template).render(_enrich(name, data))
 
 
 class DetailScanPDFReport(DetailScanReport):
@@ -113,11 +126,45 @@ class DetailScanPDFReport(DetailScanReport):
 
     def apply(self, name: str, data: Dict):
         logger.debug("got template: %s", self.__template)
-        html = loader.get_template(self.__template).render(
-            self._enrich(name, data)
-        )
+        html = loader.get_template(self.__template).render(_enrich(name, data))
         logger.debug("created html")
-        css = self._get_css('pdf_report.css')
+        css = _get_css('pdf_report.css')
+        pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
+        logger.debug("created pdf")
+        return pdf
+
+
+class ReportFormatHTMLReport(renderers.BaseRenderer):
+    media_type = 'text/html+report_format_editor'
+    format = 'html'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        request = _get_request(renderer_context)
+        if not data:
+            return _default_not_found_response(renderer_context, request)
+        template = Template(data['template'])
+        data['scan_report']['css'] = data['html_css']
+        data['scan_report']['images'] = data['images']
+        context = Context(data['scan_report'])
+        html = template.render(context)
+        logger.debug("created html")
+        return html
+
+
+class ReportFormatPDFReport(renderers.BaseRenderer):
+    media_type = 'application/pdf+report_format_editor'
+    format = 'binary'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        request = _get_request(renderer_context)
+        if not data:
+            return _default_not_found_response(renderer_context, request)
+        data['scan_report']['images'] = data['images']
+        template = Template(data['template'])
+        context = Context(data['scan_report'])
+        html = template.render(context)
+        logger.debug("created html")
+        css = Template(data['pdf_css']).render(context)
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")
         return pdf
