@@ -1,0 +1,278 @@
+<html>
+
+<head>
+    <style>
+        html body div#header {
+            background-image: linear-gradient(to left, rgb(102, 196, 48), rgb(135, 208, 80));
+            display: inline-block;
+            position: relative;
+            width: 100%;
+        }
+
+        html body div#header img {
+            max-width: 12%;
+            height: auto;
+        }
+
+        .editor {
+            width: 100%;
+            height: 80%;
+            padding-top: 5px;
+            border: 1px;
+            border-style: solid;
+        }
+
+        .selector:hover {
+            background: rgb(235, 195, 60);
+        }
+
+        .selector {
+            background: rgb(165, 67, 23);
+        }
+
+        .image_div {
+            width: 15%;
+            height: 70%;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload_div {
+            width: 40%;
+            height: 70%;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .float_right {
+            float: right;
+        }
+
+        .float_down {
+            float: bottom;
+        }
+
+        html body div#upload_report_div {
+            padding: 25px 0px 25px 0px;
+        }
+
+        input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+
+        label:hover {
+            background: rgb(135, 208, 80);
+            border: 0;
+            box-shadow: none;
+            border-radius: 0px;
+        }
+
+        button:hover {
+            background: rgb(135, 208, 80);
+            border: 0;
+            box-shadow: none;
+            border-radius: 0px;
+        }
+
+        label {
+            background: rgb(102, 196, 48);
+            border: 0;
+            box-shadow: none;
+            border-radius: 0px;
+        }
+
+        button {
+            background: rgb(102, 196, 48);
+            border: 0;
+            box-shadow: none;
+            border-radius: 0px;
+        }
+
+        html body div#header img {
+            width: 25%;
+            float: left;
+            padding-right: 3%;
+        }
+
+        html body div#header button {
+            float: right;
+            border-style: solid;
+            border: 1px;
+        }
+    </style>
+    <script>
+        var report_key = ""
+        const report_upload = (event, label) => {
+            const files = event.target.files
+            const formData = new FormData()
+            formData.append('myFile', files[0])
+
+            fetch('/transform', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    report_key = data
+                    label.innerText = data
+                })
+                .catch(error => {
+                    console.error(error)
+                })
+        }
+        const upload_img = (event, div) => {
+            const file = event.target.files[0]
+            const name = file.name.split('.').slice(0, -1).join('.')
+            var reader = new FileReader()
+            reader.onloadend = function() {
+                to_cache = {
+                    "key": report_key + "images",
+                    "value": {
+                        "content": reader.result,
+                        "name": name
+                    },
+                    "append": true
+                }
+                fetch('/cache', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(to_cache),
+                    })
+                    .then(res => {
+                        li = document.createElement('li')
+                        li.innerText = `{{ images.${name} }}`
+                        div.appendChild(li)
+                        console.log(res)
+                    })
+                    .catch(error => {
+                        console.error(error)
+                    })
+                console.log('RESULT', reader.result)
+            }
+            reader.readAsDataURL(file);
+
+
+        }
+        const upload_temp = (key, value) => {
+            to_cache = {
+                "key": key,
+                "value": value
+            }
+            that = this
+            fetch('/cache', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(to_cache),
+                })
+                .then(console.log)
+                .catch(error => {
+                    console.error(error)
+                })
+        }
+        const download_template_elements_json = (filename) => {
+            fetch(`/template/elements/${report_key}`, {
+                    method: 'GET',
+                    headers: new Headers({
+                        "Accept": "application/json"
+                    })
+                }).then(response => response.blob())
+                .then(blob => {
+                    var url = window.URL.createObjectURL(blob)
+                    var a = document.createElement('a')
+                    a.href = url
+                    a.download = filename
+                    document.body.appendChild(a) // otherwise it will not work in firefox
+                    a.click()
+                    a.remove()
+                })
+        }
+        const download_report = (key, media_type, filename) => {
+            fetch(`/report/${report_key}`, {
+                    method: 'GET',
+                    headers: new Headers({
+                        "Accept": media_type
+                    })
+                }).then(response => response.blob())
+                .then(blob => {
+                    var url = window.URL.createObjectURL(blob)
+                    var a = document.createElement('a')
+                    a.href = url
+                    a.download = filename
+                    document.body.appendChild(a) // otherwise it will not work in firefox
+                    a.click()
+                    a.remove()
+                })
+        }
+        const fetch_set_value = (path, element) => {
+            fetch(path)
+                .then(resp => resp.text())
+                .then(text => element.value = text)
+        }
+    </script>
+</head>
+
+<body>
+    <div id="header">
+        <img src="/static/logo.jpg" alt="greenbone logo" />
+        <h1>Report Format Editor</h1>
+        <button id="create_pdf" class="float_down">Create PDF</button>
+        <button id="download_all">Download All</button>
+    </div>
+    <div id="upload_report_div" , class="upload-btn-wrapper">
+        <label for="report_file" id="report_file_label">Upload Report</label>
+        <input type="file" id="report_file" name="report_file" />
+    </div>
+    <div id="upload_html_div" class="upload_div">
+        <button id="upload_html_template">Upload HTML Template</button>
+        <textarea id="html_template_editor" class="editor" contenteditable="true"></textarea>
+    </div>
+    <div id="upload_css_div" class="upload_div">
+        <div>
+            <button id="upload_css_template">Upload CSS Template</button>
+        </div>
+        <textarea id="css_template_editor" class="editor" contenteditable="true"></textarea>
+    </div>
+    <div id="upload_image_div" class="image_div">
+        <label for="image_file" id="image_file_label">Add Image</label>
+        <input type="file" id="image_file" name="image_file" />
+        <div id="image_list" , class="">
+            <ul id="images">
+            </ul>
+        </div>
+    </div>
+    <script>
+        fetch_set_value('/static/scan_report.html', document.querySelector('#html_template_editor'))
+        fetch_set_value('/static/pdf_report.css', document.querySelector('#css_template_editor'))
+        document.querySelector('#download_all').addEventListener('click', event => {
+            download_template_elements_json(`${report_key}.json`)
+        })
+        document.querySelector('#create_pdf').addEventListener('click', event => {
+            download_report(report_key, "application/pdf+report_format_editor", "report.pdf")
+        })
+        document.querySelector('#image_file').addEventListener('change', event => {
+            upload_img(event, document.querySelector('#images'))
+        })
+        document.querySelector('#report_file').addEventListener('change', event => {
+            report_upload(event, document.querySelector('#report_file_label'))
+        })
+
+        document.querySelector('#upload_html_template').addEventListener('click', event => {
+            upload_temp(report_key + "html_template", document.querySelector('#html_template_editor').value)
+        })
+        document.querySelector('#upload_css_template').addEventListener('click', event => {
+            upload_temp(report_key + "pdf_css", document.querySelector('#css_template_editor').value)
+        })
+    </script>
+</body>
+
+</html>

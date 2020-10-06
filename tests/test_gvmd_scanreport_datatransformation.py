@@ -34,10 +34,11 @@ hosts = ['first', 'second']
         (2, gen_report(hosts, oids, with_optional=True)),
         (2, gen_report(hosts, oids, with_optional=False)),
         (0, gen_report([], [], with_optional=False)),
+        (0, gen_report(None, [], with_optional=False)),
     ],
 )
 def test_report_generation(expected):
     amount_scans, scan_results = expected
     data = {'report': {'report': scan_results}}
     report = transform(data)
-    assert len(report.results) == amount_scans
+    assert len(report.results or []) == amount_scans
