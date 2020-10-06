@@ -145,7 +145,6 @@ class ReportFormatHTMLReport(renderers.BaseRenderer):
         template = Template(data['template'])
         data['scan_report']['css'] = data['html_css']
         data['scan_report']['images'] = data['images']
-        print("images, joar: {}".format(data['scan_report']['images']))
         context = Context(data['scan_report'])
         html = template.render(context)
         logger.debug("created html")
@@ -160,12 +159,12 @@ class ReportFormatPDFReport(renderers.BaseRenderer):
         request = _get_request(renderer_context)
         if not data:
             return _default_not_found_response(renderer_context, request)
+        data['scan_report']['images'] = data['images']
         template = Template(data['template'])
-        scan_report = data['scan_report']
-        context = Context(scan_report)
+        context = Context(data['scan_report'])
         html = template.render(context)
         logger.debug("created html")
-        css = Template(data['pdf_css']).render(Context(data['images']))
+        css = Template(data['pdf_css']).render(context)
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")
         return pdf
