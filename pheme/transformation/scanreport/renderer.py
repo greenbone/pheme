@@ -116,7 +116,9 @@ class DetailScanHTMLReport(DetailScanReport):
         return data
 
     def apply(self, name: str, data: Dict):
-        return loader.get_template(self.__template).render(_enrich(name, data))
+        return loader.get_template(self.__template).render(
+            self._enrich(name, data)
+        )
 
 
 class DetailScanPDFReport(DetailScanReport):

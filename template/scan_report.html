@@ -5,6 +5,9 @@
     <meta charset="utf-8">
     <title>Report</title>
     <meta name="description" content="Report example">
+    <style>
+    {{ css }}
+    </style>
 </head>
 
 <body>
@@ -55,9 +58,9 @@
             <h5>References</h5>
             {% for key, refs in detail.nvt_refs_ref.items %}
             <p>{{ key }}:
-            {% for r in refs %}
-            {{ r }}, 
-            {% endfor %}
+                {% for r in refs %}
+                {{ r }},
+                {% endfor %}
             </p>
             {% endfor %}
             {% endif %}

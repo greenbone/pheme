@@ -4,20 +4,41 @@
     <style>
         html body div#header {
             background-image: linear-gradient(to left, rgb(102, 196, 48), rgb(135, 208, 80));
-            display: inline-block;
             position: relative;
             width: 100%;
+            height: 8vh;
         }
 
         html body div#header img {
-            max-width: 12%;
-            height: auto;
+            float: left;
+            padding-right: 3%;
+            max-height: 100%;
+            width: auto;
+        }
+
+        html body div#header h1 {
+            margin: 0px 0px 0px 0px;
+        }
+
+        html body div#header button {
+            float: right;
+            border-style: solid;
+            border: 1px;
+        }
+
+        .format_label {
+            font-size: 11px;
+        }
+
+        .rb_left {
+            text_align: right;
+            float: left;
+            display: inline;
         }
 
         .editor {
             width: 100%;
-            height: 80%;
-            padding-top: 5px;
+            height: 90%;
             border: 1px;
             border-style: solid;
         }
@@ -32,7 +53,7 @@
 
         .image_div {
             width: 15%;
-            height: 70%;
+            height: 90%;
             display: inline-block;
             position: relative;
             overflow: hidden;
@@ -40,18 +61,10 @@
 
         .upload_div {
             width: 40%;
-            height: 70%;
+            height: 90%;
             display: inline-block;
             position: relative;
             overflow: hidden;
-        }
-
-        .float_right {
-            float: right;
-        }
-
-        .float_down {
-            float: bottom;
         }
 
         html body div#upload_report_div {
@@ -92,21 +105,11 @@
             box-shadow: none;
             border-radius: 0px;
         }
-
-        html body div#header img {
-            width: 25%;
-            float: left;
-            padding-right: 3%;
-        }
-
-        html body div#header button {
-            float: right;
-            border-style: solid;
-            border: 1px;
-        }
     </style>
     <script>
         var report_key = ""
+        var report_format = "application/pdf"
+        var report_type = "pdf"
         const report_upload = (event, label) => {
             const files = event.target.files
             const formData = new FormData()
@@ -121,6 +124,13 @@
                     console.log(data)
                     report_key = data
                     label.innerText = data
+                    document.querySelector('#image_file').disabled = false
+                    document.querySelector('#upload_html_template').disabled = false
+                    document.querySelector('#upload_css_template').disabled = false
+                    document.querySelector('#download_all').disabled = false
+                    document.querySelector('#create_pdf').disabled = false
+                    upload_temp(report_key + "html_template", document.querySelector('#html_template_editor').value)
+                    upload_temp(report_key + report_type + "_css", document.querySelector('#css_template_editor').value)
                 })
                 .catch(error => {
                     console.error(error)
@@ -196,11 +206,11 @@
                     a.remove()
                 })
         }
-        const download_report = (key, media_type, filename) => {
+        const download_report = (key, filename) => {
             fetch(`/report/${report_key}`, {
                     method: 'GET',
                     headers: new Headers({
-                        "Accept": media_type
+                        "Accept": report_format + "+report_format_editor"
                     })
                 }).then(response => response.blob())
                 .then(blob => {
@@ -218,6 +228,12 @@
                 .then(resp => resp.text())
                 .then(text => element.value = text)
         }
+        const set_format_type = (radiob) => {
+            report_format = radiob.value
+            report_type = report_format.split('/').slice(-1)[0]
+            document.querySelector("#create_pdf").innerHTML = `Create Report (${report_type})`
+
+        }
     </script>
 </head>
 
@@ -225,39 +241,46 @@
     <div id="header">
         <img src="/static/logo.jpg" alt="greenbone logo" />
         <h1>Report Format Editor</h1>
-        <button id="create_pdf" class="float_down">Create PDF</button>
-        <button id="download_all">Download All</button>
+        <button id="create_pdf" disabled>Create PDF</button>
+        <button id="download_all" disabled>Download All</button>
+        <div id="rb_container" class="rb_left">
+            <input type="radio" id="pdf" name="format" value="application/pdf" onclick="set_format_type(this);">PDF</input>
+            <input type="radio" class="format_label" id="html" name="format" value="text/html" onclick="set_format_type(this);">HTML</input>
+        </div>
     </div>
     <div id="upload_report_div" , class="upload-btn-wrapper">
         <label for="report_file" id="report_file_label">Upload Report</label>
         <input type="file" id="report_file" name="report_file" />
     </div>
+    <div>
+    </div>
     <div id="upload_html_div" class="upload_div">
-        <button id="upload_html_template">Upload HTML Template</button>
+        <button id="upload_html_template" disabled>Upload HTML Template</button>
         <textarea id="html_template_editor" class="editor" contenteditable="true"></textarea>
     </div>
     <div id="upload_css_div" class="upload_div">
         <div>
-            <button id="upload_css_template">Upload CSS Template</button>
+            <button id="upload_css_template" disabled>Upload CSS Template</button>
         </div>
         <textarea id="css_template_editor" class="editor" contenteditable="true"></textarea>
     </div>
     <div id="upload_image_div" class="image_div">
         <label for="image_file" id="image_file_label">Add Image</label>
-        <input type="file" id="image_file" name="image_file" />
-        <div id="image_list" , class="">
+        <input type="file" id="image_file" name="image_file" disabled />
+        <div id="image_list">
             <ul id="images">
             </ul>
         </div>
     </div>
     <script>
+        document.querySelector("#pdf").click()
         fetch_set_value('/static/scan_report.html', document.querySelector('#html_template_editor'))
         fetch_set_value('/static/pdf_report.css', document.querySelector('#css_template_editor'))
         document.querySelector('#download_all').addEventListener('click', event => {
             download_template_elements_json(`${report_key}.json`)
         })
         document.querySelector('#create_pdf').addEventListener('click', event => {
-            download_report(report_key, "application/pdf+report_format_editor", "report.pdf")
+            download_report(report_key, `report.${report_type}`)
         })
         document.querySelector('#image_file').addEventListener('change', event => {
             upload_img(event, document.querySelector('#images'))
@@ -270,7 +293,7 @@
             upload_temp(report_key + "html_template", document.querySelector('#html_template_editor').value)
         })
         document.querySelector('#upload_css_template').addEventListener('click', event => {
-            upload_temp(report_key + "pdf_css", document.querySelector('#css_template_editor').value)
+            upload_temp(`${report_key}${report_type}_css`, document.querySelector('#css_template_editor').value)
         })
     </script>
 </body>
