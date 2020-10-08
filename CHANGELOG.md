@@ -43,6 +43,7 @@ curl -H 'accept: text/markdown+table' localhost:8000/scanreport/data/description
 ```
 http://localhost:8000/static/report_format_editor.html
 ```
+- overridable design parameter [55](https://github.com/greenbone/pheme/pull/55)
 ### Changed
 ### Deprecated
 ### Removed

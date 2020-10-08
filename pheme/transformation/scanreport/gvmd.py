@@ -20,7 +20,9 @@ import base64
 import io
 import logging
 import urllib
+import time
 from typing import Any, Callable, Dict, List, Optional, Union, Tuple
+
 
 import numpy as np
 import pandas as pd
@@ -39,6 +41,17 @@ from pheme.transformation.scanreport.model import (
 
 logger = logging.getLogger(__name__)
 
+
+def measure_time(func):
+    def measure(*args, **kwargs):
+        startt = time.process_time()
+        result = func(*args, **kwargs)
+        logger.info("%s took %s", func.__name__, time.process_time() - startt)
+        return result
+
+    return measure
+
+
 __severity_class_colors = {
     'High': 'tab:red',
     'Medium': 'tab:orange',
@@ -50,6 +63,7 @@ def __create_default_figure():
     return Figure()
 
 
+@measure_time
 def __create_chart(
     set_plot: Callable,
     *,
@@ -76,6 +90,7 @@ def __create_chart(
         return None
 
 
+@measure_time
 def __create_bar_h_chart(
     series: Series, *, stacked: bool = False, colors=None
 ) -> Optional[str]:
@@ -94,6 +109,7 @@ def __create_bar_h_chart(
     return __create_chart(set_plot)
 
 
+@measure_time
 def __create_distribution_chart(results: DataFrame):
     def set_plot(ax):
         labels = results.index.values.tolist()
@@ -144,6 +160,7 @@ def __create_distribution_chart(results: DataFrame):
     return __create_chart(set_plot, fig=create_fig)
 
 
+@measure_time
 def __create_tree_chart(values, labels, *, colors=None) -> Optional[str]:
     def set_plot(ax):
         squarify.plot(sizes=values, label=labels, color=colors, pad=True, ax=ax)
@@ -159,6 +176,7 @@ def __create_tree_chart(values, labels, *, colors=None) -> Optional[str]:
     return __create_chart(set_plot, fig=create_fig, modify_fig=modify_fig)
 
 
+@measure_time
 def __create_pie_chart(
     series: Series, *, title=None, colors=None
 ) -> Optional[str]:
@@ -186,6 +204,7 @@ def __severity_class_to_color(severity_classes: List[str]):
     return [__severity_class_colors.get(v, 'white') for v in severity_classes]
 
 
+@measure_time
 def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
 
     host_threat = result_series_df.get(['host.text', 'threat'])
@@ -208,6 +227,7 @@ def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
     )
 
 
+@measure_time
 def __create_nvt(result_series_df: DataFrame) -> CountGraph:
     threat = result_series_df.get('threat')
     if threat is None:
@@ -225,6 +245,7 @@ def __create_nvt(result_series_df: DataFrame) -> CountGraph:
     )
 
 
+@measure_time
 def __create_results(
     report: DataFrame, os_lookup: DataFrame, ports_lookup: DataFrame
 ) -> List[Dict]:
@@ -302,6 +323,7 @@ def __create_results(
         return []
 
 
+@measure_time
 def __create_vulnerable_equipment(report: DataFrame) -> CountGraph:
     df = report.get(['host.text', 'threat'])
     if df is None:
@@ -351,6 +373,18 @@ def __filter_os_based_on_name(item: Union[Any, List]) -> Union[Any, Series]:
     return item
 
 
+@measure_time
+def __create_host_df(report: DataFrame) -> DataFrame:
+    host_df = report.get('host')
+    if host_df is not None:
+        host_df = host_df.map(pd.json_normalize).all()
+        host_df = host_df.get(['ip', 'detail'])
+        if host_df is not None:
+            return host_df.applymap(__filter_os_based_on_name)
+    return None
+
+
+@measure_time
 def __result_report(
     report: DataFrame,
 ) -> Tuple[CountGraph, CountGraph, CountGraph, List[HostResults]]:
@@ -358,25 +392,21 @@ def __result_report(
     if result_series_df is None:
         return None, None, None, None
     result_series_df = result_series_df.map(pd.json_normalize).all()
-    tags = result_series_df.get('nvt.tags')
     hosts = __create_host_top_ten(result_series_df)
     nvts = __create_nvt(result_series_df)
     vulnerable_equipment = __create_vulnerable_equipment(result_series_df)
+    tags = result_series_df.get('nvt.tags')
     if tags is not None:
         result_series_df['nvt.tags_interpreted'] = tags.map(__tansform_tags)
-    host_df = report.get('host')
-    if host_df is not None:
-        host_df = host_df.map(pd.json_normalize).all()
-        host_df = host_df.get(['ip', 'detail'])
-        if host_df is not None:
-            host_df = host_df.applymap(__filter_os_based_on_name)
     ports = report.get('ports.port')
     if ports is not None:
         ports = ports.map(pd.json_normalize).all()
+    host_df = __create_host_df(report)
     results = __create_results(result_series_df, host_df, ports)
     return hosts, nvts, vulnerable_equipment, results
 
 
+@measure_time
 def transform(data: Dict[str, str]) -> Report:
     if not data:
         raise ValueError("Need data to process")
@@ -384,10 +414,11 @@ def transform(data: Dict[str, str]) -> Report:
     # sometimes gvmd reports have .report.report sometimes just .report
     report = report.get("report", report)
     n_df = pd.json_normalize(report)
+
     task = report.get('task') or {}
     gmp = report.get('gmp') or {}
-    logger.info("data transformation")
     hosts, nvts, vulnerable_equipment, results = __result_report(n_df)
+    logger.info("data transformation")
     return Report(
         report.get('id'),
         task.get('name'),
