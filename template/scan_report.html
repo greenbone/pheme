@@ -11,15 +11,15 @@
 </head>
 
 <body>
-    <article id="cover">
+    <section id="cover">
         <h1>Security Report</h1>
         <p>Scan Name: {{ name }}</p>
         <p>Scan Comment: {{ comment }}</p>
         <p>Scan Date: {{ start }}</p>
         <p>Hosts scanned: {{ hosts_amount }}</p>
 
-    </article>
-    <article id="overview">
+    </section>
+    <section id="overview">
         <h2>Main Report</h2>
         <h3>Vulnerable Equipment</h3>
         <img src="{{ overview.vulnerable_equipment.chart }}" />
@@ -27,8 +27,8 @@
         <img src="{{ overview.nvts.chart }}" />
         <h3>Top 10 Hosts</h3>
         <img src="{{ overview.hosts.chart }}" />
-    </article>
-    <article id="finding">
+    </section>
+    <section id="finding">
         {% for scan in results%}
         <h3 class="host-title">{{ scan.host }}</h3>
         <p>o/s: {{ scan.equipment.os }}</p>
@@ -67,7 +67,7 @@
         </section>
         {% endfor %}
         {% endfor %}
-    </article>
+    </section>
 
 </body>
 

@@ -113,14 +113,14 @@ html body h4 {
     font-size: 13pt;
 }
 
-html body article#cover {
+html body section#cover {
     background: url({{ cover_image}}) no-repeat;
     background-size: 100%;
     align-content: space-between;
     height: 297mm;
 }
 
-html body article#cover h1{
+html body section#cover h1{
     font-size: 38pt;
     page: no-chapter;
     width: 100%;
@@ -128,24 +128,24 @@ html body article#cover h1{
     padding-top: 2cm;
     color: white
 }
-html body article#cover p{
+html body section#cover p{
     padding-left: 1cm;
 }
 
 
-html body article#finding h3 {
+html body section#finding h3 {
     background: #48b300;
     margin: 0 -3cm 1cm;
     padding: 1cm 1cm 1cm 3cm;
     width: 21cm;
 }
 
-html body article#finding section {
+html body section#finding section {
     padding: .5cm 0;
 }
 
-html body article#finding section.Low::before {
-    background: url({{ indicator }}) no-repeat center #48b300;
+html body section#finding section.Low::before {
+    background: #48b300;
     background-size: 50%;
     content: '';
     display: inline-block;
@@ -156,8 +156,8 @@ html body article#finding section.Low::before {
     width: 2cm;
 }
 
-html body article#finding section.Medium::before {
-    background: url({{ indicator }}) no-repeat center #ffad33;
+html body section#finding section.Medium::before {
+    background: #ffad33;
     background-size: 50%;
     content: '';
     display: inline-block;
@@ -168,8 +168,8 @@ html body article#finding section.Medium::before {
     width: 2cm;
 }
 
-html body article#finding section.High::before {
-    background: url({{ indicator }}) no-repeat center #ff0000;
+html body section#finding section.High::before {
+    background: #ff0000;
     background-size: 50%;
     content: '';
     display: inline-block;
@@ -180,10 +180,10 @@ html body article#finding section.High::before {
     width: 2cm;
 }
 
-html body article#finding section h4 {
+html body section#finding section h4 {
     margin: 0;
 }
 
-html body article#finding section p {
+html body section#finding section p {
     margin-top: 0;
 }

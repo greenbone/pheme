@@ -77,28 +77,28 @@ html {
     font-size: 15pt; }
   html body h4 {
     font-size: 13pt; }
-  html body article#cover {
+  html body section#cover {
     align-content: space-between;
     display: flex;
     flex-wrap: wrap;
     height: 297mm; }
-    html body article#cover address {
+    html body section#cover address {
       background: #48b300;
       flex: 1 50%;
       margin: 0 -2cm;
       padding: 1cm 0;
       white-space: pre-wrap; }
-      html body article#cover address:first-of-type {
+      html body section#cover address:first-of-type {
         padding-left: 3cm; }
-  html body article#finding h3 {
+  html body section#finding h3 {
     background: #48b300;
     margin: 0 -3cm 1cm;
     padding: 1cm 1cm 1cm 3cm;
     width: 21cm; }
-  html body article#finding section {
+  html body section#finding section {
     padding: .5cm 0; }
-    html body article#finding section.Low::before {
-      background: url({{ indicator }}) no-repeat center #48b300;
+    html body section#finding section.Low::before {
+      background: #48b300;
       background-size: 50%;
       content: '';
       display: inline-block;
@@ -107,8 +107,8 @@ html {
       margin-right: .5cm;
       vertical-align: middle;
       width: 2cm; }
-    html body article#finding section.Medium::before {
-      background: url({{ indicator }}) no-repeat center #ffad33;
+    html body section#finding section.Medium::before {
+      background: #ffad33;
       background-size: 50%;
       content: '';
       display: inline-block;
@@ -117,8 +117,8 @@ html {
       margin-right: .5cm;
       vertical-align: middle;
       width: 2cm; }
-    html body article#finding section.High::before {
-      background: url({{ indicator }}) no-repeat center #ff0000;
+    html body section#finding section.High::before {
+      background: #ff0000;
       background-size: 50%;
       content: '';
       display: inline-block;
@@ -127,7 +127,7 @@ html {
       margin-right: .5cm;
       vertical-align: middle;
       width: 2cm; }
-    html body article#finding section h4 {
+    html body section#finding section h4 {
       margin: 0; }
-    html body article#finding section p {
+    html body section#finding section p {
       margin-top: 0; }
