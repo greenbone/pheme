@@ -35,12 +35,9 @@ import os
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 STATIC_DIR = BASE_DIR / 'static'
 TEMPLATE_DIR = BASE_DIR / 'template'
-TEMPLATE_LOGO_ADDRESS = os.environ.get(
-    "TEMPLATE_LOGO_ADDRESS"
-) or '//{}/logo.jpg'.format(STATIC_DIR)
-TEMPLATE_COVER_IMAGE_ADDRESS = os.environ.get(
-    "TEMPLATE_COVER_IMAGE_ADDRESS"
-) or '//{}/cover_image.png'.format(STATIC_DIR)
+PARAMETER_FILE_ADDRESS = os.environ.get(
+    "PARAMETER_FILE_ADDRESS"
+) or '//{}/parameter.json'.format(STATIC_DIR)
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 # Quick-start development settings - unsuitable for production

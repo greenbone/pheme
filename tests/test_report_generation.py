@@ -23,7 +23,7 @@ from django.core.cache import cache
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from pheme.transformation.scanreport.renderer import as_datalink
+from pheme.datalink import as_datalink
 from tests.generate_test_data import gen_report
 
 
