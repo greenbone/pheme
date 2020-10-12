@@ -40,11 +40,9 @@ PARAMETER_FILE_ADDRESS = os.environ.get(
 ) or '//{}/parameter.json'.format(STATIC_DIR)
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'aq^_++zzyd@q&7olh&huvyc=3v=h)y+muc75i9d6$l@4fewk)='
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY', 'aq^_++zzyd@q&7olh&huvyc=3v=h)y+muc75i9d6$l@4fewk)='
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -168,5 +166,6 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_RENDERER_CLASSES': [
         'pheme.renderer.XMLRenderer',
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.MultiPartRenderer',
     ]
 }

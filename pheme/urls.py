@@ -45,7 +45,11 @@ urlpatterns = [
         pheme.parameter.put_value,
         name='put_value_parameters',
     ),
-    path('parameter', pheme.parameter.put_file, name='put_file_parameter'),
+    path(
+        'parameter',
+        pheme.parameter.put_file,
+        name='put_file_parameter',
+    ),
     path('cache/<str:key>', pheme.views.load_cache, name='load_cache'),
     path('cache', pheme.views.store_cache, name='store_cache'),
     path('unmodified', pheme.views.unmodified, name='unmodified'),
