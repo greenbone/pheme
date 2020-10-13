@@ -26,13 +26,38 @@
             border: 1px;
         }
 
+        .loader {
+            display: none;
+            border: 1px solid #000;
+            border-top: 1px solid #000;
+            width: 0.7em;
+            height: 0.7em;
+            animation: spin 2s linear infinite;
+        }
+
+        #create_loader {
+            float: right;
+        }
+
+        #report_loader {
+            float: left;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         .format_label {
             font-size: 11px;
         }
 
         .rb_left {
-            text_align: right;
-            float: left;
             display: inline;
         }
 
@@ -110,11 +135,19 @@
         var report_key = ""
         var report_format = "application/pdf"
         var report_type = "pdf"
+
+        const disable_buttons = (disable) => {
+            document.querySelector('#image_file').disabled = disable
+            document.querySelector('#upload_html_template').disabled = disable
+            document.querySelector('#upload_css_template').disabled = disable
+            document.querySelector('#download_all').disabled = disable
+            document.querySelector('#create_pdf').disabled = disable
+        }
         const report_upload = (event, label) => {
             const files = event.target.files
             const formData = new FormData()
             formData.append('myFile', files[0])
-
+            document.querySelector('#report_loader').style.display = "block"
             fetch('/transform', {
                     method: 'POST',
                     body: formData
@@ -124,13 +157,14 @@
                     console.log(data)
                     report_key = data
                     label.innerText = data
-                    document.querySelector('#image_file').disabled = false
-                    document.querySelector('#upload_html_template').disabled = false
-                    document.querySelector('#upload_css_template').disabled = false
-                    document.querySelector('#download_all').disabled = false
-                    document.querySelector('#create_pdf').disabled = false
+                    images = document.querySelector('#images')
+                    while (images.firstChild) {
+                        images.removeChild(images.firstChild)
+                    }
                     upload_temp(report_key + "html_template", document.querySelector('#html_template_editor').value)
                     upload_temp(report_key + report_type + "_css", document.querySelector('#css_template_editor').value)
+                    document.querySelector('#report_loader').style.display = "none"
+                    disable_buttons(false)
                 })
                 .catch(error => {
                     console.error(error)
@@ -206,7 +240,9 @@
                     a.remove()
                 })
         }
-        const download_report = (key, filename) => {
+        const download_report = () => {
+            document.querySelector('#create_loader').style.display = "block"
+            disable_buttons(true)
             fetch(`/report/${report_key}`, {
                     method: 'GET',
                     headers: new Headers({
@@ -217,10 +253,12 @@
                     var url = window.URL.createObjectURL(blob)
                     var a = document.createElement('a')
                     a.href = url
-                    a.download = filename
+                    a.download = `report.${report_type}`
                     document.body.appendChild(a) // otherwise it will not work in firefox
                     a.click()
                     a.remove()
+                    disable_buttons(false)
+                    document.querySelector('#create_loader').style.display = "none"
                 })
         }
         const fetch_set_value = (path, element) => {
@@ -241,14 +279,17 @@
     <div id="header">
         <img src="/static/logo.jpg" alt="greenbone logo" />
         <h1>Report Format Editor</h1>
-        <button id="create_pdf" disabled>Create PDF</button>
+        <button id="create_pdf" onclick="download_report();" disabled>Create PDF </button>
+        <div id="create_loader" class="loader"></div>
         <button id="download_all" disabled>Download All</button>
+
         <div id="rb_container" class="rb_left">
             <input type="radio" id="pdf" name="format" value="application/pdf" onclick="set_format_type(this);">PDF</input>
             <input type="radio" class="format_label" id="html" name="format" value="text/html" onclick="set_format_type(this);">HTML</input>
         </div>
     </div>
     <div id="upload_report_div" , class="upload-btn-wrapper">
+        <div id="report_loader" class="loader"></div>
         <label for="report_file" id="report_file_label">Upload Report</label>
         <input type="file" id="report_file" name="report_file" />
     </div>
@@ -278,9 +319,6 @@
         fetch_set_value('/static/pdf_report.css', document.querySelector('#css_template_editor'))
         document.querySelector('#download_all').addEventListener('click', event => {
             download_template_elements_json(`${report_key}.json`)
-        })
-        document.querySelector('#create_pdf').addEventListener('click', event => {
-            download_report(report_key, `report.${report_type}`)
         })
         document.querySelector('#image_file').addEventListener('change', event => {
             upload_img(event, document.querySelector('#images'))

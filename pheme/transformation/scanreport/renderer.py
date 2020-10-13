@@ -16,47 +16,23 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import base64
 import logging
-import urllib
-from pathlib import Path
 from typing import Dict
 
 
-from django.conf import settings
 from django.core.cache import cache
 from django.template import Template, Context, loader
 from rest_framework import renderers
 from rest_framework.request import Request
 from weasyprint import CSS, HTML
 
+from pheme.parameter import load_params
+
 logger = logging.getLogger(__name__)
 
 
-def as_datalink(data: bytes, file_format: str) -> str:
-    img = urllib.parse.quote(base64.b64encode(data))
-    return 'data:image/{};base64,{}'.format(file_format, img)
-
-
-def file_as_datalink(location: str) -> str:
-    file_format = location.split('.')[-1]
-    if file_format == 'svg':
-        file_format += '+xml'
-    return as_datalink(Path(location).read_bytes(), file_format=file_format)
-
-
-def _load_design_elemets():
-    return {
-        'logo': file_as_datalink(settings.TEMPLATE_LOGO_ADDRESS),
-        'cover_image': file_as_datalink(settings.TEMPLATE_COVER_IMAGE_ADDRESS),
-        'indicator': file_as_datalink(
-            '/{}/heading.svg'.format(settings.STATIC_DIR)
-        ),
-    }
-
-
 def _get_css(name: str) -> CSS:
-    return loader.get_template(name).render(_load_design_elemets())
+    return loader.get_template(name).render(load_params())
 
 
 def _enrich(name: str, data: Dict) -> Dict:

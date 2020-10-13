@@ -128,8 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .vim/
-# add later
 test_data/
 requirements.txt
 start.sh
 generate.sh
+# to prevent accidental uploads of default parameter
+static/parameter.json

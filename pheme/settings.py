@@ -35,19 +35,14 @@ import os
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 STATIC_DIR = BASE_DIR / 'static'
 TEMPLATE_DIR = BASE_DIR / 'template'
-TEMPLATE_LOGO_ADDRESS = os.environ.get(
-    "TEMPLATE_LOGO_ADDRESS"
-) or '//{}/logo.jpg'.format(STATIC_DIR)
-TEMPLATE_COVER_IMAGE_ADDRESS = os.environ.get(
-    "TEMPLATE_COVER_IMAGE_ADDRESS"
-) or '//{}/cover_image.png'.format(STATIC_DIR)
+PARAMETER_FILE_ADDRESS = os.environ.get(
+    "PARAMETER_FILE_ADDRESS"
+) or '//{}/parameter.json'.format(STATIC_DIR)
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'aq^_++zzyd@q&7olh&huvyc=3v=h)y+muc75i9d6$l@4fewk)='
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY', 'SECRET_KEY_missing_using_default_not_suitable_in_production'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -171,5 +166,6 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_RENDERER_CLASSES': [
         'pheme.renderer.XMLRenderer',
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.MultiPartRenderer',
     ]
 }
