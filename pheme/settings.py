@@ -41,7 +41,7 @@ PARAMETER_FILE_ADDRESS = os.environ.get(
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 SECRET_KEY = os.environ.get(
-    'SECRET_KEY', 'aq^_++zzyd@q&7olh&huvyc=3v=h)y+muc75i9d6$l@4fewk)='
+    'SECRET_KEY', 'SECRET_KEY_missing_using_default_not_suitable_in_production'
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
