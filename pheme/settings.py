@@ -32,7 +32,12 @@ from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
+__configured_base = os.environ.get('PHEME_BASE_PATH')
+BASE_DIR = (
+    Path(__configured_base)
+    if __configured_base
+    else Path(__file__).resolve(strict=True).parent.parent
+)
 STATIC_DIR = BASE_DIR / 'static'
 TEMPLATE_DIR = BASE_DIR / 'template'
 PARAMETER_FILE_ADDRESS = os.environ.get(
