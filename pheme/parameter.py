@@ -16,7 +16,7 @@ from pheme import settings
 from pheme.authentication import SimpleApiKeyAuthentication
 
 
-def load_params(from_path: str = None) -> Dict:
+def load_params(from_path: str = settings.PARAMETER_FILE_ADDRESS) -> Dict:
     param_file_obj = Path(from_path)
     return (
         json.loads(param_file_obj.read_text())
