@@ -157,6 +157,10 @@
                     console.log(data)
                     report_key = data
                     label.innerText = data
+                    images = document.querySelector('#images')
+                    while (images.firstChild) {
+                        images.removeChild(images.firstChild)
+                    }
                     upload_temp(report_key + "html_template", document.querySelector('#html_template_editor').value)
                     upload_temp(report_key + report_type + "_css", document.querySelector('#css_template_editor').value)
                     document.querySelector('#report_loader').style.display = "none"
