@@ -26,7 +26,7 @@ from rest_framework.request import Request
 from pheme.parser.xml import XMLFormParser, XMLParser
 from pheme.transformation import scanreport
 from pheme.storage import store, load
-from pheme.renderer import MarkDownTableRenderer
+from pheme.renderer import MarkDownTableRenderer, XMLRenderer
 from pheme.transformation.scanreport import model
 
 
@@ -115,6 +115,7 @@ def template_elements(request: Request, name: str):
         scanreport.renderer.ReportFormatHTMLReport,
         scanreport.renderer.DetailScanHTMLReport,
         scanreport.renderer.DetailScanPDFReport,
+        XMLRenderer,
     ]
 )
 def report(request: Request, name: str):
@@ -133,7 +134,14 @@ def report(request: Request, name: str):
                 "images": images,
             }
         )
-    return Response(load(name))
+    data = load(name)
+    if request.GET.get('without_overview'):
+        # remove charts
+        data.pop('overview', None)
+    if request.META.get('HTTP_ACCEPT') == "application/xml":
+        # XML needs exactly one root
+        data = {'report': data}
+    return Response(data)
 
 
 @api_view(['GET'])
