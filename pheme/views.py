@@ -26,7 +26,7 @@ from rest_framework.request import Request
 from pheme.parser.xml import XMLFormParser, XMLParser
 from pheme.transformation import scanreport
 from pheme.storage import store, load
-from pheme.renderer import MarkDownTableRenderer, XMLRenderer
+from pheme.renderer import MarkDownTableRenderer, XMLRenderer, CSVRenderer
 from pheme.transformation.scanreport import model
 
 
@@ -116,6 +116,7 @@ def template_elements(request: Request, name: str):
         scanreport.renderer.DetailScanHTMLReport,
         scanreport.renderer.DetailScanPDFReport,
         XMLRenderer,
+        CSVRenderer,
     ]
 )
 def report(request: Request, name: str):

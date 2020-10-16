@@ -44,6 +44,18 @@ curl -H 'accept: text/markdown+table' localhost:8000/scanreport/data/description
 http://localhost:8000/static/report_format_editor.html
 ```
 - overridable design parameter [55](https://github.com/greenbone/pheme/pull/55)
+- add possibility to not include overview information to remove charts and redundant information [63](https://github.com/greenbone/pheme/pull/63)
+```
+curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST?without_overview=TRUE' -H 'Accept: text/csv'
+```
+- add xml response [63](https://github.com/greenbone/pheme/pull/63)
+```
+curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: application/xml'
+```
+- add csv response [63](https://github.com/greenbone/pheme/pull/63)
+```
+curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: text/csv'
+```
 ### Changed
 ### Deprecated
 ### Removed

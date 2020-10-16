@@ -56,6 +56,7 @@ def test_report_contains_charts():
         "application/xml",
         "application/pdf",
         "text/html",
+        "text/csv",
     ],
 )
 def test_http_accept(http_accept):
