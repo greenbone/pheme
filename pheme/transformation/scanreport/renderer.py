@@ -25,7 +25,7 @@ from django.template import Template, Context, loader
 from rest_framework import renderers
 from rest_framework.request import Request
 from weasyprint import CSS, HTML
-
+from pheme.settings import DEBUG
 from pheme.parameter import load_params
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class DetailScanReport(renderers.BaseRenderer):
         cache_key = "{}/{}".format(self.media_type, name) if name else None
         logger.debug("generating report %s", cache_key)
 
-        if cache_key:
+        if cache_key and not DEBUG:
             cached = cache.get(cache_key)
             if cached:
                 return cached
