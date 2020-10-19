@@ -120,7 +120,7 @@ html body section#cover {
     height: 297mm;
 }
 
-html body section#cover h1{
+html body section#cover h1 {
     font-size: 38pt;
     page: no-chapter;
     width: 100%;
@@ -128,8 +128,35 @@ html body section#cover h1{
     padding-top: 2cm;
     color: white
 }
-html body section#cover p{
+
+html body section#cover p {
     padding-left: 1cm;
+}
+
+
+html body section#toc {
+    break-before: right;
+    break-after: left;
+    page: no-chapter;
+}
+
+html body section#toc ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+html body section#toc ul li::before {
+    content: '';
+    vertical-align: bottom;
+}
+
+html body section#toc ul li a::before {
+    content: target-text(attr(href));
+}
+
+html body section#toc ul li a::after {
+    content: target-counter(attr(href), page);
+    float: right;
 }
 
 

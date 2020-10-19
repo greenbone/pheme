@@ -5,9 +5,6 @@
     <meta charset="utf-8">
     <title>Report</title>
     <meta name="description" content="Report example">
-    <style>
-    {{ css }}
-    </style>
 </head>
 
 <body>
@@ -19,8 +16,13 @@
         <p>Hosts scanned: {{ hosts_amount }}</p>
 
     </section>
+    <section id="toc">
+      <ul>
+        <li><a href="#main_report"></a></li>
+      </ul>
+    </section>
     <section id="overview">
-        <h2>Main Report</h2>
+        <h2 id="main_report">Main Report</h2>
         <h3>Vulnerable Equipment</h3>
         <img src="{{ overview.vulnerable_equipment.chart }}" />
         <h3>Total NVT</h3>
