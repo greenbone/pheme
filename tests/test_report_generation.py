@@ -19,6 +19,7 @@
 
 from typing import List
 
+import pytest
 from django.core.cache import cache
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -46,6 +47,36 @@ def test_report_contains_charts():
     assert result['overview']['hosts'] is not None
     assert result['overview']['nvts'] is not None
     assert result['overview']['vulnerable_equipment'] is not None
+
+
+@pytest.mark.parametrize(
+    "http_accept",
+    [
+        "application/json",
+        "application/xml",
+        "application/pdf",
+        "text/html",
+        "text/csv",
+    ],
+)
+def test_http_accept(http_accept):
+    url = reverse('transform')
+    report = {
+        'report': {
+            'report': gen_report(
+                generate('host', 1),
+                generate('oid', 1),
+                name='http_accept_test',
+            )
+        }
+    }
+    client = APIClient()
+    response = client.post(url, data=report, format='xml')
+    assert response.status_code == 200
+    key = response.data
+    report_url = reverse('report', kwargs={'name': key})
+    html_report = client.get(report_url, HTTP_ACCEPT=http_accept)
+    assert html_report.status_code == 200
 
 
 def test_generate_format_editor_html_report():
