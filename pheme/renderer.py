@@ -16,8 +16,50 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from typing import List, Dict, Generator, Union
+from io import StringIO
+from csv import DictWriter
 from rest_framework.renderers import BaseRenderer
 import xmltodict
+
+
+class CSVRenderer(BaseRenderer):
+    media_type = 'text/csv'
+    format = 'text'
+    charset = 'utf-8'
+
+    def __flatten_per_result(
+        self, data: Dict
+    ) -> Generator[Union[List[str], Dict], None, None]:
+        # for the case that results is there but it is None
+        results = data.pop('results', None) or []
+        send_keys = True
+        for host in results:
+            for result in host.get('results'):
+                flatten = {
+                    **data,
+                    "os": host.get('os'),
+                    **result.pop('nvt_tags_interpreted', {}),
+                    **result,
+                }
+                if send_keys:
+                    yield flatten.keys()
+                    send_keys = False
+                yield flatten
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        if data is None:
+            return ''
+        try:
+            generator = self.__flatten_per_result(data)
+            result = StringIO()
+            writer = DictWriter(result, next(generator))
+            writer.writeheader()
+            writer.writerows(generator)
+            result.seek(0)
+            return result.read()
+        except StopIteration:
+            return ''
 
 
 class MarkDownTableRenderer(BaseRenderer):
