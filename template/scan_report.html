@@ -6,29 +6,87 @@
     <title>Report</title>
     <meta name="description" content="Report example">
     <style>
-    {{ css }}
+        {%if report_type == "HTML"%}
+          bootstrap
+        {%endif%}
+
+        {{ css }}
     </style>
 </head>
 
 <body>
-    <section id="cover">
+    {%if report_type == "HTML"%}
+        <div class="container">
+    {%endif%}
+
+    {%if report_type == "HTML"%}
+    <div class="row">
+    <div class="col">
+    {%endif%}
+    <article id="cover">
         <h1>Security Report</h1>
         <p>Scan Name: {{ name }}</p>
         <p>Scan Comment: {{ comment }}</p>
         <p>Scan Date: {{ start }}</p>
         <p>Hosts scanned: {{ hosts_amount }}</p>
 
-    </section>
-    <section id="overview">
-        <h2>Main Report</h2>
+    </article>
+
+    {% if report_type == "HTML"%}
+    </div>
+    </div>
+    {%endif%}
+
+    {%if report_type == "HTML"%}
+    <div class="row">
+    <div class="col">
+    {%endif%}
+    <article id="contents">
+        <h2>Contents</h2>
+
+        <ul>
+            <li><a href="#overview-title">test</a></li>
+            <li><a href="#finding-title">test</a></li>
+
+          </ul>
+
+    </article>
+
+    {% if report_type == "HTML"%}
+    </div>
+    </div>
+    {%endif%}
+
+    
+
+
+    {%if report_type == "HTML"%}
+    <div class="row">
+    <div class="col">
+    {%endif%}
+    <article id="overview" style="page-break-after: always">
+        <h2 id="overview-title">Main Report</h2>
+
         <h3>Vulnerable Equipment</h3>
         <img src="{{ overview.vulnerable_equipment.chart }}" />
         <h3>Total NVT</h3>
         <img src="{{ overview.nvts.chart }}" />
         <h3>Top 10 Hosts</h3>
         <img src="{{ overview.hosts.chart }}" />
-    </section>
-    <section id="finding">
+    </article>
+
+    {% if report_type == "HTML"%}
+    </div>
+    </div>
+    {%endif%}
+
+
+    {%if report_type == "HTML"%}
+    <div class="row">
+    <div class="col">
+    {%endif%}
+    <article id="finding">
+        <h2 style="visibility: hidden; height: 0px" id="finding-title">Vulnerability Details</h2>
         {% for scan in results%}
         <h3 class="host-title">{{ scan.host }}</h3>
         <p>o/s: {{ scan.equipment.os }}</p>
@@ -67,8 +125,17 @@
         </section>
         {% endfor %}
         {% endfor %}
-    </section>
+    </article>
+    {% if report_type == "HTML"%}
+    </div>
+    </div>
+    {%endif%}
 
+
+
+    {%if report_type == "HTML"%}
+      </div>
+    {%endif%}
 </body>
 
 </html>

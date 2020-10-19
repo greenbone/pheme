@@ -89,6 +89,8 @@ class DetailScanHTMLReport(DetailScanReport):
     def _enrich(self, name: str, data: Dict) -> Dict:
         data = _enrich(name, data)
         data['css'] = _get_css('html_report.css')
+        data['bootstrap'] = _get_css("bootstrap-grid.css")
+        data["report_type"] = "HTML"
         return data
 
     def apply(self, name: str, data: Dict):

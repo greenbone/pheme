@@ -134,3 +134,7 @@ start.sh
 generate.sh
 # to prevent accidental uploads of default parameter
 static/parameter.json
+
+
+
+.idea
