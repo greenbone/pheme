@@ -64,14 +64,16 @@ def put_value(
 
 
 @api_view(['PUT'])
-@parser_classes([rest_framework.parsers.MultiPartParser])
+@parser_classes(
+    [rest_framework.parsers.JSONParser, rest_framework.parsers.MultiPartParser]
+)
 @renderer_classes(
     [
         rest_framework.renderers.JSONRenderer,
     ]
 )
 @authentication_classes([SimpleApiKeyAuthentication])
-def put_file(request: Request) -> Response:
+def put(request: Request) -> Response:
     def manipulate(data: Dict) -> Dict:
         for (key, value) in request.data.items():
             if isinstance(value, UploadedFile):
@@ -87,4 +89,9 @@ def put_file(request: Request) -> Response:
                 data[key] = value
         return data
 
+    def merge(data: Dict) -> Dict:
+        return {**data, **request.data}
+
+    if request.content_type == "application/json":
+        return __put(merge)
     return __put(manipulate)

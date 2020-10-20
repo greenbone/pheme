@@ -13,7 +13,7 @@ def test_unauthorized_on_missing_x_api_key():
     )
     response = client.put(url, data="#66c430", format='json')
     assert response.status_code == 403
-    url = reverse('put_file_parameter')
+    url = reverse('put_parameter')
     response = client.put(url, data={})
     assert response.status_code == 403
 
@@ -23,7 +23,7 @@ def test_put_image(upload_file):
     upload_file.name = 'test.svg'
     client = APIClient()
     url = reverse(
-        'put_file_parameter',
+        'put_parameter',
     )
     # api_key = request.META.get('HTTP_X_API_KEY', "")
     response = client.put(
@@ -42,7 +42,7 @@ def test_not_allow_binary_types(upload_file):
     upload_file.name = 'test.pdf'
     client = APIClient()
     url = reverse(
-        'put_file_parameter',
+        'put_parameter',
     )
     # api_key = request.META.get('HTTP_X_API_KEY', "")
     with pytest.raises(ValueError):
@@ -53,6 +53,34 @@ def test_not_allow_binary_types(upload_file):
                 "cover_image": upload_file,
             },
             HTTP_X_API_KEY=SECRET_KEY,
+        )
+
+
+def test_put_merge_json():
+    client = APIClient()
+    url = reverse(
+        'put_parameter',
+    )
+    # api_key = request.META.get('HTTP_X_API_KEY', "")
+    response = client.put(
+        url,
+        data={"main_color2": "#FFF"},
+        format='json',
+        HTTP_X_API_KEY=SECRET_KEY,
+    )
+    assert response.status_code == 200
+    assert response.data["main_color2"] == "#FFF"
+
+
+def test_put_not_merge_string_json():
+    client = APIClient()
+    url = reverse(
+        'put_parameter',
+    )
+    # api_key = request.META.get('HTTP_X_API_KEY', "")
+    with pytest.raises(TypeError):
+        assert client.put(
+            url, data="#66c430", format='json', HTTP_X_API_KEY=SECRET_KEY
         )
 
 
