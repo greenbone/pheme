@@ -1,3 +1,5 @@
+import mimetypes
+import logging
 from typing import Dict, Callable
 from pathlib import Path
 import json
@@ -14,6 +16,9 @@ from rest_framework.response import Response
 from pheme.datalink import filename_as_datalink
 from pheme import settings
 from pheme.authentication import SimpleApiKeyAuthentication
+
+
+logger = logging.getLogger(__name__)
 
 
 def load_params(from_path: str = settings.PARAMETER_FILE_ADDRESS) -> Dict:
@@ -70,7 +75,14 @@ def put_file(request: Request) -> Response:
     def manipulate(data: Dict) -> Dict:
         for (key, value) in request.data.items():
             if isinstance(value, UploadedFile):
-                data[key] = filename_as_datalink(value.name, value.read())
+                file_type, _ = mimetypes.guess_type(value.name)
+                logger.info("uploaded %s for %s", file_type, key)
+                if file_type.startswith('image'):
+                    data[key] = filename_as_datalink(value.name, value.read())
+                elif file_type.startswith('text'):
+                    data[key] = value.read().decode()
+                else:
+                    raise ValueError("Only image or text is permitted")
             else:
                 data[key] = value
         return data

@@ -85,11 +85,31 @@ E.g.:
 The returned identifier can be used to generate the actual report. 
 
 So far a report can be either in:
+- application/json
+- application/xml
+- text/csv
+E.g.
+
+```
+> curl -v 'http://localhost:8000/report/scanreport-nvt-9a233b0d-713c-4f22-9e15-f6e5090873e3' -H 'Accept: application/csv'
+```
+
+For visual report like
+
 - application/pdf
 - text/html
-- application/json
 
-E.g.
+the corresponding css and html template needs to be put into pheme first:
+
+```
+> curl -X PUT localhost:8000/parameter\
+    -H 'x-api-key: SECRET_KEY_missing_using_default_not_suitable_in_production'\
+    --form vulnerability_report_html_css=@path_to_css_template\
+    --form vulnerability_report_pdf_css=@path_to_css_template\
+    --form vulnerability_report=@path_to_html_template
+```
+
+afterwards it can be get as usual:
 
 ```
 > curl -v 'http://localhost:8000/report/scanreport-nvt-9a233b0d-713c-4f22-9e15-f6e5090873e3' -H 'Accept: application/pdf'

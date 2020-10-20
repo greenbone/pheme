@@ -113,8 +113,8 @@ def template_elements(request: Request, name: str):
         rest_framework.renderers.JSONRenderer,
         scanreport.renderer.ReportFormatPDFReport,
         scanreport.renderer.ReportFormatHTMLReport,
-        scanreport.renderer.DetailScanHTMLReport,
-        scanreport.renderer.DetailScanPDFReport,
+        scanreport.renderer.VulnerabilityHTMLReport,
+        scanreport.renderer.VulnerabilityPDFReport,
         XMLRenderer,
         CSVRenderer,
     ]
@@ -129,7 +129,7 @@ def report(request: Request, name: str):
         return Response(
             {
                 "template": load_value_of("{}html_template".format(name)),
-                "scan_report": load(name),
+                "vulnerability_report": load(name),
                 "pdf_css": load_value_of("{}pdf_css".format(name)),
                 "html_css": load_value_of("{}html_css".format(name)),
                 "images": images,
