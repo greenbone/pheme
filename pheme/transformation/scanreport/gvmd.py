@@ -259,6 +259,8 @@ def __create_results(
             'nvt.cvss_base',
             'nvt.tags_interpreted',
             'nvt.refs.ref',
+            'nvt.solution.type',
+            'nvt.solution.text',
             'port',
             'threat',
             'severity',

@@ -24,6 +24,13 @@ Or in this case personification of a service to generate reports.
 
 Python 3.7 and later is supported.
 
+Besides python `pheme` also needs to have
+
+- libcairo2-dev
+- pango1.0
+
+installed.
+
 ## Development
 
 **pheme** uses [poetry] for its own dependency management and build
