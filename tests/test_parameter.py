@@ -25,7 +25,6 @@ def test_put_image(upload_file):
     url = reverse(
         'put_parameter',
     )
-    # api_key = request.META.get('HTTP_X_API_KEY', "")
     response = client.put(
         url,
         data={
@@ -44,7 +43,6 @@ def test_not_allow_binary_types(upload_file):
     url = reverse(
         'put_parameter',
     )
-    # api_key = request.META.get('HTTP_X_API_KEY', "")
     with pytest.raises(ValueError):
         assert client.put(
             url,
@@ -61,7 +59,6 @@ def test_put_merge_json():
     url = reverse(
         'put_parameter',
     )
-    # api_key = request.META.get('HTTP_X_API_KEY', "")
     response = client.put(
         url,
         data={"main_color2": "#FFF"},
@@ -77,7 +74,6 @@ def test_put_not_merge_string_json():
     url = reverse(
         'put_parameter',
     )
-    # api_key = request.META.get('HTTP_X_API_KEY', "")
     with pytest.raises(TypeError):
         assert client.put(
             url, data="#66c430", format='json', HTTP_X_API_KEY=SECRET_KEY
@@ -90,7 +86,6 @@ def test_put_main_color():
         'put_value_parameters',
         kwargs={"key": "main_color"},
     )
-    # api_key = request.META.get('HTTP_X_API_KEY', "")
     response = client.put(
         url, data="#66c430", format='json', HTTP_X_API_KEY=SECRET_KEY
     )
