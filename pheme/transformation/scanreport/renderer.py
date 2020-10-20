@@ -21,7 +21,7 @@ from typing import Dict
 
 
 from django.core.cache import cache
-from django.template import Template, Context, loader
+from django.template import Template, Context
 from rest_framework import renderers
 from rest_framework.request import Request
 from weasyprint import CSS, HTML
@@ -31,8 +31,10 @@ from pheme.parameter import load_params
 logger = logging.getLogger(__name__)
 
 
-def _get_css(name: str) -> CSS:
-    return loader.get_template(name).render(load_params())
+def _load_template(name: str, params: Dict = None) -> Template:
+    if not params:
+        params = load_params()
+    return Template(params[name])
 
 
 def _enrich(name: str, data: Dict) -> Dict:
@@ -56,7 +58,7 @@ def _default_not_found_response(
     return '"not data found for %s"' % report_id
 
 
-class DetailScanReport(renderers.BaseRenderer):
+class Report(renderers.BaseRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
         request = _get_request(renderer_context)
         if not data:
@@ -77,36 +79,42 @@ class DetailScanReport(renderers.BaseRenderer):
 
     def apply(self, name: str, data: Dict):
         raise NotImplementedError(
-            'DetailScanReport class requires .apply() to be implemented'
+            'Report class requires .apply() to be implemented'
         )
 
 
-class DetailScanHTMLReport(DetailScanReport):
-    __template = 'scan_report.html'
+class VulnerabilityHTMLReport(Report):
+    __template = 'vulnerability_report'
+    __css_template = 'vulnerability_report_html_css'
     media_type = 'text/html'
     format = 'html'
 
-    def _enrich(self, name: str, data: Dict) -> Dict:
-        data = _enrich(name, data)
-        data['css'] = _get_css('html_report.css')
-        return data
-
     def apply(self, name: str, data: Dict):
-        return loader.get_template(self.__template).render(
-            self._enrich(name, data)
+        params = load_params()
+        css = _load_template(self.__css_template, params).render(
+            Context(params)
+        )
+        data['css'] = css
+        return _load_template(self.__template).render(
+            Context(_enrich(name, data))
         )
 
 
-class DetailScanPDFReport(DetailScanReport):
-    __template = 'scan_report.html'
+class VulnerabilityPDFReport(Report):
+    __template = 'vulnerability_report'
+    __css_template = 'vulnerability_report_pdf_css'
     media_type = 'application/pdf'
     format = 'binary'
 
     def apply(self, name: str, data: Dict):
         logger.debug("got template: %s", self.__template)
-        html = loader.get_template(self.__template).render(_enrich(name, data))
+        params = load_params()
+        css = _load_template(self.__css_template, params).render(
+            Context(params)
+        )
+        html_template = _load_template(self.__template)
+        html = html_template.render(Context(_enrich(name, data)))
         logger.debug("created html")
-        css = _get_css('pdf_report.css')
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")
         return pdf
@@ -121,9 +129,9 @@ class ReportFormatHTMLReport(renderers.BaseRenderer):
         if not data:
             return _default_not_found_response(renderer_context, request)
         template = Template(data['template'])
-        data['scan_report']['css'] = data['html_css']
-        data['scan_report']['images'] = data['images']
-        context = Context(data['scan_report'])
+        data['vulnerability_report']['css'] = data['html_css']
+        data['vulnerability_report']['images'] = data['images']
+        context = Context(data['vulnerability_report'])
         html = template.render(context)
         logger.debug("created html")
         return html
@@ -137,9 +145,9 @@ class ReportFormatPDFReport(renderers.BaseRenderer):
         request = _get_request(renderer_context)
         if not data:
             return _default_not_found_response(renderer_context, request)
-        data['scan_report']['images'] = data['images']
+        data['vulnerability_report']['images'] = data['images']
         template = Template(data['template'])
-        context = Context(data['scan_report'])
+        context = Context(data['vulnerability_report'])
         html = template.render(context)
         logger.debug("created html")
         css = Template(data['pdf_css']).render(context)

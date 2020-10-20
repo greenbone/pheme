@@ -191,8 +191,21 @@ def __create_pie_chart(
 
     def set_plot(ax):
         ax.set_title(title)
-        series.plot.pie(
-            legend=True, ax=ax, colors=colors, autopct=raw_value_pct
+        wedges, _, _ = ax.pie(
+            series.values,
+            colors=colors,
+            autopct=raw_value_pct,
+            wedgeprops=dict(width=0.5),
+            startangle=-40,
+        )
+
+        keys = series.keys()
+        ax.legend(
+            wedges,
+            keys,
+            bbox_to_anchor=(1, 0, 0, 1),
+            loc='lower right',
+            fontsize='small',
         )
 
     if len(series) < 1:
@@ -239,7 +252,6 @@ def __create_nvt(result_series_df: DataFrame) -> CountGraph:
         chart=__create_pie_chart(
             counted,
             colors=__severity_class_to_color(counted.keys()),
-            title="Total NVT",
         ),
         counts=None,
     )

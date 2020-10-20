@@ -18,13 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import List
-
 import pytest
 from django.core.cache import cache
 from django.urls import reverse
 from rest_framework.test import APIClient
 
 from pheme.datalink import as_datalink
+from pheme.settings import SECRET_KEY
 from tests.generate_test_data import gen_report
 
 
@@ -52,10 +52,35 @@ def test_report_contains_charts():
 @pytest.mark.parametrize(
     "http_accept",
     [
-        "application/json",
-        "application/xml",
         "application/pdf",
         "text/html",
+    ],
+)
+def test_http_accept_visual(http_accept):
+    css_key = 'vulnerability_report_{}_css'.format(http_accept.split('/')[-1])
+    template_key = 'vulnerability_report'
+    client = APIClient()
+    url = reverse(
+        'put_file_parameter',
+    )
+    # api_key = request.META.get('HTTP_X_API_KEY', "")
+    response = client.put(
+        url,
+        data={
+            css_key: "background: #000",
+            template_key: "<html><h1>Holla</h1></html>",
+        },
+        HTTP_X_API_KEY=SECRET_KEY,
+    )
+    assert response.status_code == 200
+    test_http_accept(http_accept)
+
+
+@pytest.mark.parametrize(
+    "http_accept",
+    [
+        "application/json",
+        "application/xml",
         "text/csv",
     ],
 )

@@ -315,8 +315,6 @@
     </div>
     <script>
         document.querySelector("#pdf").click()
-        fetch_set_value('/static/scan_report.html', document.querySelector('#html_template_editor'))
-        fetch_set_value('/static/pdf_report.css', document.querySelector('#css_template_editor'))
         document.querySelector('#download_all').addEventListener('click', event => {
             download_template_elements_json(`${report_key}.json`)
         })
