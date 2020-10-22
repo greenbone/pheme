@@ -67,7 +67,7 @@ def test_http_accept_visual(http_accept):
     response = client.put(
         url,
         data={
-            css_key: "background: #000",
+            css_key: "html { background: #000; }",
             template_key: "<html><h1>Holla</h1></html>",
         },
         HTTP_X_API_KEY=SECRET_KEY,
