@@ -20,6 +20,8 @@ from pheme.authentication import SimpleApiKeyAuthentication
 
 logger = logging.getLogger(__name__)
 
+mimetypes.add_type('text/scss', '.scss')
+
 
 def load_params(from_path: str = settings.PARAMETER_FILE_ADDRESS) -> Dict:
     param_file_obj = Path(from_path)
@@ -78,10 +80,15 @@ def put(request: Request) -> Response:
         for (key, value) in request.data.items():
             if isinstance(value, UploadedFile):
                 file_type, _ = mimetypes.guess_type(value.name)
-                logger.info("uploaded %s for %s", file_type, key)
-                if file_type.startswith('image'):
+                logger.info(
+                    "uploading filetype %s/%s for %s",
+                    file_type,
+                    value.name,
+                    key,
+                )
+                if file_type and file_type.startswith('image'):
                     data[key] = filename_as_datalink(value.name, value.read())
-                elif file_type.startswith('text'):
+                elif file_type and file_type.startswith('text'):
                     data[key] = value.read().decode()
                 else:
                     raise ValueError("Only image or text is permitted")
