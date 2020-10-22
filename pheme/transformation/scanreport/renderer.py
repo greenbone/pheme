@@ -84,7 +84,7 @@ class Report(renderers.BaseRenderer):
 
 
 class VulnerabilityHTMLReport(Report):
-    __template = 'vulnerability_report'
+    __template = 'vulnerability_report_template'
     __css_template = 'vulnerability_report_html_css'
     media_type = 'text/html'
     format = 'html'
@@ -101,7 +101,7 @@ class VulnerabilityHTMLReport(Report):
 
 
 class VulnerabilityPDFReport(Report):
-    __template = 'vulnerability_report'
+    __template = 'vulnerability_report_template'
     __css_template = 'vulnerability_report_pdf_css'
     media_type = 'application/pdf'
     format = 'binary'
