@@ -61,7 +61,7 @@ def test_http_accept_visual(http_accept):
     template_key = 'vulnerability_report'
     client = APIClient()
     url = reverse(
-        'put_file_parameter',
+        'put_parameter',
     )
     # api_key = request.META.get('HTTP_X_API_KEY', "")
     response = client.put(
