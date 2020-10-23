@@ -133,7 +133,7 @@ class ReportFormatHTMLReport(renderers.BaseRenderer):
             return _default_not_found_response(renderer_context, request)
         template = Template(data['template'])
         data['vulnerability_report']['css'] = data['html_css']
-        data['vulnerability_report']['images'] = data['images']
+        data['vulnerability_report']['images'] = data.get('images')
         context = Context(data['vulnerability_report'])
         html = template.render(context)
         logger.debug("created html")
@@ -148,7 +148,7 @@ class ReportFormatPDFReport(renderers.BaseRenderer):
         request = _get_request(renderer_context)
         if not data:
             return _default_not_found_response(renderer_context, request)
-        data['vulnerability_report']['images'] = data['images']
+        data['vulnerability_report']['images'] = data.get('images')
         template = Template(data['template'])
         context = Context(data['vulnerability_report'])
         html = template.render(context)
