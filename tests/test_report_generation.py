@@ -57,8 +57,9 @@ def test_report_contains_charts():
     ],
 )
 def test_http_accept_visual(http_accept):
-    css_key = 'vulnerability_report_{}_css'.format(http_accept.split('/')[-1])
-    template_key = 'vulnerability_report_template'
+    subtype = http_accept.split('/')[-1]
+    css_key = 'vulnerability_report_{}_css'.format(subtype)
+    template_key = 'vulnerability_report_{}_template'.format(subtype)
     client = APIClient()
     url = reverse(
         'put_parameter',
