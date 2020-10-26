@@ -302,7 +302,7 @@ django = ">=2.2"
 
 [[package]]
 name = "djangorestframework-dataclasses"
-version = "0.6"
+version = "0.7"
 description = "A dataclasses serializer for Django REST Framework"
 category = "main"
 optional = false
@@ -898,7 +898,7 @@ testing = ["pytest (>=3.5,<3.7.3 || >3.7.3)", "pytest-checkdocs (>=1.2.3)", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "58092ac5a0c653c5ee4a741b390dac97a31050d0ba4956e59eb603308a828cfe"
+content-hash = "8f88cfb96f7f59c1ced18ffa26014e9ea252f08c0f6b515ba30dcf4802531668"
 
 [metadata.files]
 appdirs = [
@@ -1066,7 +1066,7 @@ djangorestframework = [
     {file = "djangorestframework-3.12.1.tar.gz", hash = "sha256:d54452aedebb4b650254ca092f9f4f5df947cb1de6ab245d817b08b4f4156249"},
 ]
 djangorestframework-dataclasses = [
-    {file = "djangorestframework-dataclasses-0.6.tar.gz", hash = "sha256:ec935068baf08f3e95e6a9a6963f97beb13246edf7b6264b706dcd88bf97c7d4"},
+    {file = "djangorestframework-dataclasses-0.7.tar.gz", hash = "sha256:da967b8f9987ac60ae2d969707818521fd30882b1a9361ceca6408feea66b437"},
 ]
 html5lib = [
     {file = "html5lib-1.1-py2.py3-none-any.whl", hash = "sha256:0d78f8fde1c230e99fe37986a60526d7049ed4bf8a9fadbad5f00e22e58e041d"},
