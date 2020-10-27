@@ -13,7 +13,7 @@ from rest_framework.decorators import (
 )
 from rest_framework.request import Request
 from rest_framework.response import Response
-from pheme.datalink import filename_as_datalink
+from pheme.datalink import as_datalink
 from pheme import settings
 from pheme.authentication import SimpleApiKeyAuthentication
 
@@ -40,10 +40,11 @@ def __store(params: Dict, *, from_path: str = None) -> Dict:
 def __put(
     func: Callable[[Dict], Dict],
     *,
-    from_path: str = settings.PARAMETER_FILE_ADDRESS
+    from_path: str = settings.PARAMETER_FILE_ADDRESS,
+    store: Callable[[Dict, str], Dict] = __store
 ) -> Response:
     params = load_params(from_path=from_path)
-    return Response(__store(func(params), from_path=from_path))
+    return Response(store(func(params), from_path=from_path))
 
 
 @api_view(['PUT'])
@@ -87,7 +88,7 @@ def put(request: Request) -> Response:
                     key,
                 )
                 if file_type and file_type.startswith('image'):
-                    data[key] = filename_as_datalink(value.name, value.read())
+                    data[key] = as_datalink(value.read(), file_type)
                 elif file_type and file_type.startswith('text'):
                     data[key] = value.read().decode()
                 else:
