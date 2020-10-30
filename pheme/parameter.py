@@ -11,11 +11,11 @@ from rest_framework.decorators import (
     renderer_classes,
     authentication_classes,
 )
-from rest_framework.request import Request
+from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 from pheme.datalink import as_datalink
 from pheme import settings
-from pheme.authentication import SimpleApiKeyAuthentication
+from pheme.authentication import SimpleApiKeyAuthentication, LoggedInAsAUser
 
 
 logger = logging.getLogger(__name__)
@@ -38,13 +38,50 @@ def __store(params: Dict, *, from_path: str = None) -> Dict:
 
 
 def __put(
-    func: Callable[[Dict], Dict],
+    request: HttpRequest,
+    func: Callable[[HttpRequest, Dict], Dict],
     *,
     from_path: str = settings.PARAMETER_FILE_ADDRESS,
     store: Callable[[Dict, str], Dict] = __store
 ) -> Response:
     params = load_params(from_path=from_path)
-    return Response(store(func(params), from_path=from_path))
+    print("authe: {}".format(request.user))
+    username = request.META.get('GVM_USERNAME')
+    if username:
+        all_user = params.get('user_specific', {})
+        specific_user_params = all_user.get(username, {})
+        specific_user_params = func(request, specific_user_params)
+        all_user[username] = specific_user_params
+        params['user_specific'] = all_user
+        value = params
+    else:
+        value = func(request, params)
+    return Response(store(value, from_path=from_path))
+
+
+def __process_form_data(request: HttpRequest, data: Dict) -> Dict:
+    for (key, value) in request.data.items():
+        if isinstance(value, UploadedFile):
+            file_type, _ = mimetypes.guess_type(value.name)
+            logger.info(
+                "uploading filetype %s/%s for %s",
+                file_type,
+                value.name,
+                key,
+            )
+            if file_type and file_type.startswith('image'):
+                data[key] = as_datalink(value.read(), file_type)
+            elif file_type and file_type.startswith('text'):
+                data[key] = value.read().decode()
+            else:
+                raise ValueError("Only image or text is permitted")
+        else:
+            data[key] = value
+    return data
+
+
+def __process_json_object(request: HttpRequest, data: Dict) -> Dict:
+    return {**data, **request.data}
 
 
 @api_view(['PUT'])
@@ -56,14 +93,14 @@ def __put(
 )
 @authentication_classes([SimpleApiKeyAuthentication])
 def put_value(
-    request: Request,
+    request: HttpRequest,
     key: str,
 ) -> Response:
-    def manipulate(data: Dict) -> Dict:
+    def __process_single_value(request: HttpRequest, data: Dict) -> Dict:
         data[key] = request.data
         return data
 
-    return __put(manipulate)
+    return __put(request, __process_single_value)
 
 
 @api_view(['PUT'])
@@ -75,31 +112,9 @@ def put_value(
         rest_framework.renderers.JSONRenderer,
     ]
 )
-@authentication_classes([SimpleApiKeyAuthentication])
-def put(request: Request) -> Response:
-    def manipulate(data: Dict) -> Dict:
-        for (key, value) in request.data.items():
-            if isinstance(value, UploadedFile):
-                file_type, _ = mimetypes.guess_type(value.name)
-                logger.info(
-                    "uploading filetype %s/%s for %s",
-                    file_type,
-                    value.name,
-                    key,
-                )
-                if file_type and file_type.startswith('image'):
-                    data[key] = as_datalink(value.read(), file_type)
-                elif file_type and file_type.startswith('text'):
-                    data[key] = value.read().decode()
-                else:
-                    raise ValueError("Only image or text is permitted")
-            else:
-                data[key] = value
-        return data
-
-    def merge(data: Dict) -> Dict:
-        return {**data, **request.data}
+@authentication_classes([LoggedInAsAUser, SimpleApiKeyAuthentication])
+def put(request: HttpRequest) -> Response:
 
     if request.content_type == "application/json":
-        return __put(merge)
-    return __put(manipulate)
+        return __put(request, __process_json_object)
+    return __put(request, __process_form_data)

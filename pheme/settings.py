@@ -43,6 +43,9 @@ TEMPLATE_DIR = BASE_DIR / 'template'
 PARAMETER_FILE_ADDRESS = os.environ.get(
     "PARAMETER_FILE_ADDRESS"
 ) or '//{}/parameter.json'.format(STATIC_DIR)
+
+GSAD_URL = os.environ.get('GSAD_URL', "http://localhost:8080/gmp")
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 SECRET_KEY = os.environ.get(
