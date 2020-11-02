@@ -130,11 +130,11 @@ xcb = ["xcffib (>=0.3.2)"]
 
 [[package]]
 name = "cairosvg"
-version = "2.4.2"
+version = "2.5.0"
 description = "A Simple SVG Converter based on Cairo"
 category = "main"
 optional = false
-python-versions = ">= 3.5"
+python-versions = ">=3.5"
 
 [package.dependencies]
 cairocffi = "*"
@@ -941,8 +941,8 @@ cairocffi = [
     {file = "cairocffi-1.2.0.tar.gz", hash = "sha256:9a979b500c64c8179fec286f337e8fe644eca2f2cd05860ce0b62d25f22ea140"},
 ]
 cairosvg = [
-    {file = "CairoSVG-2.4.2-py3-none-any.whl", hash = "sha256:9cb1df7e9bc60f75fb87f67940a8fb805aad544337a67a40b67c05cfe33711a2"},
-    {file = "CairoSVG-2.4.2.tar.gz", hash = "sha256:4e668f96653326780036ebb0a9ff2bb59a8443d7bcfc51a14aab77b57a8e67ad"},
+    {file = "CairoSVG-2.5.0-py3-none-any.whl", hash = "sha256:cf1d8dcba8984ce46ddfecf5bb4768b4bdd86577873470ccb798cba0b024b842"},
+    {file = "CairoSVG-2.5.0.tar.gz", hash = "sha256:3fc50d10f0cbef53b3ee376a97a88d81bbd9e2f190f7e63de08431a1a08e9afa"},
 ]
 certifi = [
     {file = "certifi-2020.6.20-py2.py3-none-any.whl", hash = "sha256:8fc0819f1f30ba15bdb34cceffb9ef04d99f420f68eb75d901e9560b8749fc41"},
