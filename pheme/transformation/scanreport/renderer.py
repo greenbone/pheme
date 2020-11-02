@@ -39,9 +39,9 @@ def _load_template(name: str, params: Dict = None) -> Template:
     return Template(params[name])
 
 
-def _enrich(name: str, data: Dict) -> Dict:
+def _enrich(name: str, data: Dict, parameter: Dict) -> Dict:
     data['internal_name'] = name
-    return data
+    return {**parameter, **data}
 
 
 def _get_request(renderer_context: Dict) -> Request:
@@ -104,8 +104,9 @@ class VulnerabilityHTMLReport(Report):
         )
         css = sass.compile(string=css, output_style="compressed")
         data['css'] = css
+
         return _load_template(self.__template).render(
-            Context(_enrich(name, data))
+            Context(_enrich(name, data, parameter))
         )
 
 
@@ -122,7 +123,7 @@ class VulnerabilityPDFReport(Report):
         )
         css = sass.compile(string=css, output_style="compressed")
         html_template = _load_template(self.__template)
-        html = html_template.render(Context(_enrich(name, data)))
+        html = html_template.render(Context(_enrich(name, data, parameter)))
         logger.debug("created html")
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")

@@ -15,7 +15,7 @@ from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 from pheme.datalink import as_datalink
 from pheme import settings
-from pheme.authentication import SimpleApiKeyAuthentication, LoggedInAsAUser
+import pheme.authentication
 
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,6 @@ def __put(
     store: Callable[[Dict, str], Dict] = __store
 ) -> Response:
     params = load_params(from_path=from_path)
-    print("authe: {}".format(request.user))
     username = request.META.get('GVM_USERNAME')
     if username:
         all_user = params.get('user_specific', {})
@@ -91,7 +90,12 @@ def __process_json_object(request: HttpRequest, data: Dict) -> Dict:
         rest_framework.renderers.JSONRenderer,
     ]
 )
-@authentication_classes([SimpleApiKeyAuthentication])
+@authentication_classes(
+    [
+        pheme.authentication.LoggedInAsAUser,
+        pheme.authentication.SimpleApiKeyAuthentication,
+    ]
+)
 def put_value(
     request: HttpRequest,
     key: str,
@@ -112,7 +116,12 @@ def put_value(
         rest_framework.renderers.JSONRenderer,
     ]
 )
-@authentication_classes([LoggedInAsAUser, SimpleApiKeyAuthentication])
+@authentication_classes(
+    [
+        pheme.authentication.LoggedInAsAUser,
+        pheme.authentication.SimpleApiKeyAuthentication,
+    ]
+)
 def put(request: HttpRequest) -> Response:
 
     if request.content_type == "application/json":

@@ -57,6 +57,7 @@ curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: application
 curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: text/csv'
 ```
 - `pheme-create-parameter-json` to create `parameter.json` based on a directory ( `pheme-create-parameter-json $SOURCE_PATH > $TARGET_PATH/parameter.json` )
+- possibility to have user specific changes [98](https://github.com/greenbone/pheme/pull/98)
 ### Changed
 ### Deprecated
 ### Removed

@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from unittest.mock import patch
 from typing import List
 import pytest
 from django.core.cache import cache
@@ -103,6 +104,7 @@ def test_http_accept(http_accept):
     report_url = reverse('report', kwargs={'name': key})
     html_report = client.get(report_url, HTTP_ACCEPT=http_accept)
     assert html_report.status_code == 200
+    return html_report
 
 
 def test_generate_format_editor_html_report():
@@ -173,3 +175,38 @@ def test_generate_format_editor_html_report():
     assert 'background-color: #000' in report
     for content in images:
         assert "<img src=\"{}\"/>".format(content) in report
+
+
+@patch('pheme.parameter.pheme.authentication.get_username_role')
+def test_html_report_contains_user_paramater(user_information):
+    user_information.side_effect = [(None, None), ('test', 'admin')]
+    subtype = "html"
+    css_key = 'vulnerability_report_{}_css'.format(subtype)
+    template_key = 'vulnerability_report_{}_template'.format(subtype)
+    client = APIClient()
+    url = reverse(
+        'put_parameter',
+    )
+    html_template = "<html><body><p>{{ main_color }}</p></body></html>" ""
+    response = client.put(
+        url,
+        data={
+            css_key: "html { background: {{ main_color }}; }",
+            template_key: html_template,
+            "main_color": "#fff",
+        },
+        HTTP_X_API_KEY=SECRET_KEY,
+    )
+    assert response.status_code == 200
+    assert response.data['main_color']
+    client = APIClient()
+    url = reverse(
+        'put_value_parameters',
+        kwargs={"key": "main_color"},
+    )
+    response = client.put(url, data="#000", format='json')
+    assert response.status_code == 200
+    assert response.data['user_specific']['test']['main_color'] == "#000"
+    report_response = test_http_accept('text/html')
+    html_report = report_response.getvalue().decode('utf-8')
+    assert html_report == "<html><body><p>#fff</p></body></html>"
