@@ -28,6 +28,7 @@ from weasyprint import CSS, HTML
 import sass
 from pheme.settings import DEBUG
 from pheme.parameter import load_params
+from pheme.get_user_information import get_username_role
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +39,9 @@ def _load_template(name: str, params: Dict = None) -> Template:
     return Template(params[name])
 
 
-def _enrich(name: str, data: Dict) -> Dict:
+def _enrich(name: str, data: Dict, parameter: Dict) -> Dict:
     data['internal_name'] = name
-    return data
+    return {**parameter, **data}
 
 
 def _get_request(renderer_context: Dict) -> Request:
@@ -73,12 +74,19 @@ class Report(renderers.BaseRenderer):
             cached = cache.get(cache_key)
             if cached:
                 return cached
-        result = self.apply(name, data)
+        params = load_params()
+        # separate user specific parameter
+        user_parameter = params.pop('user_specific', {})
+        username, _ = get_username_role(request)
+        if username:
+            params = {**params, **user_parameter.get(username, {})}
+
+        result = self.apply(name, data, params)
         if cache_key:
             cache.set(cache_key, result)
         return result
 
-    def apply(self, name: str, data: Dict):
+    def apply(self, name: str, data: Dict, parameter: Dict):
         raise NotImplementedError(
             'Report class requires .apply() to be implemented'
         )
@@ -90,15 +98,15 @@ class VulnerabilityHTMLReport(Report):
     media_type = 'text/html'
     format = 'html'
 
-    def apply(self, name: str, data: Dict):
-        params = load_params()
-        css = _load_template(self.__css_template, params).render(
-            Context(params)
+    def apply(self, name: str, data: Dict, parameter: Dict):
+        css = _load_template(self.__css_template, parameter).render(
+            Context(parameter)
         )
         css = sass.compile(string=css, output_style="compressed")
         data['css'] = css
+
         return _load_template(self.__template).render(
-            Context(_enrich(name, data))
+            Context(_enrich(name, data, parameter))
         )
 
 
@@ -108,15 +116,14 @@ class VulnerabilityPDFReport(Report):
     media_type = 'application/pdf'
     format = 'binary'
 
-    def apply(self, name: str, data: Dict):
+    def apply(self, name: str, data: Dict, parameter: Dict):
         logger.debug("got template: %s", self.__template)
-        params = load_params()
-        css = _load_template(self.__css_template, params).render(
-            Context(params)
+        css = _load_template(self.__css_template, parameter).render(
+            Context(parameter)
         )
         css = sass.compile(string=css, output_style="compressed")
         html_template = _load_template(self.__template)
-        html = html_template.render(Context(_enrich(name, data)))
+        html = html_template.render(Context(_enrich(name, data, parameter)))
         logger.debug("created html")
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")

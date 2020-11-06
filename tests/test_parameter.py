@@ -5,6 +5,32 @@ from rest_framework.reverse import reverse
 from pheme.settings import SECRET_KEY
 
 
+@patch('pheme.parameter.pheme.authentication.get_username_role')
+def test_set_user_parameter(user_information):
+    user_information.side_effect = [('admin', 'admin'), ('test', 'admin')]
+    client = APIClient()
+    url = reverse(
+        'put_value_parameters',
+        kwargs={"key": "main_color"},
+    )
+    response = client.put(url, data="#000", format='json')
+    assert response.status_code == 200
+    client = APIClient()
+    url = reverse(
+        'put_parameter',
+    )
+    response = client.put(
+        url,
+        data={
+            "greeting": "Hellas",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.data['user_specific']['admin']['main_color'] == "#000"
+    assert response.data['user_specific']['test']['greeting'] == "Hellas"
+
+
 def test_unauthorized_on_missing_x_api_key():
     client = APIClient()
     url = reverse(
