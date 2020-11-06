@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.0.1a3] - 2020-11-06
 ### Added
 - XMLParser (pheme/parser/xml.py) [#5](https://github.com/greenbone/pheme/pull/5)
 - transformation for [gvmd] scan results to host grouped template data [#5](https://github.com/greenbone/pheme/pull/5)
@@ -58,13 +58,7 @@ curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: text/csv'
 ```
 - `pheme-create-parameter-json` to create `parameter.json` based on a directory ( `pheme-create-parameter-json $SOURCE_PATH > $TARGET_PATH/parameter.json` )
 - possibility to have user specific changes [98](https://github.com/greenbone/pheme/pull/98)
-### Changed
-### Deprecated
-### Removed
-### Fixed
-
-[Unreleased]: https://github.com/greenbone/pheme/compare/v0.0.1a2...HEAD
-
+[0.0.1a3]: https://github.com/greenbone/pheme/compare/v0.0.1a2...HEAD
 
 ## [0.0.1a2] - 2020-08-14
 ### Added
