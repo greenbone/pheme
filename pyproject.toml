@@ -37,7 +37,6 @@ pandas = "^1.1.2"
 rope = ">=0.17,<0.19"
 squarify = "^0.4.3"
 pytest-env = "^0.6.2"
-libsass = "^0.20.1"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
