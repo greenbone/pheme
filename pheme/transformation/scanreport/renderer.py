@@ -25,7 +25,6 @@ from django.template import Template, Context
 from rest_framework import renderers
 from rest_framework.request import Request
 from weasyprint import CSS, HTML
-import sass
 from pheme.settings import DEBUG
 from pheme.parameter import load_params
 from pheme.get_user_information import get_username_role
@@ -102,7 +101,6 @@ class VulnerabilityHTMLReport(Report):
         css = _load_template(self.__css_template, parameter).render(
             Context(parameter)
         )
-        css = sass.compile(string=css, output_style="compressed")
         data['css'] = css
 
         return _load_template(self.__template).render(
@@ -121,7 +119,6 @@ class VulnerabilityPDFReport(Report):
         css = _load_template(self.__css_template, parameter).render(
             Context(parameter)
         )
-        css = sass.compile(string=css, output_style="compressed")
         html_template = _load_template(self.__template)
         html = html_template.render(Context(_enrich(name, data, parameter)))
         logger.debug("created html")

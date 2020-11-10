@@ -56,7 +56,6 @@ def main():
     if len(sys.argv) != 2:
         sys.stderr.write("need exactly one one path parameter. Aborting.")
         sys.exit(1)
-    mimetypes.add_type('text/scss', '.scss')
     data = {}
     paths = sys.argv[1:]
     for i in paths:

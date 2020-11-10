@@ -20,8 +20,6 @@ import pheme.authentication
 
 logger = logging.getLogger(__name__)
 
-mimetypes.add_type('text/scss', '.scss')
-
 
 def load_params(from_path: str = settings.PARAMETER_FILE_ADDRESS) -> Dict:
     param_file_obj = Path(from_path)
