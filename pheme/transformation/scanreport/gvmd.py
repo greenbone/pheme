@@ -381,6 +381,71 @@ def __result_report(
     return hosts, nvts, vulnerable_equipment, results
 
 
+def __create_results_per_host_wo_pandas(report: Dict) -> List[HostResults]:
+    results = report.get('results', {}).get('result', [])
+    by_host = {}
+    host_count = {}
+    port_count = {}
+    nvt_count = {}
+
+    def return_highest_threat(old: str, new: str) -> str:
+        if old == 'High' or new == 'High':
+            return 'High'
+        if old == 'Medium' or new == 'Medium':
+            return 'Medium'
+        return 'Low'
+
+    def transform_key(prefix: str, vic: Dict) -> Dict:
+        return {
+            "{}_{}".format(prefix, key): value for key, value in vic.items()
+        }
+
+    def group_refs(refs: List[Dict]) -> Dict:
+        refs_ref = {}
+        for ref in refs.get('ref', []):
+            typus = ref.get('type', 'unknown')
+            refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
+        return refs_ref
+
+    for result in results:
+        hostname = result.get('host', {}).get('text', 'unknown')
+        host_dict = by_host.get(hostname, {})
+        threat = result.get('threat', '')
+        highest_threat = return_highest_threat(
+            host_dict.get('threat', ''), threat
+        )
+        port = result.get('port')
+        nvt = transform_key("nvt", result.get('nvt', {}))  # interprete tags
+        nvt['nvt_tags_interpreted'] = __tansform_tags(nvt.get('nvt_tags', ''))
+        nvt['nvt_refs_ref'] = group_refs(nvt.get('nvt_refs', {}))
+        # add equipment information
+        qod = transform_key('qod', result.get('qod', {}))
+        new_host_result = {
+            "port": port,
+            "threat": threat,
+            "severity": result.get('severity'),
+            "description": result.get('description'),
+            **nvt,
+            **qod,
+        }
+        host_results = host_dict.get('results', [])
+        host_results.append(new_host_result)
+        equipment = host_dict.get('equipment', {})
+        equipment['ports'] = equipment.get('ports', []) + [port]
+        equipment['os'] = "unknown"
+        by_host[hostname] = {
+            "host": hostname,
+            "threat": highest_threat,
+            "equipment": equipment,
+            "results": host_results,
+        }
+        host_count[hostname] = host_count.get(hostname, 0) + 1
+        port_count[port] = port_count.get(port, 0) + 1
+        nvt_oid = nvt.get('nvt_oid', 'unknown')
+        nvt_count[nvt_oid] = nvt_count.get(nvt_oid, 0) + 1
+    return list(by_host.values()), host_count, port_count, nvt_count
+
+
 @measure_time
 def transform(data: Dict[str, str]) -> Report:
     if not data:
@@ -388,12 +453,13 @@ def transform(data: Dict[str, str]) -> Report:
     report = data.get("report")
     # sometimes gvmd reports have .report.report sometimes just .report
     report = report.get("report", report)
-    n_df = pd.json_normalize(report)
 
     task = report.get('task') or {}
     gmp = report.get('gmp') or {}
-    hosts, nvts, vulnerable_equipment, results = __result_report(n_df)
+    # n_df = pd.json_normalize(report)
+    # hosts, nvts, vulnerable_equipment, results = __result_report(n_df)
     logger.info("data transformation")
+    results, _, _, _ = __create_results_per_host_wo_pandas(report)
     return Report(
         report.get('id'),
         task.get('name'),
@@ -401,9 +467,9 @@ def transform(data: Dict[str, str]) -> Report:
         gmp.get('version'),
         report.get('scan_start'),
         Overview(
-            hosts=hosts,
-            nvts=nvts,
-            vulnerable_equipment=vulnerable_equipment,
+            hosts=None,
+            nvts=None,
+            vulnerable_equipment=None,
         ),
         results,
     )
