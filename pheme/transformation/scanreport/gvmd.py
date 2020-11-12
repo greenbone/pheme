@@ -21,22 +21,16 @@ import io
 import logging
 import time
 import urllib
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Union
 
-import numpy as np
-import pandas as pd
 from matplotlib.figure import Figure
-from pandas import DataFrame
-from pandas.core.series import Series
 from pheme.transformation.scanreport.model import (
-    CountGraph,
-    Equipment,
+    # CountGraph,
+    # Equipment,
     HostResults,
     Overview,
     Report,
 )
-
-from pheme import squarify
 
 logger = logging.getLogger(__name__)
 
@@ -89,247 +83,8 @@ def __create_chart(
         return None
 
 
-@measure_time
-def __create_bar_h_chart(
-    series: Series, *, stacked: bool = False, colors=None
-) -> Optional[str]:
-    # https://matplotlib.org/3.1.1/gallery/statistics/barchart_demo.html#sphx-glr-gallery-statistics-barchart-demo-py
-    # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.barh.html
-    def set_plot(ax):
-        series.plot.barh(
-            ax=ax,
-            stacked=stacked,
-            color=colors,
-            width=0.03,
-        )
-        ax.legend(
-            ncol=len(__severity_class_colors.items()),
-            bbox_to_anchor=(0, 1),
-            loc='lower left',
-            fontsize='small',
-        )
-
-    def create_fig():
-        fig = Figure(figsize=(10, 6))
-        return fig
-
-    if len(series) < 1:
-        return None
-    return __create_chart(set_plot, fig=create_fig)
-
-
-@measure_time
-def __create_tree_chart(values, labels, *, colors=None) -> Optional[str]:
-    def set_plot(ax):
-        squarify.plot(sizes=values, label=labels, color=colors, pad=True, ax=ax)
-
-    def modify_fig(fig: Figure):
-        for ax in fig.axes:
-            ax.set_axis_off()
-
-    def create_fig():
-        fig = Figure(figsize=(33, 12))
-        return fig
-
-    return __create_chart(set_plot, fig=create_fig, modify_fig=modify_fig)
-
-
-@measure_time
-def __create_pie_chart(
-    series: Series, *, title=None, colors=None
-) -> Optional[str]:
-    total = series.sum()
-
-    def raw_value_pct(pct):
-        return "{:d}".format(int(round(pct * total / 100.0)))
-
-    def modify_fig(fig: Figure):
-        for ax in fig.axes:
-            ax.set_axis_off()
-
-    def set_plot(ax):
-        ax.set_title(title)
-        wedges, _, _ = ax.pie(
-            series.values,
-            colors=colors,
-            autopct=raw_value_pct,
-            wedgeprops=dict(width=0.5),
-            startangle=-40,
-        )
-
-        keys = series.keys()
-        ax.legend(
-            wedges,
-            keys,
-            bbox_to_anchor=(1, 0, 0, 1),
-            loc='lower right',
-            fontsize='small',
-        )
-
-    if len(series) < 1:
-        return None
-    return __create_chart(set_plot, modify_fig=modify_fig)
-
-
 def __severity_class_to_color(severity_classes: List[str]):
     return [__severity_class_colors.get(v, 'white') for v in severity_classes]
-
-
-@measure_time
-def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
-    def sort_keys(keys):
-        order = ["High", "Medium", "Low"]
-        return [o for o in order if o in keys]
-
-    host_threat = result_series_df.get(['host.text', 'threat'])
-    if host_threat is None:
-        return None
-    host_threat = host_threat.value_counts().unstack('threat').fillna(0)
-    host_threat['sum'] = host_threat.sum(axis=1)
-    host_threat = host_threat.sort_values(by='sum', ascending=False).head(10)
-    host_threat = host_threat[sort_keys(host_threat.keys())]
-    chart = __create_bar_h_chart(
-        host_threat,
-        stacked=True,
-        colors=__severity_class_colors,
-    )
-
-    return CountGraph(
-        name="host_top_ten",
-        chart=chart,
-        counts=host_threat,
-    )
-
-
-@measure_time
-def __create_nvt(result_series_df: DataFrame) -> CountGraph:
-    threat = result_series_df.get('threat')
-    if threat is None:
-        return None
-
-    counted = threat.value_counts()
-    return CountGraph(
-        name="nvt_overview",
-        chart=__create_pie_chart(
-            counted,
-            colors=__severity_class_to_color(counted.keys()),
-        ),
-        counts=None,
-    )
-
-
-@measure_time
-def __create_results(
-    report: DataFrame, os_lookup: DataFrame, ports_lookup: DataFrame
-) -> List[Dict]:
-    try:
-        grouped_host = report.groupby('host.text')
-        wanted_columns = [
-            'nvt.oid',
-            'nvt.type',
-            'nvt.name',
-            'nvt.family',
-            'nvt.cvss_base',
-            'nvt.tags_interpreted',
-            'nvt.refs.ref',
-            'nvt.solution.type',
-            'nvt.solution.text',
-            'port',
-            'threat',
-            'severity',
-            'qod.value',
-            'qod.type',
-            'description',
-        ]
-        results = []
-
-        def normalize_key(key: str) -> str:
-            return key.replace('.', '_')
-
-        def normalize_ref_value(ref_val) -> List[str]:
-            return [v for v, _ in ref_val]
-
-        for host_text, host_df in grouped_host:
-            columns = [x for x in host_df.columns if x in wanted_columns]
-            if len(wanted_columns) != len(columns):
-                logger.warning(
-                    "report for %s -> missing keys: %s",
-                    host_text,
-                    np.setdiff1d(wanted_columns, columns),
-                )
-            flat_results = host_df[columns]
-            result = []
-            os = None
-            if os_lookup is not None:
-                may_os = os_lookup.loc[
-                    os_lookup['ip'] == host_text, 'detail'
-                ].values
-                os = may_os[0].value.all() if len(may_os) > 0 else None
-            ports = []
-            if ports_lookup is not None:
-                ports = ports_lookup.query(
-                    'host == "{}"'.format(host_text)
-                ).get('text')
-                ports = ports.values.tolist() if ports is not None else []
-            for key, series in flat_results.items():
-                for i, value in enumerate(series):
-                    if not (isinstance(value, float) and np.isnan(value)):
-                        if key == 'nvt.refs.ref':
-                            grouped_refs = pd.json_normalize(value).groupby(
-                                'type'
-                            )
-                            value = {
-                                key: normalize_ref_value(val.values)
-                                for key, val in grouped_refs
-                            }
-                        if len(result) < i + 1:
-                            result.append({})
-                        result[i][normalize_key(key)] = value
-            results.append(
-                HostResults(
-                    host=host_text,
-                    equipment=Equipment(os=os, ports=ports),
-                    results=result,
-                )
-            )
-        return results
-    except KeyError as e:
-        logger.warning('report does not contain host.text returning []; %s', e)
-        return []
-
-
-@measure_time
-def __create_vulnerable_equipment(report: DataFrame) -> CountGraph:
-    df = report.get(['host.text', 'threat'])
-    if df is None:
-        return None
-
-    def return_highest(item):
-        if 'High' in item:
-            return __severity_class_colors.get('High')
-        if 'Medium' in item:
-            return __severity_class_colors.get('Medium')
-        if 'Medium' in item:
-            return __severity_class_colors.get('Low')
-        return "white"
-
-    values = []
-    labels = []
-    colors = []
-    max_count_nvt = df.groupby('host.text').count().count().item()
-
-    for host, df in df.groupby('host.text'):
-        count_nvt = len(df)
-        until = round(len(host) * count_nvt / max_count_nvt)
-        labels.append(host[0:until] if until else "")
-        values.append(count_nvt)
-        colors.append(return_highest(df.groupby('threat').groups.keys()))
-
-    return CountGraph(
-        name="vulnerable_equipment",
-        counts=None,
-        chart=__create_tree_chart(values, labels, colors=colors),
-    )
 
 
 def __tansform_tags(item) -> List[Dict]:
@@ -339,54 +94,12 @@ def __tansform_tags(item) -> List[Dict]:
     return None
 
 
-def __filter_os_based_on_name(item: Union[Any, List]) -> Union[Any, Series]:
-    """
-    filters operating system in host.details for best_os_cpe
-    """
-    if isinstance(item, list):
-        return pd.json_normalize(item).query('name == "best_os_cpe"')
-    return item
-
-
 @measure_time
-def __create_host_df(report: DataFrame) -> DataFrame:
-    host_df = report.get('host')
-    if host_df is not None:
-        host_df = host_df.map(pd.json_normalize).all()
-        host_df = host_df.get(['ip', 'detail'])
-        if host_df is not None:
-            return host_df.applymap(__filter_os_based_on_name)
-    return None
-
-
-@measure_time
-def __result_report(
-    report: DataFrame,
-) -> Tuple[CountGraph, CountGraph, CountGraph, List[HostResults]]:
-    result_series_df = report.get('results.result')
-    if result_series_df is None:
-        return None, None, None, None
-    result_series_df = result_series_df.map(pd.json_normalize).all()
-    hosts = __create_host_top_ten(result_series_df)
-    nvts = __create_nvt(result_series_df)
-    vulnerable_equipment = __create_vulnerable_equipment(result_series_df)
-    tags = result_series_df.get('nvt.tags')
-    if tags is not None:
-        result_series_df['nvt.tags_interpreted'] = tags.map(__tansform_tags)
-    ports = report.get('ports.port')
-    if ports is not None:
-        ports = ports.map(pd.json_normalize).all()
-    host_df = __create_host_df(report)
-    results = __create_results(result_series_df, host_df, ports)
-    return hosts, nvts, vulnerable_equipment, results
-
-
 def __create_results_per_host_wo_pandas(report: Dict) -> List[HostResults]:
     results = report.get('results', {}).get('result', [])
     by_host = {}
     host_count = {}
-    port_count = {}
-    nvt_count = {}
+    nvt_count = [0, 0, 0]
 
     def return_highest_threat(old: str, new: str) -> str:
         if old == 'High' or new == 'High':
@@ -407,10 +120,17 @@ def __create_results_per_host_wo_pandas(report: Dict) -> List[HostResults]:
             refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
         return refs_ref
 
+    def threat_to_index(threat: str) -> int:
+        if threat == 'High':
+            return 0
+        if threat == 'Medium':
+            return 1
+        return 2
+
     for result in results:
         hostname = result.get('host', {}).get('text', 'unknown')
         host_dict = by_host.get(hostname, {})
-        threat = result.get('threat', '')
+        threat = result.get('threat', 'unknown')
         highest_threat = return_highest_threat(
             host_dict.get('threat', ''), threat
         )
@@ -432,6 +152,7 @@ def __create_results_per_host_wo_pandas(report: Dict) -> List[HostResults]:
         host_results.append(new_host_result)
         equipment = host_dict.get('equipment', {})
         equipment['ports'] = equipment.get('ports', []) + [port]
+        # filter for best_os_cpe
         equipment['os'] = "unknown"
         by_host[hostname] = {
             "host": hostname,
@@ -439,11 +160,14 @@ def __create_results_per_host_wo_pandas(report: Dict) -> List[HostResults]:
             "equipment": equipment,
             "results": host_results,
         }
-        host_count[hostname] = host_count.get(hostname, 0) + 1
-        port_count[port] = port_count.get(port, 0) + 1
-        nvt_oid = nvt.get('nvt_oid', 'unknown')
-        nvt_count[nvt_oid] = nvt_count.get(nvt_oid, 0) + 1
-    return list(by_host.values()), host_count, port_count, nvt_count
+        # needs hostname, high, medium, low and total
+        host_threats = host_count.get(hostname, [0, 0, 0])
+        threat_index = threat_to_index(threat)
+        host_threats[threat_index] += 1
+        host_count[hostname] = host_threats
+        # needs high, medium, low
+        nvt_count[threat_index] += 1
+    return list(by_host.values()), host_count, nvt_count
 
 
 @measure_time
@@ -459,7 +183,7 @@ def transform(data: Dict[str, str]) -> Report:
     # n_df = pd.json_normalize(report)
     # hosts, nvts, vulnerable_equipment, results = __result_report(n_df)
     logger.info("data transformation")
-    results, _, _, _ = __create_results_per_host_wo_pandas(report)
+    results, _, _ = __create_results_per_host_wo_pandas(report)
     return Report(
         report.get('id'),
         task.get('name'),
