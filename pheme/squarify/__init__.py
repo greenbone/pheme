@@ -6,7 +6,10 @@
 #   (but not using their pseudocode)
 
 
+import matplotlib.pyplot as plt
+
 # INTERNAL FUNCTIONS not meant to be used by the user
+# pylint: disable=C0103
 
 
 def pad_rectangle(rect):
@@ -18,11 +21,11 @@ def pad_rectangle(rect):
         rect["dy"] -= 2
 
 
-def layoutrow(sizes, x, y, dx, dy):
+def layoutrow(sizes, x, y, _, dy):
     # generate rects for each size in sizes
     # dx >= dy
     # they will fill up height dy, and width will be determined by their area
-    # sizes should be pre-normalized wrt dx * dy (i.e., they should be same units)
+    # sizes should be pre-normalized wrt dx * dy (they should be same units)
     covered_area = sum(sizes)
     width = covered_area / dy
     rects = []
@@ -32,11 +35,11 @@ def layoutrow(sizes, x, y, dx, dy):
     return rects
 
 
-def layoutcol(sizes, x, y, dx, dy):
+def layoutcol(sizes, x, y, dx, _):
     # generate rects for each size in sizes
     # dx < dy
     # they will fill up width dx, and height will be determined by their area
-    # sizes should be pre-normalized wrt dx * dy (i.e., they should be same units)
+    # sizes should be pre-normalized wrt dx * dy (they should be same units)
     covered_area = sum(sizes)
     height = covered_area / dx
     rects = []
@@ -48,7 +51,9 @@ def layoutcol(sizes, x, y, dx, dy):
 
 def layout(sizes, x, y, dx, dy):
     return (
-        layoutrow(sizes, x, y, dx, dy) if dx >= dy else layoutcol(sizes, x, y, dx, dy)
+        layoutrow(sizes, x, y, dx, dy)
+        if dx >= dy
+        else layoutcol(sizes, x, y, dx, dy)
     )
 
 
@@ -125,14 +130,16 @@ def squarify(sizes, x, y, dx, dy):
 
     # figure out where 'split' should be
     i = 1
-    while i < len(sizes) and worst_ratio(sizes[:i], x, y, dx, dy) >= worst_ratio(
-        sizes[: (i + 1)], x, y, dx, dy
-    ):
+    while i < len(sizes) and worst_ratio(
+        sizes[:i], x, y, dx, dy
+    ) >= worst_ratio(sizes[: (i + 1)], x, y, dx, dy):
         i += 1
     current = sizes[:i]
     remaining = sizes[i:]
 
-    (leftover_x, leftover_y, leftover_dx, leftover_dy) = leftover(current, x, y, dx, dy)
+    (leftover_x, leftover_y, leftover_dx, leftover_dy) = leftover(
+        current, x, y, dx, dy
+    )
     return layout(current, x, y, dx, dy) + squarify(
         remaining, leftover_x, leftover_y, leftover_dx, leftover_dy
     )
@@ -195,7 +202,7 @@ def plot(
     label
         list-like used as label text
     value
-        list-like used as value text (in most cases identical with sizes argument)
+        list-like used as value text
     ax
         Matplotlib Axes instance
     pad
@@ -213,12 +220,11 @@ def plot(
         Matplotlib Axes
     """
 
-    import matplotlib.pyplot as plt
-
     if ax is None:
         ax = plt.gca()
 
     if color is None:
+        # pylint: disable=C0415
         import matplotlib.cm
         import random
 
@@ -245,7 +251,14 @@ def plot(
     dy = [rect["dy"] for rect in rects]
 
     ax.bar(
-        x, dy, width=dx, bottom=y, color=color, label=label, align="edge", **bar_kwargs
+        x,
+        dy,
+        width=dx,
+        bottom=y,
+        color=color,
+        label=label,
+        align="edge",
+        **bar_kwargs,
     )
 
     if value is not None:
@@ -253,13 +266,17 @@ def plot(
 
         for v, r in zip(value, rects):
             x, y, dx, dy = r["x"], r["y"], r["dx"], r["dy"]
-            ax.text(x + dx / 2, y + dy / 2, v, va=va, ha="center", **text_kwargs)
+            ax.text(
+                x + dx / 2, y + dy / 2, v, va=va, ha="center", **text_kwargs
+            )
 
     if label is not None:
         va = "center" if value is None else "bottom"
         for l, r in zip(label, rects):
             x, y, dx, dy = r["x"], r["y"], r["dx"], r["dy"]
-            ax.text(x + dx / 2, y + dy / 2, l, va=va, ha="center", **text_kwargs)
+            ax.text(
+                x + dx / 2, y + dy / 2, l, va=va, ha="center", **text_kwargs
+            )
 
     ax.set_xlim(0, norm_x)
     ax.set_ylim(0, norm_y)

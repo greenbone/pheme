@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 ### Changed
+- favor local treemap implementation over squarify to be more inline with debian packages [i112](https://github.com/greenbone/pheme/pull/112)
 ### Deprecated
 ### Removed
 - libsass support: https://sass-lang.com/blog/libsass-is-deprecated [111](https://github.com/greenbone/pheme/pull/111)
