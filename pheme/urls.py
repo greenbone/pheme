@@ -71,7 +71,6 @@ urlpatterns = [
         get_schema_view(
             title="Pheme",
             description="static report generation",
-            version=pheme.version.__version__,
             public=True,
         ),
         name='openapi-schema',
