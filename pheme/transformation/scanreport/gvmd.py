@@ -25,7 +25,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-import squarify
 from matplotlib.figure import Figure
 from pandas import DataFrame
 from pandas.core.series import Series
@@ -36,6 +35,8 @@ from pheme.transformation.scanreport.model import (
     Overview,
     Report,
 )
+
+from pheme import squarify
 
 logger = logging.getLogger(__name__)
 
