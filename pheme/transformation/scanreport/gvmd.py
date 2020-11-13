@@ -16,22 +16,32 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+pheme.transformation.scanreport.gvmd
+
+contrains the function
+
+- transform
+
+it is a specialized module for gvmd scanreports.
+"""
 import base64
 import io
 import logging
 import time
 import urllib
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+from typing import Callable, Dict, List, Optional, Union
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.colors import CSS4_COLORS, hex2color
+from matplotlib.figure import Figure
 
 import numpy as np
-import pandas as pd
-import squarify
-from matplotlib.figure import Figure
-from pandas import DataFrame
-from pandas.core.series import Series
+
 from pheme.transformation.scanreport.model import (
     CountGraph,
-    Equipment,
+    # Equipment,
     HostResults,
     Overview,
     Report,
@@ -51,9 +61,9 @@ def measure_time(func):
 
 
 __severity_class_colors = {
-    'High': 'tab:red',
-    'Medium': 'tab:orange',
-    'Low': 'tab:blue',
+    'High': CSS4_COLORS['red'],
+    'Medium': CSS4_COLORS['orange'],
+    'Low': CSS4_COLORS['blue'],
 }
 
 
@@ -68,267 +78,115 @@ def __create_chart(
     fig: Union[Figure, Callable] = __create_default_figure,
     modify_fig: Callable = None,
 ) -> Optional[str]:
-    try:
-        fig = fig() if callable(fig) else fig
-        # https://matplotlib.org/faq/howto_faq.html#how-to-use-matplotlib-in-a-web-application-server
-        ax = fig.subplots()
-        set_plot(ax)
-        if modify_fig:
-            modify_fig(fig)
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=300)
-        buf.seek(0)
-        base64_fig = base64.b64encode(buf.read())
-        uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
-        del fig
-        return uri
-    # pylint: disable=W0703
-    except Exception as e:
-        logger.warning("returning None due to exception: %e", e)
-        return None
+    fig = fig() if callable(fig) else fig
+    # there is a bug in 3.0.2 (debian buster)
+    # that canvas is not set automatically
+    canvas = FigureCanvas(fig)
+    ax = fig.subplots()
+    set_plot(ax)
+    if modify_fig:
+        modify_fig(fig)
+    buf = io.BytesIO()
+    fig.canvas = canvas
+    fig.savefig(buf, format='png', dpi=300)
+    buf.seek(0)
+    base64_fig = base64.b64encode(buf.read())
+    uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
+    return uri
 
 
 @measure_time
-def __create_bar_h_chart(
-    series: Series, *, stacked: bool = False, colors=None
-) -> Optional[str]:
-    # https://matplotlib.org/3.1.1/gallery/statistics/barchart_demo.html#sphx-glr-gallery-statistics-barchart-demo-py
-    # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.barh.html
+def __create_host_distribution_chart(host_count: Dict[str, List[int]]) -> str:
     def set_plot(ax):
-        series.plot.barh(
-            ax=ax,
-            stacked=stacked,
-            color=colors,
-            width=0.03,
-        )
+        # pylint: disable=C0103
+        data = np.array(list(host_count.values()))
+        h_sum = np.sum(data, axis=1)
+        idx = (-h_sum).argsort()
+        keys = np.array(list(host_count.keys()))
+        sorted_data = np.take(data, idx[:10], axis=0)
+        labels = np.take(keys, idx[:10], axis=0)
+        ax.invert_yaxis()
+        ax.xaxis.set_visible(False)
+        ax.set_xlim(0, np.sum(sorted_data, axis=1).max())
+        category_names = list(__severity_class_colors.keys())
+        category_colors = list(__severity_class_colors.values())
+
+        data_cum = sorted_data.cumsum(axis=1)
+        for i, (colname, color) in enumerate(
+            zip(category_names, category_colors)
+        ):
+            widths = sorted_data[:, i]
+            starts = data_cum[:, i] - widths
+            ax.barh(
+                labels,
+                widths,
+                left=starts,
+                height=0.5,
+                label=colname,
+                color=color,
+            )
+            xcenters = starts + widths / 2
+            r, g, b = hex2color(color)
+            text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
+            for y, (x, c) in enumerate(zip(xcenters, widths)):
+                ax.text(
+                    x,
+                    y,
+                    str(int(c)),
+                    ha='center',
+                    va='center',
+                    color=text_color,
+                )
         ax.legend(
-            ncol=len(__severity_class_colors.items()),
+            ncol=len(category_names),
             bbox_to_anchor=(0, 1),
             loc='lower left',
             fontsize='small',
         )
 
     def create_fig():
-        fig = Figure(figsize=(10, 6))
-        return fig
+        return Figure(figsize=(9.2, 5))
 
-    if len(series) < 1:
+    if len(host_count.keys()) == 0:
         return None
     return __create_chart(set_plot, fig=create_fig)
 
 
 @measure_time
-def __create_tree_chart(values, labels, *, colors=None) -> Optional[str]:
-    def set_plot(ax):
-        squarify.plot(sizes=values, label=labels, color=colors, pad=True, ax=ax)
-
-    def modify_fig(fig: Figure):
-        for ax in fig.axes:
-            ax.set_axis_off()
-
-    def create_fig():
-        fig = Figure(figsize=(33, 12))
-        return fig
-
-    return __create_chart(set_plot, fig=create_fig, modify_fig=modify_fig)
-
-
-@measure_time
-def __create_pie_chart(
-    series: Series, *, title=None, colors=None
-) -> Optional[str]:
-    total = series.sum()
+def __create_pie_chart(values, *, title=None) -> Optional[str]:
+    total = sum(values)
 
     def raw_value_pct(pct):
-        return "{:d}".format(int(round(pct * total / 100.0)))
+        value = pct * total / 100.0
+        return "{:d}".format(int(round(value)))
 
     def modify_fig(fig: Figure):
         for ax in fig.axes:
             ax.set_axis_off()
 
     def set_plot(ax):
+        category_names = list(__severity_class_colors.keys())
+        category_colors = list(__severity_class_colors.values())
         ax.set_title(title)
         wedges, _, _ = ax.pie(
-            series.values,
-            colors=colors,
+            values,
+            colors=category_colors,
             autopct=raw_value_pct,
             wedgeprops=dict(width=0.5),
             startangle=-40,
         )
 
-        keys = series.keys()
         ax.legend(
             wedges,
-            keys,
+            category_names,
             bbox_to_anchor=(1, 0, 0, 1),
             loc='lower right',
             fontsize='small',
         )
 
-    if len(series) < 1:
+    if total == 0:
         return None
     return __create_chart(set_plot, modify_fig=modify_fig)
-
-
-def __severity_class_to_color(severity_classes: List[str]):
-    return [__severity_class_colors.get(v, 'white') for v in severity_classes]
-
-
-@measure_time
-def __create_host_top_ten(result_series_df: DataFrame) -> CountGraph:
-    def sort_keys(keys):
-        order = ["High", "Medium", "Low"]
-        return [o for o in order if o in keys]
-
-    host_threat = result_series_df.get(['host.text', 'threat'])
-    if host_threat is None:
-        return None
-    host_threat = host_threat.value_counts().unstack('threat').fillna(0)
-    host_threat['sum'] = host_threat.sum(axis=1)
-    host_threat = host_threat.sort_values(by='sum', ascending=False).head(10)
-    host_threat = host_threat[sort_keys(host_threat.keys())]
-    chart = __create_bar_h_chart(
-        host_threat,
-        stacked=True,
-        colors=__severity_class_colors,
-    )
-
-    return CountGraph(
-        name="host_top_ten",
-        chart=chart,
-        counts=host_threat,
-    )
-
-
-@measure_time
-def __create_nvt(result_series_df: DataFrame) -> CountGraph:
-    threat = result_series_df.get('threat')
-    if threat is None:
-        return None
-
-    counted = threat.value_counts()
-    return CountGraph(
-        name="nvt_overview",
-        chart=__create_pie_chart(
-            counted,
-            colors=__severity_class_to_color(counted.keys()),
-        ),
-        counts=None,
-    )
-
-
-@measure_time
-def __create_results(
-    report: DataFrame, os_lookup: DataFrame, ports_lookup: DataFrame
-) -> List[Dict]:
-    try:
-        grouped_host = report.groupby('host.text')
-        wanted_columns = [
-            'nvt.oid',
-            'nvt.type',
-            'nvt.name',
-            'nvt.family',
-            'nvt.cvss_base',
-            'nvt.tags_interpreted',
-            'nvt.refs.ref',
-            'nvt.solution.type',
-            'nvt.solution.text',
-            'port',
-            'threat',
-            'severity',
-            'qod.value',
-            'qod.type',
-            'description',
-        ]
-        results = []
-
-        def normalize_key(key: str) -> str:
-            return key.replace('.', '_')
-
-        def normalize_ref_value(ref_val) -> List[str]:
-            return [v for v, _ in ref_val]
-
-        for host_text, host_df in grouped_host:
-            columns = [x for x in host_df.columns if x in wanted_columns]
-            if len(wanted_columns) != len(columns):
-                logger.warning(
-                    "report for %s -> missing keys: %s",
-                    host_text,
-                    np.setdiff1d(wanted_columns, columns),
-                )
-            flat_results = host_df[columns]
-            result = []
-            os = None
-            if os_lookup is not None:
-                may_os = os_lookup.loc[
-                    os_lookup['ip'] == host_text, 'detail'
-                ].values
-                os = may_os[0].value.all() if len(may_os) > 0 else None
-            ports = []
-            if ports_lookup is not None:
-                ports = ports_lookup.query(
-                    'host == "{}"'.format(host_text)
-                ).get('text')
-                ports = ports.values.tolist() if ports is not None else []
-            for key, series in flat_results.items():
-                for i, value in enumerate(series):
-                    if not (isinstance(value, float) and np.isnan(value)):
-                        if key == 'nvt.refs.ref':
-                            grouped_refs = pd.json_normalize(value).groupby(
-                                'type'
-                            )
-                            value = {
-                                key: normalize_ref_value(val.values)
-                                for key, val in grouped_refs
-                            }
-                        if len(result) < i + 1:
-                            result.append({})
-                        result[i][normalize_key(key)] = value
-            results.append(
-                HostResults(
-                    host=host_text,
-                    equipment=Equipment(os=os, ports=ports),
-                    results=result,
-                )
-            )
-        return results
-    except KeyError as e:
-        logger.warning('report does not contain host.text returning []; %s', e)
-        return []
-
-
-@measure_time
-def __create_vulnerable_equipment(report: DataFrame) -> CountGraph:
-    df = report.get(['host.text', 'threat'])
-    if df is None:
-        return None
-
-    def return_highest(item):
-        if 'High' in item:
-            return __severity_class_colors.get('High')
-        if 'Medium' in item:
-            return __severity_class_colors.get('Medium')
-        if 'Medium' in item:
-            return __severity_class_colors.get('Low')
-        return "white"
-
-    values = []
-    labels = []
-    colors = []
-    max_count_nvt = df.groupby('host.text').count().count().item()
-
-    for host, df in df.groupby('host.text'):
-        count_nvt = len(df)
-        until = round(len(host) * count_nvt / max_count_nvt)
-        labels.append(host[0:until] if until else "")
-        values.append(count_nvt)
-        colors.append(return_highest(df.groupby('threat').groups.keys()))
-
-    return CountGraph(
-        name="vulnerable_equipment",
-        counts=None,
-        chart=__create_tree_chart(values, labels, colors=colors),
-    )
 
 
 def __tansform_tags(item) -> List[Dict]:
@@ -338,61 +196,128 @@ def __tansform_tags(item) -> List[Dict]:
     return None
 
 
-def __filter_os_based_on_name(item: Union[Any, List]) -> Union[Any, Series]:
-    """
-    filters operating system in host.details for best_os_cpe
-    """
-    if isinstance(item, list):
-        return pd.json_normalize(item).query('name == "best_os_cpe"')
-    return item
+def __return_highest_threat(old: str, new: str) -> str:
+    if old == 'High' or new == 'High':
+        return 'High'
+    if old == 'Medium' or new == 'Medium':
+        return 'Medium'
+    return 'Low'
+
+
+def __group_refs(refs: List[Dict]) -> Dict:
+    refs_ref = {}
+    for ref in refs.get('ref', []):
+        typus = ref.get('type', 'unknown')
+        refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
+    return refs_ref
+
+
+def __threat_to_index(threat: str) -> int:
+    if threat == 'High':
+        return 0
+    if threat == 'Medium':
+        return 1
+    return 2
+
+
+def __get_hostname_from_result(result) -> str:
+    if isinstance(result, str):
+        return result
+    if isinstance(result, dict):
+        host = result.get('host', {})
+        if isinstance(host, dict):
+            return host.get('text', 'unknown')
+        return host
+    return 'unknown'
 
 
 @measure_time
-def __create_host_df(report: DataFrame) -> DataFrame:
-    host_df = report.get('host')
-    if host_df is not None:
-        host_df = host_df.map(pd.json_normalize).all()
-        host_df = host_df.get(['ip', 'detail'])
-        if host_df is not None:
-            return host_df.applymap(__filter_os_based_on_name)
-    return None
+def __create_results_per_host(report: Dict) -> List[HostResults]:
+    results = report.get('results', {}).get('result', [])
+    by_host = {}
+    host_count = {}
+    nvt_count = [0, 0, 0]
 
+    def transform_key(prefix: str, vic: Dict) -> Dict:
+        return {
+            "{}_{}".format(prefix, key): value for key, value in vic.items()
+        }
 
-@measure_time
-def __result_report(
-    report: DataFrame,
-) -> Tuple[CountGraph, CountGraph, CountGraph, List[HostResults]]:
-    result_series_df = report.get('results.result')
-    if result_series_df is None:
-        return None, None, None, None
-    result_series_df = result_series_df.map(pd.json_normalize).all()
-    hosts = __create_host_top_ten(result_series_df)
-    nvts = __create_nvt(result_series_df)
-    vulnerable_equipment = __create_vulnerable_equipment(result_series_df)
-    tags = result_series_df.get('nvt.tags')
-    if tags is not None:
-        result_series_df['nvt.tags_interpreted'] = tags.map(__tansform_tags)
-    ports = report.get('ports.port')
-    if ports is not None:
-        ports = ports.map(pd.json_normalize).all()
-    host_df = __create_host_df(report)
-    results = __create_results(result_series_df, host_df, ports)
-    return hosts, nvts, vulnerable_equipment, results
+    def per_result(result):
+        hostname = __get_hostname_from_result(result)
+        host_dict = by_host.get(hostname, {})
+        threat = result.get('threat', 'unknown')
+        highest_threat = __return_highest_threat(
+            host_dict.get('threat', ''), threat
+        )
+        port = result.get('port')
+        nvt = transform_key("nvt", result.get('nvt', {}))
+        nvt['nvt_tags_interpreted'] = __tansform_tags(nvt.get('nvt_tags', ''))
+        nvt['nvt_refs_ref'] = __group_refs(nvt.get('nvt_refs', {}))
+        qod = transform_key('qod', result.get('qod', {}))
+        new_host_result = {
+            "port": port,
+            "threat": threat,
+            "severity": result.get('severity'),
+            "description": result.get('description'),
+            **nvt,
+            **qod,
+        }
+        host_results = host_dict.get('results', [])
+        host_results.append(new_host_result)
+        equipment = host_dict.get('equipment', {})
+        equipment['ports'] = equipment.get('ports', []) + [port]
+        # filter for best_os_cpe
+        equipment['os'] = "unknown"
+        by_host[hostname] = {
+            "host": hostname,
+            "threat": highest_threat,
+            "equipment": equipment,
+            "results": host_results,
+        }
+        # needs hostname, high, medium, low
+        host_threats = host_count.get(hostname, [0, 0, 0])
+        threat_index = __threat_to_index(threat)
+        host_threats[threat_index] += 1
+        host_count[hostname] = host_threats
+        # needs high, medium, low
+        nvt_count[threat_index] += 1
+
+    # lists with just one element can be parsed as dict by xmltodict
+    if isinstance(results, dict):
+        per_result(results)
+    else:
+        for result in results:
+            per_result(result)
+
+    return list(by_host.values()), host_count, nvt_count
 
 
 @measure_time
 def transform(data: Dict[str, str]) -> Report:
+    """
+    transform will use the given dict of a scanreport from gvmd
+    to create an easy to use data representation for visual reports.
+    """
     if not data:
         raise ValueError("Need data to process")
     report = data.get("report")
     # sometimes gvmd reports have .report.report sometimes just .report
     report = report.get("report", report)
-    n_df = pd.json_normalize(report)
 
     task = report.get('task') or {}
     gmp = report.get('gmp') or {}
-    hosts, nvts, vulnerable_equipment, results = __result_report(n_df)
     logger.info("data transformation")
+    results, host_counts, nvts_counts = __create_results_per_host(report)
+
+    nvt = CountGraph(
+        name="nvt_count", chart=__create_pie_chart(nvts_counts), counts=None
+    )
+    host_chart = CountGraph(
+        name="host_top_ten",
+        chart=__create_host_distribution_chart(host_counts),
+        counts=None,
+    )
     return Report(
         report.get('id'),
         task.get('name'),
@@ -400,9 +325,9 @@ def transform(data: Dict[str, str]) -> Report:
         gmp.get('version'),
         report.get('scan_start'),
         Overview(
-            hosts=hosts,
-            nvts=nvts,
-            vulnerable_equipment=vulnerable_equipment,
+            hosts=host_chart,
+            nvts=nvt,
+            vulnerable_equipment=None,
         ),
         results,
     )

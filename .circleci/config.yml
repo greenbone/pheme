@@ -17,7 +17,7 @@ commands:
       - checkout
       - run:
           name: Install dependencies
-          command: poetry install --no-dev
+          command: poetry install
       - run:
           name: Run unit tests
           command: poetry run python -m pytest 
