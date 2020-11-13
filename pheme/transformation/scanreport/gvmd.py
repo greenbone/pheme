@@ -21,8 +21,6 @@ import io
 import logging
 import time
 import urllib
-from pathlib import Path
-import json
 
 from typing import Callable, Dict, List, Optional, Union
 
@@ -142,6 +140,42 @@ def __create_host_distribution_chart(host_count: Dict[str, List[int]]) -> str:
     return __create_chart(set_plot, fig=create_fig)
 
 
+@measure_time
+def __create_pie_chart(values, *, title=None) -> Optional[str]:
+    total = sum(values)
+
+    def raw_value_pct(pct):
+        return "{:d}".format(int(round(pct * total / 100.0)))
+
+    def modify_fig(fig: Figure):
+        for ax in fig.axes:
+            ax.set_axis_off()
+
+    def set_plot(ax):
+        category_names = list(__severity_class_colors.keys())
+        category_colors = list(__severity_class_colors.values())
+        ax.set_title(title)
+        wedges, _, _ = ax.pie(
+            values,
+            colors=category_colors,
+            autopct=raw_value_pct,
+            wedgeprops=dict(width=0.5),
+            startangle=-40,
+        )
+
+        ax.legend(
+            wedges,
+            category_names,
+            bbox_to_anchor=(1, 0, 0, 1),
+            loc='lower right',
+            fontsize='small',
+        )
+
+    if len(values) < 1:
+        return None
+    return __create_chart(set_plot, modify_fig=modify_fig)
+
+
 def __severity_class_to_color(severity_classes: List[str]):
     return [__severity_class_colors.get(v, 'white') for v in severity_classes]
 
@@ -254,12 +288,15 @@ def transform(data: Dict[str, str]) -> Report:
     results, host_counts, nvts_counts = __create_results_per_host_wo_pandas(
         report
     )
+
+    nvt = CountGraph(
+        name="host_top_ten", chart=__create_pie_chart(nvts_counts), counts=None
+    )
     host_chart = CountGraph(
         name="host_top_ten",
         chart=__create_host_distribution_chart(host_counts),
         counts=None,
     )
-    Path('/tmp/nvts_count.json').write_text(json.dumps(nvts_counts))
     return Report(
         report.get('id'),
         task.get('name'),
@@ -268,7 +305,7 @@ def transform(data: Dict[str, str]) -> Report:
         report.get('scan_start'),
         Overview(
             hosts=host_chart,
-            nvts=None,
+            nvts=nvt,
             vulnerable_equipment=None,
         ),
         results,
