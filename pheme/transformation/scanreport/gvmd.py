@@ -137,6 +137,8 @@ def __create_host_distribution_chart(host_count: Dict[str, List[int]]) -> str:
     def create_fig():
         return Figure(figsize=(9.2, 5))
 
+    if len(host_count.keys()) == 0:
+        return None
     return __create_chart(set_plot, fig=create_fig)
 
 
@@ -145,7 +147,8 @@ def __create_pie_chart(values, *, title=None) -> Optional[str]:
     total = sum(values)
 
     def raw_value_pct(pct):
-        return "{:d}".format(int(round(pct * total / 100.0)))
+        value = pct * total / 100.0
+        return "{:d}".format(int(round(value)))
 
     def modify_fig(fig: Figure):
         for ax in fig.axes:
@@ -171,13 +174,9 @@ def __create_pie_chart(values, *, title=None) -> Optional[str]:
             fontsize='small',
         )
 
-    if len(values) < 1:
+    if total == 0:
         return None
     return __create_chart(set_plot, modify_fig=modify_fig)
-
-
-def __severity_class_to_color(severity_classes: List[str]):
-    return [__severity_class_colors.get(v, 'white') for v in severity_classes]
 
 
 def __tansform_tags(item) -> List[Dict]:
@@ -187,60 +186,64 @@ def __tansform_tags(item) -> List[Dict]:
     return None
 
 
+def __return_highest_threat(old: str, new: str) -> str:
+    if old == 'High' or new == 'High':
+        return 'High'
+    if old == 'Medium' or new == 'Medium':
+        return 'Medium'
+    return 'Low'
+
+
+def __group_refs(refs: List[Dict]) -> Dict:
+    refs_ref = {}
+    for ref in refs.get('ref', []):
+        typus = ref.get('type', 'unknown')
+        refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
+    return refs_ref
+
+
+def __threat_to_index(threat: str) -> int:
+    if threat == 'High':
+        return 0
+    if threat == 'Medium':
+        return 1
+    return 2
+
+
+def __get_hostname_from_result(result) -> str:
+    if isinstance(result, str):
+        return result
+    if isinstance(result, dict):
+        host = result.get('host', {})
+        if isinstance(host, dict):
+            return host.get('text', 'unknown')
+        return host
+    return 'unknown'
+
+
 @measure_time
-def __create_results_per_host_wo_pandas(report: Dict) -> List[HostResults]:
+def __create_results_per_host(report: Dict) -> List[HostResults]:
     results = report.get('results', {}).get('result', [])
     by_host = {}
     host_count = {}
     nvt_count = [0, 0, 0]
-
-    def return_highest_threat(old: str, new: str) -> str:
-        if old == 'High' or new == 'High':
-            return 'High'
-        if old == 'Medium' or new == 'Medium':
-            return 'Medium'
-        return 'Low'
 
     def transform_key(prefix: str, vic: Dict) -> Dict:
         return {
             "{}_{}".format(prefix, key): value for key, value in vic.items()
         }
 
-    def group_refs(refs: List[Dict]) -> Dict:
-        refs_ref = {}
-        for ref in refs.get('ref', []):
-            typus = ref.get('type', 'unknown')
-            refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
-        return refs_ref
-
-    def threat_to_index(threat: str) -> int:
-        if threat == 'High':
-            return 0
-        if threat == 'Medium':
-            return 1
-        return 2
-
-    def get_hostname(result) -> str:
-        if isinstance(result, str):
-            return result
-        if isinstance(result, dict):
-            host = result.get('host', {})
-            if isinstance(host, dict):
-                return host.get('text', 'unknown')
-            return host
-        return 'unknown'
-
-    for result in results:
-        hostname = get_hostname(result)
+    def per_result(result):
+        hostname = __get_hostname_from_result(result)
         host_dict = by_host.get(hostname, {})
         threat = result.get('threat', 'unknown')
-        highest_threat = return_highest_threat(
+        highest_threat = __return_highest_threat(
             host_dict.get('threat', ''), threat
         )
         port = result.get('port')
         nvt = transform_key("nvt", result.get('nvt', {}))
         nvt['nvt_tags_interpreted'] = __tansform_tags(nvt.get('nvt_tags', ''))
-        nvt['nvt_refs_ref'] = group_refs(nvt.get('nvt_refs', {}))
+        nvt['nvt_refs_ref'] = __group_refs(nvt.get('nvt_refs', {}))
         qod = transform_key('qod', result.get('qod', {}))
         new_host_result = {
             "port": port,
@@ -262,13 +265,21 @@ def __create_results_per_host_wo_pandas(report: Dict) -> List[HostResults]:
             "equipment": equipment,
             "results": host_results,
         }
-        # needs hostname, high, medium, low and total
+        # needs hostname, high, medium, low
         host_threats = host_count.get(hostname, [0, 0, 0])
-        threat_index = threat_to_index(threat)
+        threat_index = __threat_to_index(threat)
         host_threats[threat_index] += 1
         host_count[hostname] = host_threats
         # needs high, medium, low
         nvt_count[threat_index] += 1
+
+    # lists with just one element can be parsed as dict by xmltodict
+    if isinstance(results, dict):
+        per_result(results)
+    else:
+        for result in results:
+            per_result(result)
+
     return list(by_host.values()), host_count, nvt_count
 
 
@@ -282,15 +293,11 @@ def transform(data: Dict[str, str]) -> Report:
 
     task = report.get('task') or {}
     gmp = report.get('gmp') or {}
-    # n_df = pd.json_normalize(report)
-    # hosts, nvts, vulnerable_equipment, results = __result_report(n_df)
     logger.info("data transformation")
-    results, host_counts, nvts_counts = __create_results_per_host_wo_pandas(
-        report
-    )
+    results, host_counts, nvts_counts = __create_results_per_host(report)
 
     nvt = CountGraph(
-        name="host_top_ten", chart=__create_pie_chart(nvts_counts), counts=None
+        name="nvt_count", chart=__create_pie_chart(nvts_counts), counts=None
     )
     host_chart = CountGraph(
         name="host_top_ten",

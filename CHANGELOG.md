@@ -7,10 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 ### Changed
-- favor local treemap implementation over squarify to be more inline with debian packages [i112](https://github.com/greenbone/pheme/pull/112)
+- remove pandas due to too old debian version [i112](https://github.com/greenbone/pheme/pull/112)
 ### Deprecated
 ### Removed
 - libsass support: https://sass-lang.com/blog/libsass-is-deprecated [111](https://github.com/greenbone/pheme/pull/111)
+- equipment treemap [i112](https://github.com/greenbone/pheme/pull/112)
 ### Fixed
 
 [Unreleased]: https://github.com/greenbone/pheme/compare/v0.0.1a3...HEAD

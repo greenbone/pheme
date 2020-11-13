@@ -181,7 +181,7 @@ def gen_report(
         else None,
     }
     if hosts is not None:
-        results['result'] = result
+        results['result'] = list(result)
     return {
         'id': uuid.uuid1().hex if with_optional else None,
         'gmp': gen_gmp() if with_optional else None,
