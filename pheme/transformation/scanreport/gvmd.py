@@ -21,11 +21,19 @@ import io
 import logging
 import time
 import urllib
+from pathlib import Path
+import json
+
 from typing import Callable, Dict, List, Optional, Union
 
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.colors import CSS4_COLORS, hex2color
 from matplotlib.figure import Figure
+
+import numpy as np
+
 from pheme.transformation.scanreport.model import (
-    # CountGraph,
+    CountGraph,
     # Equipment,
     HostResults,
     Overview,
@@ -46,9 +54,9 @@ def measure_time(func):
 
 
 __severity_class_colors = {
-    'High': 'tab:red',
-    'Medium': 'tab:orange',
-    'Low': 'tab:blue',
+    'High': CSS4_COLORS['red'],
+    'Medium': CSS4_COLORS['orange'],
+    'Low': CSS4_COLORS['blue'],
 }
 
 
@@ -63,24 +71,75 @@ def __create_chart(
     fig: Union[Figure, Callable] = __create_default_figure,
     modify_fig: Callable = None,
 ) -> Optional[str]:
-    try:
-        fig = fig() if callable(fig) else fig
-        # https://matplotlib.org/faq/howto_faq.html#how-to-use-matplotlib-in-a-web-application-server
-        ax = fig.subplots()
-        set_plot(ax)
-        if modify_fig:
-            modify_fig(fig)
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=300)
-        buf.seek(0)
-        base64_fig = base64.b64encode(buf.read())
-        uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
-        del fig
-        return uri
-    # pylint: disable=W0703
-    except Exception as e:
-        logger.warning("returning None due to exception: %e", e)
-        return None
+    fig = fig() if callable(fig) else fig
+    # there is a bug in 3.0.2 (debian buster)
+    # that canvas is not set automatically
+    canvas = FigureCanvas(fig)
+    ax = fig.subplots()
+    set_plot(ax)
+    if modify_fig:
+        modify_fig(fig)
+    buf = io.BytesIO()
+    fig.canvas = canvas
+    fig.savefig(buf, format='png', dpi=300)
+    buf.seek(0)
+    base64_fig = base64.b64encode(buf.read())
+    uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
+    return uri
+
+
+def __create_host_distribution_chart(host_count: Dict[str, List[int]]) -> str:
+    def set_plot(ax):
+        # pylint: disable=C0103
+        data = np.array(list(host_count.values()))
+        h_sum = np.sum(data, axis=1)
+        idx = (-h_sum).argsort()
+        keys = np.array(list(host_count.keys()))
+        sorted_data = np.take(data, idx[:10], axis=0)
+        labels = np.take(keys, idx[:10], axis=0)
+        ax.invert_yaxis()
+        ax.xaxis.set_visible(False)
+        ax.set_xlim(0, np.sum(sorted_data, axis=1).max())
+        category_names = list(__severity_class_colors.keys())
+        category_colors = list(__severity_class_colors.values())
+
+        data_cum = sorted_data.cumsum(axis=1)
+        for i, (colname, color) in enumerate(
+            zip(category_names, category_colors)
+        ):
+            widths = sorted_data[:, i]
+            starts = data_cum[:, i] - widths
+            ax.barh(
+                labels,
+                widths,
+                left=starts,
+                height=0.5,
+                label=colname,
+                color=color,
+            )
+            xcenters = starts + widths / 2
+            r, g, b = hex2color(color)
+            text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
+            for y, (x, c) in enumerate(zip(xcenters, widths)):
+                ax.text(
+                    x,
+                    y,
+                    str(int(c)),
+                    ha='center',
+                    va='center',
+                    color=text_color,
+                )
+        ax.legend(
+            ncol=len(category_names),
+            bbox_to_anchor=(0, 1),
+            loc='lower left',
+            fontsize='small',
+        )
+
+    def create_fig():
+        return Figure(figsize=(9.2, 5))
+
+    return __create_chart(set_plot, fig=create_fig)
 
 
 def __severity_class_to_color(severity_classes: List[str]):
@@ -127,18 +186,27 @@ def __create_results_per_host_wo_pandas(report: Dict) -> List[HostResults]:
             return 1
         return 2
 
+    def get_hostname(result) -> str:
+        if isinstance(result, str):
+            return result
+        if isinstance(result, dict):
+            host = result.get('host', {})
+            if isinstance(host, dict):
+                return host.get('text', 'unknown')
+            return host
+        return 'unknown'
+
     for result in results:
-        hostname = result.get('host', {}).get('text', 'unknown')
+        hostname = get_hostname(result)
         host_dict = by_host.get(hostname, {})
         threat = result.get('threat', 'unknown')
         highest_threat = return_highest_threat(
             host_dict.get('threat', ''), threat
         )
         port = result.get('port')
-        nvt = transform_key("nvt", result.get('nvt', {}))  # interprete tags
+        nvt = transform_key("nvt", result.get('nvt', {}))
         nvt['nvt_tags_interpreted'] = __tansform_tags(nvt.get('nvt_tags', ''))
         nvt['nvt_refs_ref'] = group_refs(nvt.get('nvt_refs', {}))
-        # add equipment information
         qod = transform_key('qod', result.get('qod', {}))
         new_host_result = {
             "port": port,
@@ -183,7 +251,15 @@ def transform(data: Dict[str, str]) -> Report:
     # n_df = pd.json_normalize(report)
     # hosts, nvts, vulnerable_equipment, results = __result_report(n_df)
     logger.info("data transformation")
-    results, _, _ = __create_results_per_host_wo_pandas(report)
+    results, host_counts, nvts_counts = __create_results_per_host_wo_pandas(
+        report
+    )
+    host_chart = CountGraph(
+        name="host_top_ten",
+        chart=__create_host_distribution_chart(host_counts),
+        counts=None,
+    )
+    Path('/tmp/nvts_count.json').write_text(json.dumps(nvts_counts))
     return Report(
         report.get('id'),
         task.get('name'),
@@ -191,7 +267,7 @@ def transform(data: Dict[str, str]) -> Report:
         gmp.get('version'),
         report.get('scan_start'),
         Overview(
-            hosts=None,
+            hosts=host_chart,
             nvts=None,
             vulnerable_equipment=None,
         ),
