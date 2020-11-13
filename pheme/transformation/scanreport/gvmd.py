@@ -16,6 +16,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+pheme.transformation.scanreport.gvmd
+
+contrains the function
+
+- transform
+
+it is a specialized module for gvmd scanreports.
+"""
 import base64
 import io
 import logging
@@ -86,6 +95,7 @@ def __create_chart(
     return uri
 
 
+@measure_time
 def __create_host_distribution_chart(host_count: Dict[str, List[int]]) -> str:
     def set_plot(ax):
         # pylint: disable=C0103
@@ -285,6 +295,10 @@ def __create_results_per_host(report: Dict) -> List[HostResults]:
 
 @measure_time
 def transform(data: Dict[str, str]) -> Report:
+    """
+    transform will use the given dict of a scanreport from gvmd
+    to create an easy to use data representation for visual reports.
+    """
     if not data:
         raise ValueError("Need data to process")
     report = data.get("report")
