@@ -199,6 +199,9 @@ def __tansform_tags(item) -> List[Dict]:
 
 
 def __return_highest_threat(threats: List[int]) -> str:
+    """
+    retuns the highest threat within a list of threats based on __threats
+    """
     for i, value in enumerate(threats):
         if value > 0:
             return __threats[i]
@@ -226,7 +229,7 @@ def __get_hostname_from_result(result) -> str:
 
 def __host_nvt_overview(nvt_count: List[int]) -> Dict:
     """
-    returns a nvt statistics mostly used in the per host overview
+    returns nvt statistics mostly used in the per host overview
     """
     result = {__threats[i].lower(): value for i, value in enumerate(nvt_count)}
     result['total'] = sum(nvt_count)
@@ -266,7 +269,9 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         host_results = host_dict.get('results', [])
         host_results.append(new_host_result)
         equipment = host_dict.get('equipment', {})
-        equipment['ports'] = equipment.get('ports', []) + [port]
+        equipment['ports'] = list(
+            dict.fromkeys(equipment.get('ports', []) + [port])
+        )
         # filter for best_os_cpe
         equipment['os'] = "unknown"
 
