@@ -166,6 +166,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache',
+        'TIMEOUT': 1 * 60 * 2 * 60,  # 2 hours
     }
 }
 
