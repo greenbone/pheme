@@ -34,13 +34,6 @@ class Equipment:
 
 
 @dataclass
-class HostResults:
-    host: str
-    equipment: Equipment
-    results: List[Dict]
-
-
-@dataclass
 class NVTCount:
     oid: str
     amount: int
@@ -82,7 +75,7 @@ class Report:
     version: str
     start: str
     overview: Overview
-    results: List[HostResults]
+    results: List[Dict]
 
 
 def describe():
@@ -110,8 +103,15 @@ def describe():
             ),
         ),
         results=[
-            HostResults(
+            dict(
                 host="str; ip address of host",
+                threats={
+                    'high': 'int; amount of high nvts in host',
+                    'medium': 'int; amount of medium nvts in host',
+                    'low': 'int; amount of low nvts in host',
+                    'total': 'int; amount of nvts in host',
+                    'highest': 'str; highest threat within host',
+                },
                 equipment=Equipment(
                     os="str; operating system", ports=["str; open ports"]
                 ),
@@ -134,7 +134,6 @@ def describe():
                     'nvt.solution.type': 'str; nvt.solution.type; optional',
                     'nvt.solution.text': 'str; nvt.solution.text; optional',
                     'port': 'str; port; optional',
-                    'threat': 'str; severity class of nvt',
                     'severity': 'str; severity; optional',
                     'qod.value': 'str; qod.value; optional',
                     'qod.type': 'str; qod.type; optional',
