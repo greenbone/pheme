@@ -33,6 +33,21 @@ def generate(prefix: str, amount: int) -> List[str]:
     return ["{}_{}".format(prefix, i) for i in range(amount)]
 
 
+def test_report_contains_equipment():
+    client = APIClient()
+    url = reverse('transform')
+    report = {
+        'report': {
+            'report': gen_report(generate('host', 10), generate('oid', 5))
+        }
+    }
+    response = client.post(url, data=report, format='xml')
+    assert response.status_code == 200
+    result = cache.get(response.data)
+    assert result['results'][0]['equipment']['os'] == "rusty rust rust"
+    assert result['results'][0]['equipment']['ports'] is not None
+
+
 def test_report_contains_charts():
     client = APIClient()
     url = reverse('transform')

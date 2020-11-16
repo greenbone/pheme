@@ -237,8 +237,44 @@ def __host_nvt_overview(nvt_count: List[int]) -> Dict:
     return result
 
 
+def __create_host_information_lookup(report: Dict) -> Dict:
+    """
+    created a lookup table for available host information
+    """
+    # lookup for host information name and dict name
+    information_key = {'best_os_txt': 'os'}
+
+    def filter_per_host(host: Dict) -> Dict:
+        information = {}
+        found = 0
+        details = host.get('detail', [])
+        for detail in details:
+            name = detail.get('name', '')
+            if name in information_key.keys():
+                result[information_key.get(name)] = detail.get('value')
+                found += 1
+            if found == len(information_key.keys()):
+                return information
+        return information
+
+    result = {}
+    hosts = report.get('host')
+    if isinstance(hosts, dict):
+        result[hosts.get('ip', 'unknown')] = filter_per_host(hosts)
+    elif isinstance(hosts, list):
+        # best_os_txt seems to be in the end
+        for host in hosts[::-1]:
+            result[host.get('ip', 'unknown')] = filter_per_host(host)
+    return result
+
+
 @measure_time
 def __create_results_per_host(report: Dict) -> List[Dict]:
+    """
+    creates the results dict used by a vulnerability-report based on a given
+    gvmd report.
+    """
+    host_information_lookup = __create_host_information_lookup(report)
     results = report.get('results', {}).get('result', [])
     by_host = {}
     host_count = {}
@@ -272,8 +308,8 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         equipment['ports'] = list(
             dict.fromkeys(equipment.get('ports', []) + [port])
         )
-        # filter for best_os_cpe
-        equipment['os'] = "unknown"
+        if not equipment.get('os'):
+            equipment['os'] = host_information_lookup.get('os', 'unknown')
 
         # needs hostname, high, medium, low
         host_threats = host_count.get(hostname, [0, 0, 0])
