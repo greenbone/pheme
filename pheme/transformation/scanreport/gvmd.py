@@ -251,7 +251,7 @@ def __create_host_information_lookup(report: Dict) -> Dict:
         for detail in details:
             name = detail.get('name', '')
             if name in information_key.keys():
-                result[information_key.get(name)] = detail.get('value')
+                information[information_key.get(name)] = detail.get('value')
                 found += 1
             if found == len(information_key.keys()):
                 return information
@@ -309,7 +309,9 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             dict.fromkeys(equipment.get('ports', []) + [port])
         )
         if not equipment.get('os'):
-            equipment['os'] = host_information_lookup.get('os', 'unknown')
+            equipment['os'] = host_information_lookup.get(hostname, {}).get(
+                'os', 'unknown'
+            )
 
         # needs hostname, high, medium, low
         host_threats = host_count.get(hostname, [0, 0, 0])
