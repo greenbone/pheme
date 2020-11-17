@@ -42,12 +42,14 @@ import numpy as np
 from pheme.transformation.scanreport.model import (
     CountGraph,
     # Equipment,
-    HostResults,
     Overview,
     Report,
 )
 
 logger = logging.getLogger(__name__)
+
+__threats = ["High", "Medium", "Low"]
+__threat_index_lookup = {v: i for i, v in enumerate(__threats)}
 
 
 def measure_time(func):
@@ -196,12 +198,14 @@ def __tansform_tags(item) -> List[Dict]:
     return None
 
 
-def __return_highest_threat(old: str, new: str) -> str:
-    if old == 'High' or new == 'High':
-        return 'High'
-    if old == 'Medium' or new == 'Medium':
-        return 'Medium'
-    return 'Low'
+def __return_highest_threat(threats: List[int]) -> str:
+    """
+    retuns the highest threat within a list of threats based on __threats
+    """
+    for i, value in enumerate(threats):
+        if value > 0:
+            return __threats[i]
+    return 'NA'
 
 
 def __group_refs(refs: List[Dict]) -> Dict:
@@ -210,14 +214,6 @@ def __group_refs(refs: List[Dict]) -> Dict:
         typus = ref.get('type', 'unknown')
         refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
     return refs_ref
-
-
-def __threat_to_index(threat: str) -> int:
-    if threat == 'High':
-        return 0
-    if threat == 'Medium':
-        return 1
-    return 2
 
 
 def __get_hostname_from_result(result) -> str:
@@ -231,8 +227,54 @@ def __get_hostname_from_result(result) -> str:
     return 'unknown'
 
 
+def __host_nvt_overview(nvt_count: List[int]) -> Dict:
+    """
+    returns nvt statistics mostly used in the per host overview
+    """
+    result = {__threats[i].lower(): value for i, value in enumerate(nvt_count)}
+    result['total'] = sum(nvt_count)
+    result['highest'] = __return_highest_threat(nvt_count)
+    return result
+
+
+def __create_host_information_lookup(report: Dict) -> Dict:
+    """
+    created a lookup table for available host information
+    """
+    # lookup for host information name and dict name
+    information_key = {'best_os_txt': 'os'}
+
+    def filter_per_host(host: Dict) -> Dict:
+        information = {}
+        found = 0
+        details = host.get('detail', [])
+        for detail in details:
+            name = detail.get('name', '')
+            if name in information_key.keys():
+                information[information_key.get(name)] = detail.get('value')
+                found += 1
+            if found == len(information_key.keys()):
+                return information
+        return information
+
+    result = {}
+    hosts = report.get('host')
+    if isinstance(hosts, dict):
+        result[hosts.get('ip', 'unknown')] = filter_per_host(hosts)
+    elif isinstance(hosts, list):
+        # best_os_txt seems to be in the end
+        for host in hosts[::-1]:
+            result[host.get('ip', 'unknown')] = filter_per_host(host)
+    return result
+
+
 @measure_time
-def __create_results_per_host(report: Dict) -> List[HostResults]:
+def __create_results_per_host(report: Dict) -> List[Dict]:
+    """
+    creates the results dict used by a vulnerability-report based on a given
+    gvmd report.
+    """
+    host_information_lookup = __create_host_information_lookup(report)
     results = report.get('results', {}).get('result', [])
     by_host = {}
     host_count = {}
@@ -247,9 +289,6 @@ def __create_results_per_host(report: Dict) -> List[HostResults]:
         hostname = __get_hostname_from_result(result)
         host_dict = by_host.get(hostname, {})
         threat = result.get('threat', 'unknown')
-        highest_threat = __return_highest_threat(
-            host_dict.get('threat', ''), threat
-        )
         port = result.get('port')
         nvt = transform_key("nvt", result.get('nvt', {}))
         nvt['nvt_tags_interpreted'] = __tansform_tags(nvt.get('nvt_tags', ''))
@@ -266,22 +305,29 @@ def __create_results_per_host(report: Dict) -> List[HostResults]:
         host_results = host_dict.get('results', [])
         host_results.append(new_host_result)
         equipment = host_dict.get('equipment', {})
-        equipment['ports'] = equipment.get('ports', []) + [port]
-        # filter for best_os_cpe
-        equipment['os'] = "unknown"
+        equipment['ports'] = list(
+            dict.fromkeys(equipment.get('ports', []) + [port])
+        )
+        if not equipment.get('os'):
+            equipment['os'] = host_information_lookup.get(hostname, {}).get(
+                'os', 'unknown'
+            )
+
+        # needs hostname, high, medium, low
+        host_threats = host_count.get(hostname, [0, 0, 0])
+        threat_index = __threat_index_lookup.get(threat, 2)
+        host_threats[threat_index] += 1
+        host_count[hostname] = host_threats
+
+        # needs high, medium, low
+        nvt_count[threat_index] += 1
+
         by_host[hostname] = {
             "host": hostname,
-            "threat": highest_threat,
+            "threats": __host_nvt_overview(host_threats),
             "equipment": equipment,
             "results": host_results,
         }
-        # needs hostname, high, medium, low
-        host_threats = host_count.get(hostname, [0, 0, 0])
-        threat_index = __threat_to_index(threat)
-        host_threats[threat_index] += 1
-        host_count[hostname] = host_threats
-        # needs high, medium, low
-        nvt_count[threat_index] += 1
 
     # lists with just one element can be parsed as dict by xmltodict
     if isinstance(results, dict):

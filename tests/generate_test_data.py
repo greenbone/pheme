@@ -168,6 +168,7 @@ def gen_report(
                     "ip": res['host']['text'],
                     "detail": [
                         {"name": "best_os_cpe", "value": "rusty kernel"},
+                        {"name": "best_os_txt", "value": "rusty rust rust"},
                         {"name": "something else", "value": "hum"},
                     ],
                 }
