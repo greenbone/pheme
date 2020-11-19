@@ -11,6 +11,13 @@ executors:
     working_directory: ~/repo
 
 commands:
+  verify-setup-py:
+    description: "verify setup.py"
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: python3 setup.py build_py 
   test:
     description: "Download and run tests"
     steps:
@@ -80,6 +87,10 @@ jobs:
     executor: python-38
     steps:
       - test
+  verify-setup-py-37:
+    executor: python-37
+    steps:
+      - verify-setup-py
   test-37:
     executor: python-37
     steps:
@@ -101,6 +112,7 @@ workflows:
       - test-37
       - test-38
       - lint-37
+      - verify-setup-py-37
   test_and_deploy:
     jobs:
       - test-37:
