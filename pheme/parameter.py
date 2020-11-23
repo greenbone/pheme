@@ -57,6 +57,12 @@ def __put(
 
 
 def __process_form_data(request: HttpRequest, data: Dict) -> Dict:
+    if not isinstance(request.data, dict):
+        raise TypeError(
+            "Request data is expected to be a dict, but it is {}".format(
+                type(request.data)
+            )
+        )
     for (key, value) in request.data.items():
         if isinstance(value, UploadedFile):
             file_type, _ = mimetypes.guess_type(value.name)
