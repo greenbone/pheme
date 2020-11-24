@@ -84,11 +84,10 @@ setup(
     ],
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(),
     # If there are data files included in your packages that need to be
     # installed, specify them here.
     include_package_data=True,
-    package_data={'': []},
     # Scripts. Define scripts here which should be installed in the
     # sys.prefix/bin directory. You can define an alternative place for
     # installation by setting the --install-scripts option of setup.py
