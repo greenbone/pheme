@@ -1,0 +1,5 @@
+global-include *.py
+graft static
+graft template
+graft tests
+include CHANGELOG.md LICENSE README.md pytest.ini
