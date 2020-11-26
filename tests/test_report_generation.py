@@ -26,6 +26,8 @@ from rest_framework.test import APIClient
 
 from pheme.datalink import as_datalink
 from pheme.settings import SECRET_KEY
+from pheme.transformation.scanreport import renderer
+
 from tests.generate_test_data import gen_report
 
 
@@ -63,6 +65,21 @@ def test_report_contains_charts():
     assert result['overview']['hosts'] is not None
     assert result['overview']['nvts'] is not None
     # assert result['overview']['vulnerable_equipment'] is not None
+
+
+@pytest.mark.parametrize(
+    "html_contains",
+    [
+        ('<svg width="343"><g id="severity_arrows">', "svg"),  # missing end tag
+        ('<svg width="343"><g id="severity_arrows"></svg>', "img"),  # replaced
+        ('<div width="343"><g id="severity_arrows"></div>', "div"),  # not svg
+    ],
+)
+def test_workaround_for_inline_svg_and_weasyprint(html_contains):
+    # pylint: disable=W0212
+    html, contains = html_contains
+    result = renderer._replace_inline_svg_with_img_tags(html)
+    assert contains in result
 
 
 @pytest.mark.parametrize(

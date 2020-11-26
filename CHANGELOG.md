@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - nvt threat information in host result [114](https://github.com/greenbone/pheme/pull/114)
 ### Changed
 - remove pandas due to too old debian version [112](https://github.com/greenbone/pheme/pull/112)
+- add workaround for svg in pdf with wasyprint [120](https://github.com/greenbone/pheme/pull/120)
+
 ### Deprecated
 ### Removed
 - libsass support: https://sass-lang.com/blog/libsass-is-deprecated [111](https://github.com/greenbone/pheme/pull/111)

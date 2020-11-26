@@ -17,8 +17,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-from typing import Dict
+from typing import Dict, Generator, Tuple
 
+from base64 import b64encode
 
 from django.core.cache import cache
 from django.template import Template, Context
@@ -108,7 +109,64 @@ class VulnerabilityHTMLReport(Report):
         )
 
 
+def __find_all_tags_in(
+    html: str, open_tag: str, close_tag: str
+) -> Generator[Tuple[int, int], None, None]:
+
+    """
+    Is used within __replace_inline_svg_with_img_tag
+
+    It searches for open and close tags and returns the start of the opening
+    and the end of the close_tag so that it is easy to extract and replace an
+    svg image.
+    """
+    open_index = 0
+    close_end_index = 0
+    # abort conditions are: open or close_tag not found (-1)
+    while True:
+        open_index = html.find(open_tag, open_index)
+        if open_index == -1:
+            return
+        close_end_index = html.find(close_tag, open_index + len(open_tag))
+        if close_end_index == -1:
+            return
+        close_end_index += len(close_tag)
+        yield (open_index, close_end_index)
+        open_index = close_end_index
+
+
+def _replace_inline_svg_with_img_tags(html: str) -> str:
+    """
+    Is a workaround because WeasyPrint is not capable of dealing with inline svg
+
+    It searches for svg tags and replaces the inline svg within a given
+    html document with img containing a base64 encoded data link.
+
+    It is known that we lose the css styling with that hack, but in the moment
+    it is considered better than losing the image altogether or trying to
+    produce the images before rendering the template.
+
+    Please replace this method as soon as possible with a proper solution.
+    """
+    for from_index, to_index in __find_all_tags_in(html, '<svg ', '</svg>'):
+        to_encode = html[from_index:to_index]
+        encoded = b64encode(to_encode.encode()).decode()
+        img = (
+            '<img src="data:image/svg+xml;charset=utf-8;base64, {}" />'.format(
+                encoded
+            )
+        )
+        html = html[:from_index] + img + html[to_index:]
+    return html
+
+
 class VulnerabilityPDFReport(Report):
+    """
+    Is used to generate vulnerability reports in PDF.
+    It renders html and css templates given data struct and then translate
+    the html document to PDF
+    """
+
     __template = 'vulnerability_report_pdf_template'
     __css_template = 'vulnerability_report_pdf_css'
     media_type = 'application/pdf'
@@ -121,6 +179,7 @@ class VulnerabilityPDFReport(Report):
         )
         html_template = _load_template(self.__template)
         html = html_template.render(Context(_enrich(name, data, parameter)))
+        html = _replace_inline_svg_with_img_tags(html)
         logger.debug("created html")
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")
