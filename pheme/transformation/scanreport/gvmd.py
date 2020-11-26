@@ -198,16 +198,6 @@ def __tansform_tags(item) -> List[Dict]:
     return None
 
 
-def __return_highest_threat(threats: List[int]) -> str:
-    """
-    retuns the highest threat within a list of threats based on __threats
-    """
-    for i, value in enumerate(threats):
-        if value > 0:
-            return __threats[i]
-    return 'NA'
-
-
 def __group_refs(refs: List[Dict]) -> Dict:
     refs_ref = {}
     for ref in refs.get('ref', []):
@@ -227,13 +217,45 @@ def __get_hostname_from_result(result) -> str:
     return 'unknown'
 
 
-def __host_nvt_overview(nvt_count: List[int]) -> Dict:
+def __return_highest_threat(threats: List[int]) -> str:
+    """
+    returns the highest threat
+    """
+    for i, value in enumerate(threats):
+        if value > 0:
+            return __threats[i]
+    return 'NA'
+
+
+def __host_threat_overview(threat_count: List[int]) -> Dict:
     """
     returns nvt statistics mostly used in the per host overview
     """
-    result = {__threats[i].lower(): value for i, value in enumerate(nvt_count)}
+    result = {
+        __threats[i].lower(): value for i, value in enumerate(threat_count)
+    }
+    result['total'] = sum(threat_count)
+    result['highest'] = __return_highest_threat(threat_count)
+    return result
+
+
+def __return_highest_severity(severities: List[int]) -> str:
+    """
+    retuns the highest severity within a list
+    """
+    for i in range(len(severities) - 1, -1, -1):
+        if severities[i] > 0:
+            return str(i + 1)
+    return 'NA'
+
+
+def __host_severity_overview(nvt_count: List[int]) -> Dict:
+    """
+    returns nvt severity statistics mostly used in the per host overview
+    """
+    result = {str(i + 1): value for i, value in enumerate(nvt_count)}
     result['total'] = sum(nvt_count)
-    result['highest'] = __return_highest_threat(nvt_count)
+    result['highest'] = __return_highest_severity(nvt_count)
     return result
 
 
@@ -277,8 +299,9 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     host_information_lookup = __create_host_information_lookup(report)
     results = report.get('results', {}).get('result', [])
     by_host = {}
-    host_count = {}
-    nvt_count = [0, 0, 0]
+    host_threat_count = {}
+    host_severity_count = {}
+    threat_count = [0, 0, 0]
 
     def transform_key(prefix: str, vic: Dict) -> Dict:
         return {
@@ -294,10 +317,11 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         nvt['nvt_tags_interpreted'] = __tansform_tags(nvt.get('nvt_tags', ''))
         nvt['nvt_refs_ref'] = __group_refs(nvt.get('nvt_refs', {}))
         qod = transform_key('qod', result.get('qod', {}))
+        severity = int(float(result.get('severity', '0.0')))
         new_host_result = {
             "port": port,
             "threat": threat,
-            "severity": result.get('severity'),
+            "severity": severity,
             "description": result.get('description'),
             **nvt,
             **qod,
@@ -314,17 +338,23 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             )
 
         # needs hostname, high, medium, low
-        host_threats = host_count.get(hostname, [0, 0, 0])
+        host_threats = host_threat_count.get(hostname, [0, 0, 0])
         threat_index = __threat_index_lookup.get(threat, 2)
         host_threats[threat_index] += 1
-        host_count[hostname] = host_threats
+        host_threat_count[hostname] = host_threats
 
         # needs high, medium, low
-        nvt_count[threat_index] += 1
+        threat_count[threat_index] += 1
+
+        # severity 1 to 10
+        host_severities = host_severity_count.get(hostname, [0] * 10)
+        host_severities[severity - 1] += 1
+        host_severity_count[hostname] = host_severities
 
         by_host[hostname] = {
             "host": hostname,
-            "threats": __host_nvt_overview(host_threats),
+            "threats": __host_threat_overview(host_threats),
+            "severities": __host_severity_overview(host_severities),
             "equipment": equipment,
             "results": host_results,
         }
@@ -336,7 +366,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         for result in results:
             per_result(result)
 
-    return list(by_host.values()), host_count, nvt_count
+    return list(by_host.values()), host_threat_count, threat_count
 
 
 @measure_time
