@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - nvt threat information in host result [114](https://github.com/greenbone/pheme/pull/114)
+- nvt severity information in host result [114](https://github.com/greenbone/pheme/pull/121)
 ### Changed
 - remove pandas due to too old debian version [112](https://github.com/greenbone/pheme/pull/112)
 - add workaround for svg in pdf with wasyprint [120](https://github.com/greenbone/pheme/pull/120)

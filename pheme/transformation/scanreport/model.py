@@ -112,6 +112,20 @@ def describe():
                     'total': 'int; amount of nvts in host',
                     'highest': 'str; highest threat within host',
                 },
+                severities={
+                    '1': 'int; amount of 1 severities in host',
+                    '2': 'int; amount of 2 severities in host',
+                    '3': 'int; amount of 3 severities in host',
+                    '4': 'int; amount of 4 severities in host',
+                    '5': 'int; amount of 5 severities in host',
+                    '6': 'int; amount of 6 severities in host',
+                    '7': 'int; amount of 7 severities in host',
+                    '8': 'int; amount of 8 severities in host',
+                    '9': 'int; amount of 9 severities in host',
+                    '10': 'int; amount of 10 severities in host',
+                    'total': 'int; amount of nvts in host',
+                    'highest': 'str; highest severity within host',
+                },
                 equipment=Equipment(
                     os="str; operating system", ports=["str; open ports"]
                 ),
