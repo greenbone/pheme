@@ -25,22 +25,13 @@ contrains the function
 
 it is a specialized module for gvmd scanreports.
 """
-import base64
-import io
 import logging
 import time
-import urllib
 
-from typing import Callable, Dict, List, Optional, Union
+from typing import Dict, List
 
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.colors import CSS4_COLORS, hex2color
-from matplotlib.figure import Figure
-
-import numpy as np
 
 from pheme.transformation.scanreport.model import (
-    CountGraph,
     # Equipment,
     Overview,
     Report,
@@ -60,135 +51,6 @@ def measure_time(func):
         return result
 
     return measure
-
-
-__severity_class_colors = {
-    'High': CSS4_COLORS['red'],
-    'Medium': CSS4_COLORS['orange'],
-    'Low': CSS4_COLORS['blue'],
-}
-
-
-def __create_default_figure():
-    return Figure()
-
-
-@measure_time
-def __create_chart(
-    set_plot: Callable,
-    *,
-    fig: Union[Figure, Callable] = __create_default_figure,
-    modify_fig: Callable = None,
-) -> Optional[str]:
-    fig = fig() if callable(fig) else fig
-    # there is a bug in 3.0.2 (debian buster)
-    # that canvas is not set automatically
-    canvas = FigureCanvas(fig)
-    ax = fig.subplots()
-    set_plot(ax)
-    if modify_fig:
-        modify_fig(fig)
-    buf = io.BytesIO()
-    fig.canvas = canvas
-    fig.savefig(buf, format='png', dpi=300)
-    buf.seek(0)
-    base64_fig = base64.b64encode(buf.read())
-    uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
-    return uri
-
-
-@measure_time
-def __create_host_distribution_chart(host_count: Dict[str, List[int]]) -> str:
-    def set_plot(ax):
-        # pylint: disable=C0103
-        data = np.array(list(host_count.values()))
-        h_sum = np.sum(data, axis=1)
-        idx = (-h_sum).argsort()
-        keys = np.array(list(host_count.keys()))
-        sorted_data = np.take(data, idx[:10], axis=0)
-        labels = np.take(keys, idx[:10], axis=0)
-        ax.invert_yaxis()
-        ax.xaxis.set_visible(False)
-        ax.set_xlim(0, np.sum(sorted_data, axis=1).max())
-        category_names = list(__severity_class_colors.keys())
-        category_colors = list(__severity_class_colors.values())
-
-        data_cum = sorted_data.cumsum(axis=1)
-        for i, (colname, color) in enumerate(
-            zip(category_names, category_colors)
-        ):
-            widths = sorted_data[:, i]
-            starts = data_cum[:, i] - widths
-            ax.barh(
-                labels,
-                widths,
-                left=starts,
-                height=0.5,
-                label=colname,
-                color=color,
-            )
-            xcenters = starts + widths / 2
-            r, g, b = hex2color(color)
-            text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
-            for y, (x, c) in enumerate(zip(xcenters, widths)):
-                ax.text(
-                    x,
-                    y,
-                    str(int(c)),
-                    ha='center',
-                    va='center',
-                    color=text_color,
-                )
-        ax.legend(
-            ncol=len(category_names),
-            bbox_to_anchor=(0, 1),
-            loc='lower left',
-            fontsize='small',
-        )
-
-    def create_fig():
-        return Figure(figsize=(9.2, 5))
-
-    if len(host_count.keys()) == 0:
-        return None
-    return __create_chart(set_plot, fig=create_fig)
-
-
-@measure_time
-def __create_pie_chart(values, *, title=None) -> Optional[str]:
-    total = sum(values)
-
-    def raw_value_pct(pct):
-        value = pct * total / 100.0
-        return "{:d}".format(int(round(value)))
-
-    def modify_fig(fig: Figure):
-        for ax in fig.axes:
-            ax.set_axis_off()
-
-    def set_plot(ax):
-        category_names = list(__severity_class_colors.keys())
-        category_colors = list(__severity_class_colors.values())
-        ax.set_title(title)
-        wedges, _, _ = ax.pie(
-            values,
-            colors=category_colors,
-            autopct=raw_value_pct,
-            wedgeprops=dict(width=0.5),
-            startangle=-40,
-        )
-
-        ax.legend(
-            wedges,
-            category_names,
-            bbox_to_anchor=(1, 0, 0, 1),
-            loc='lower right',
-            fontsize='small',
-        )
-
-    if total == 0:
-        return None
-    return __create_chart(set_plot, modify_fig=modify_fig)
 
 
 def __tansform_tags(item) -> List[Dict]:
@@ -231,11 +93,9 @@ def __host_threat_overview(threat_count: List[int]) -> Dict:
     """
     returns nvt statistics mostly used in the per host overview
     """
-    result = {
-        __threats[i].lower(): value for i, value in enumerate(threat_count)
-    }
-    result['total'] = sum(threat_count)
-    result['highest'] = __return_highest_threat(threat_count)
+    result = {**threat_count}
+    result['total'] = sum(threat_count.values())
+    result['highest'] = __return_highest_threat(threat_count.values())
     return result
 
 
@@ -301,7 +161,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     by_host = {}
     host_threat_count = {}
     host_severity_count = {}
-    threat_count = [0, 0, 0]
+    threat_count = [0] * len(__threats)
 
     def transform_key(prefix: str, vic: Dict) -> Dict:
         return {
@@ -338,9 +198,11 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             )
 
         # needs hostname, high, medium, low
-        host_threats = host_threat_count.get(hostname, [0, 0, 0])
-        threat_index = __threat_index_lookup.get(threat, 2)
-        host_threats[threat_index] += 1
+        host_threats = host_threat_count.get(
+            hostname, {threat: 0 for threat in __threats}
+        )
+        threat_index = __threat_index_lookup.get(threat, len(__threats) - 1)
+        host_threats[threat] += 1
         host_threat_count[hostname] = host_threats
 
         # needs high, medium, low
@@ -365,8 +227,10 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     else:
         for result in results:
             per_result(result)
-
-    return list(by_host.values()), host_threat_count, threat_count
+    threat_count_dict = {
+        __threats[i]: count for i, count in enumerate(threat_count)
+    }
+    return list(by_host.values()), host_threat_count, threat_count_dict
 
 
 @measure_time
@@ -386,14 +250,6 @@ def transform(data: Dict[str, str]) -> Report:
     logger.info("data transformation")
     results, host_counts, nvts_counts = __create_results_per_host(report)
 
-    nvt = CountGraph(
-        name="nvt_count", chart=__create_pie_chart(nvts_counts), counts=None
-    )
-    host_chart = CountGraph(
-        name="host_top_ten",
-        chart=__create_host_distribution_chart(host_counts),
-        counts=None,
-    )
     return Report(
         report.get('id'),
         task.get('name'),
@@ -401,8 +257,8 @@ def transform(data: Dict[str, str]) -> Report:
         gmp.get('version'),
         report.get('scan_start'),
         Overview(
-            hosts=host_chart,
-            nvts=nvt,
+            hosts=host_counts,
+            nvts=nvts_counts,
             vulnerable_equipment=None,
         ),
         results,

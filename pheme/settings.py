@@ -61,6 +61,7 @@ ALLOWED_HOSTS = ENV_HOSTS.split(' ') if ENV_HOSTS else []
 # Application definition
 
 INSTALLED_APPS = [
+    'pheme',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
