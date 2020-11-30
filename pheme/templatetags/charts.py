@@ -107,7 +107,7 @@ def h_bar_chart(
         for category, count in counts.items():
             color = title_color.get(category)
             width = count / max_sum * max_width
-            elements += __BAR_ELEMENTS_TEMPLATE.format(element_x, width, color)
+            elements += __BAR_ELEMENT_TEMPLATE.format(element_x, width, color)
             element_x += width
 
         bars += __BAR_TEMPLATE.format(
