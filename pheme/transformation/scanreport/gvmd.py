@@ -231,6 +231,15 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     threat_count_dict = {
         __threats[i]: count for i, count in enumerate(threat_count)
     }
+    # sort by amount descending
+    host_threat_count = dict(
+        sorted(
+            host_threat_count.items(),
+            key=lambda x: sum(x[1].values()),
+            reverse=True,
+        )
+    )
+
     return list(by_host.values()), host_threat_count, threat_count_dict
 
 

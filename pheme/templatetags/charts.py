@@ -35,7 +35,7 @@ __severity_class_colors = {
 register = template.Library()
 
 __COUNTLINE_TEMPLATE = """
-<rect x="{}" y="17" height="{}" width="1" style="fill: #000000;"></rect>
+<rect x="{}" y="0" height="{}" width="1" style="fill: #000000;"></rect>
 """
 
 __COUNTLINE_TEXT_TEMPLATE = """
@@ -53,8 +53,8 @@ __BAR_TEMPLATE = """
 style="text-anchor: middle;" width="175">{key}
 </text>
 <g transform="translate(175, 0)">
-{bar_elements}
 {countlines}
+{bar_elements}
 </g>
 <g transform="translate(700, 0)">
 <text class="sum" y="22" x="10" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
@@ -106,6 +106,7 @@ def h_bar_chart(
         countline_basis - if higher than 0 than there will be a vertical line
             each countline_basis. It will also add the next countline amount to
             the max_sum.
+        limit - limits the data by N first elements
     """
 
     data = dict(itertools.islice(chart_data.items(), limit))
@@ -141,6 +142,7 @@ def h_bar_chart(
             calculated_rectangles, countline_labels = __add_countline(
                 i, calculated_rectangles, countline_labels
             )
+
         calculated_rectangles, countline_labels = __add_countline(
             int(max_sum / countline_basis),
             calculated_rectangles,

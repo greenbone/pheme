@@ -89,6 +89,40 @@ def test_workaround_for_inline_svg_and_weasyprint(html_contains):
         "text/html",
     ],
 )
+def test_chart_keyswords(http_accept):
+    subtype = http_accept.split('/')[-1]
+    css_key = 'vulnerability_report_{}_css'.format(subtype)
+    template_key = 'vulnerability_report_{}_template'.format(subtype)
+    client = APIClient()
+    url = reverse(
+        'put_parameter',
+    )
+    render_charts = """
+    {% load charts %}
+    <html>
+    {{ overview.nvts | pie_chart}}
+    {{ overview.hosts | h_bar_chart  }}
+    </html>
+    """
+    response = client.put(
+        url,
+        data={
+            css_key: "html { background: #000; }",
+            template_key: render_charts,
+        },
+        HTTP_X_API_KEY=SECRET_KEY,
+    )
+    assert response.status_code == 200
+    test_http_accept(http_accept)
+
+
+@pytest.mark.parametrize(
+    "http_accept",
+    [
+        "application/pdf",
+        "text/html",
+    ],
+)
 def test_http_accept_visual(http_accept):
     subtype = http_accept.split('/')[-1]
     css_key = 'vulnerability_report_{}_css'.format(subtype)
@@ -97,7 +131,6 @@ def test_http_accept_visual(http_accept):
     url = reverse(
         'put_parameter',
     )
-    # api_key = request.META.get('HTTP_X_API_KEY', "")
     response = client.put(
         url,
         data={
