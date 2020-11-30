@@ -34,12 +34,12 @@ __severity_class_colors = {
 
 register = template.Library()
 
-__COUNTLINE_TEMPLATE = """
+__ORIENTATION_LINE_TEMPLATE = """
 <rect x="{}" y="0" height="{}" width="1" style="fill: #000000;"></rect>
 """
 
-__COUNTLINE_TEXT_TEMPLATE = """
-<text class="countline label" y="22" x="{}" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
+__ORIENTATION_LINE_TEXT_TEMPLATE = """
+<text class="orientation label" y="22" x="{}" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
 style="text-anchor: middle;" width="{}">{}
 </text>
 """
@@ -53,7 +53,7 @@ __BAR_TEMPLATE = """
 style="text-anchor: middle;" width="175">{key}
 </text>
 <g transform="translate(175, 0)">
-{countlines}
+{orientation_lines}
 {bar_elements}
 </g>
 <g transform="translate(700, 0)">
@@ -77,7 +77,7 @@ def h_bar_chart(
     title_color=None,
     svg_width=800,
     bar_jump=44,
-    countline_basis=20,
+    orientation_basis=20,
     limit=10,
 ) -> str:
 
@@ -103,9 +103,8 @@ def h_bar_chart(
         svg_width - The overall width of the output chart, default 800
         bar_jump - The amount of y pixels to jump from bar element to the next.
             Default is 44.
-        countline_basis - if higher than 0 than there will be a vertical line
-            each countline_basis. It will also add the next countline amount to
-            the max_sum.
+        orientation_basis - if higher than 0 than there will be a vertical line
+            each orientation_basis.
         limit - limits the data by N first elements
     """
 
@@ -117,36 +116,36 @@ def h_bar_chart(
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
     if max_sum == 0:
         return None
-    calculated_rectangles = ""
-    countline_labels = ""
+    orientation_lines = ""
+    orientation_labels = ""
 
-    def __add_countline(i: int, calculated_rectangles="", countline_labels=""):
-        x_pos = i * countline_basis / max_sum * max_width
-        label = str(i * countline_basis)
-        calculated_rectangles += __COUNTLINE_TEMPLATE.format(
+    def __add_orientation(i: int, orientation_lines="", orientation_labels=""):
+        x_pos = i * orientation_basis / max_sum * max_width
+        label = str(i * orientation_basis)
+        orientation_lines += __ORIENTATION_LINE_TEMPLATE.format(
             x_pos, bar_jump + 10
         )
-        countline_labels += __COUNTLINE_TEXT_TEMPLATE.format(
+        orientation_labels += __ORIENTATION_LINE_TEXT_TEMPLATE.format(
             x_pos, len(label), label
         )
-        return calculated_rectangles, countline_labels
+        return orientation_lines, orientation_labels
 
-    if countline_basis > 0:
-        overhead = max_sum % countline_basis
+    if orientation_basis > 0:
+        overhead = max_sum % orientation_basis
         # if it's already adjusted we don't need to add anything
         if overhead == 0:
-            overhead = countline_basis
-        max_sum = max_sum + countline_basis - overhead
+            overhead = orientation_basis
+        max_sum = max_sum + orientation_basis - overhead
 
-        for i in range(int(max_sum / countline_basis)):
-            calculated_rectangles, countline_labels = __add_countline(
-                i, calculated_rectangles, countline_labels
+        for i in range(int(max_sum / orientation_basis)):
+            orientation_lines, orientation_labels = __add_orientation(
+                i, orientation_lines, orientation_labels
             )
 
-        calculated_rectangles, countline_labels = __add_countline(
-            int(max_sum / countline_basis),
-            calculated_rectangles,
-            countline_labels,
+        orientation_lines, orientation_labels = __add_orientation(
+            int(max_sum / orientation_basis),
+            orientation_lines,
+            orientation_labels,
         )
 
     bars = ""
@@ -163,14 +162,14 @@ def h_bar_chart(
             y=i * bar_jump,
             key=key,
             bar_elements=elements,
-            countlines=calculated_rectangles,
+            orientation_lines=orientation_lines,
             total=sum(counts.values()),
         )
     svg_chart = __BAR_CHART_TEMPLATE.format(
         width=svg_width,
         height=len(data.keys()) * bar_jump + 50,
         bars=bars,
-        bar_legend=countline_labels,
+        bar_legend=orientation_labels,
         bar_legend_y=len(data.keys()) * bar_jump + 20,
     )
     return mark_safe(svg_chart)
