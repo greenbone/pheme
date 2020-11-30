@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - libsass support: https://sass-lang.com/blog/libsass-is-deprecated [111](https://github.com/greenbone/pheme/pull/111)
 - equipment treemap [112](https://github.com/greenbone/pheme/pull/112)
+- openapi [127](https://github.com/greenbone/pheme/pull/127)
 ### Fixed
 
 [Unreleased]: https://github.com/greenbone/pheme/compare/v0.0.1a3...HEAD
