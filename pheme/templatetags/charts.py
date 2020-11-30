@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import io
+import itertools
 from typing import Callable, Optional, Union, Dict
 
 from django import template
@@ -33,30 +34,39 @@ __severity_class_colors = {
 
 register = template.Library()
 
+__COUNTLINE_TEMPLATE = """
+<rect x="{}" y="17" height="{}" width="1" style="fill: #000000;"></rect>
+"""
 
+__COUNTLINE_TEXT_TEMPLATE = """
+<text class="countline label" y="22" x="{}" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
+style="text-anchor: middle;" width="{}">{}
+</text>
+"""
 __BAR_ELEMENT_TEMPLATE = """
 <rect x="{}" y="17" height="10" width="{}" style="fill: {};"></rect>
 """
 
 __BAR_TEMPLATE = """
-<!-- transform everytime +44 of previous -->
 <g class="entry" transform="translate(0, {y})">
 <text class="label category" y="22" x="87.5" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
 style="text-anchor: middle;" width="175">{key}
 </text>
 <g transform="translate(175, 0)">
 {bar_elements}
+{countlines}
 </g>
 <g transform="translate(700, 0)">
-<text class="sum" y="22" x="87.5" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
-style="text-anchor: middle;" width="100">{total}</text>
+<text class="sum" y="22" x="10" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
+style="text-anchor: left;" width="100">{total}</text>
 </g>
 </g>
 """
 __BAR_CHART_TEMPLATE = """
 <svg width="{width}" viewBox="0 0 1000 {height}" xmlns="http://www.w3.org/2000/svg">
 {bars}
-{legend}
+<g transform="translate(175, {bar_legend_y})">
+{bar_legend}
 </svg>
 """
 
@@ -67,6 +77,8 @@ def h_bar_chart(
     title_color=None,
     svg_width=800,
     bar_jump=44,
+    countline_basis=20,
+    limit=10,
 ) -> str:
 
     """
@@ -91,17 +103,52 @@ def h_bar_chart(
         svg_width - The overall width of the output chart, default 800
         bar_jump - The amount of y pixels to jump from bar element to the next.
             Default is 44.
+        countline_basis - if higher than 0 than there will be a vertical line
+            each countline_basis. It will also add the next countline amount to
+            the max_sum.
     """
 
+    data = dict(itertools.islice(chart_data.items(), limit))
     if not title_color:
         title_color = __severity_class_colors
     max_width = svg_width - 175 - 100  # key and total placeholder
     # highest sum of counts
-    max_sum = max([sum(counts.values()) for counts in chart_data.values()])
+    max_sum = max([sum(list(counts.values())) for counts in data.values()])
     if max_sum == 0:
         return None
+    calculated_rectangles = ""
+    countline_labels = ""
+
+    def __add_countline(i: int, calculated_rectangles="", countline_labels=""):
+        x_pos = i * countline_basis / max_sum * max_width
+        label = str(i * countline_basis)
+        calculated_rectangles += __COUNTLINE_TEMPLATE.format(
+            x_pos, bar_jump + 10
+        )
+        countline_labels += __COUNTLINE_TEXT_TEMPLATE.format(
+            x_pos, len(label), label
+        )
+        return calculated_rectangles, countline_labels
+
+    if countline_basis > 0:
+        overhead = max_sum % countline_basis
+        # if it's already adjusted we don't need to add anything
+        if overhead == 0:
+            overhead = countline_basis
+        max_sum = max_sum + countline_basis - overhead
+
+        for i in range(int(max_sum / countline_basis)):
+            calculated_rectangles, countline_labels = __add_countline(
+                i, calculated_rectangles, countline_labels
+            )
+        calculated_rectangles, countline_labels = __add_countline(
+            int(max_sum / countline_basis),
+            calculated_rectangles,
+            countline_labels,
+        )
+
     bars = ""
-    for i, (key, counts) in enumerate(chart_data.items()):
+    for i, (key, counts) in enumerate(data.items()):
         element_x = 0
         elements = ""
         for category, count in counts.items():
@@ -114,11 +161,15 @@ def h_bar_chart(
             y=i * bar_jump,
             key=key,
             bar_elements=elements,
+            countlines=calculated_rectangles,
             total=sum(counts.values()),
         )
-
     svg_chart = __BAR_CHART_TEMPLATE.format(
-        height=len(chart_data.keys()) * bar_jump, bars=bars, legend=""
+        width=svg_width,
+        height=len(data.keys()) * bar_jump + 50,
+        bars=bars,
+        bar_legend=countline_labels,
+        bar_legend_y=len(data.keys()) * bar_jump + 20,
     )
     return mark_safe(svg_chart)
 
