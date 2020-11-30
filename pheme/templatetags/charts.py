@@ -34,7 +34,7 @@ __severity_class_colors = {
 register = template.Library()
 
 
-__BAR_ELEMENTS_TEMPLATE = """
+__BAR_ELEMENT_TEMPLATE = """
 <rect x="{}" y="17" height="10" width="{}" style="fill: {};"></rect>
 """
 
