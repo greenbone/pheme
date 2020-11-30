@@ -32,9 +32,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.urls import path, re_path
-from django.views.generic import TemplateView
-from rest_framework.schemas import get_schema_view
+from django.urls import path
 import pheme.version
 import pheme.views
 import pheme.parameter
@@ -65,21 +63,5 @@ urlpatterns = [
         'template/elements/<str:name>',
         pheme.views.template_elements,
         name='template_elements',
-    ),
-    re_path(
-        r'^openapi-schema',
-        get_schema_view(
-            title="Pheme",
-            description="static report generation",
-            public=True,
-        ),
-        name='openapi-schema',
-    ),
-    path(
-        'docs/',
-        TemplateView.as_view(
-            template_name='swagger-ui.html',
-            extra_context={'schema_url': 'openapi-schema'},
-        ),
     ),
 ]
