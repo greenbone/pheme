@@ -202,7 +202,8 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             hostname, {threat: 0 for threat in __threats}
         )
         threat_index = __threat_index_lookup.get(threat, len(__threats) - 1)
-        host_threats[threat] += 1
+        if host_threats.get(threat) is not None:
+            host_threats[threat] += 1
         host_threat_count[hostname] = host_threats
 
         # needs high, medium, low
@@ -230,6 +231,15 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     threat_count_dict = {
         __threats[i]: count for i, count in enumerate(threat_count)
     }
+    # sort by amount descending
+    host_threat_count = dict(
+        sorted(
+            host_threat_count.items(),
+            key=lambda x: sum(x[1].values()),
+            reverse=True,
+        )
+    )
+
     return list(by_host.values()), host_threat_count, threat_count_dict
 
 
