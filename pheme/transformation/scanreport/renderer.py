@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-from typing import Dict, Generator, Tuple
+from typing import Dict
 
 from base64 import b64encode
 
@@ -109,33 +109,9 @@ class VulnerabilityHTMLReport(Report):
         )
 
 
-def __find_all_tags_in(
-    html: str, open_tag: str, close_tag: str
-) -> Generator[Tuple[int, int], None, None]:
-
-    """
-    Is used within __replace_inline_svg_with_img_tag
-
-    It searches for open and close tags and returns the start of the opening
-    and the end of the close_tag so that it is easy to extract and replace an
-    svg image.
-    """
-    open_index = 0
-    close_end_index = 0
-    # abort conditions are: open or close_tag not found (-1)
-    while True:
-        open_index = html.find(open_tag, open_index)
-        if open_index == -1:
-            return
-        close_end_index = html.find(close_tag, open_index + len(open_tag))
-        if close_end_index == -1:
-            return
-        close_end_index += len(close_tag)
-        yield (open_index, close_end_index)
-        open_index = close_end_index
-
-
-def _replace_inline_svg_with_img_tags(html: str) -> str:
+def _replace_inline_svg_with_img_tags(
+    html: str, from_index: int = 0, open_tag='<svg ', close_tag='</svg>'
+) -> str:
     """
     Is a workaround because WeasyPrint is not capable of dealing with inline svg
 
@@ -148,16 +124,21 @@ def _replace_inline_svg_with_img_tags(html: str) -> str:
 
     Please replace this method as soon as possible with a proper solution.
     """
-    for from_index, to_index in __find_all_tags_in(html, '<svg ', '</svg>'):
-        to_encode = html[from_index:to_index]
-        encoded = b64encode(to_encode.encode()).decode()
-        img = (
-            '<img src="data:image/svg+xml;charset=utf-8;base64, {}" />'.format(
-                encoded
-            )
-        )
-        html = html[:from_index] + img + html[to_index:]
-    return html
+    from_index = html.find(open_tag, from_index)
+    if from_index == -1:
+        return html
+    to_index = html.find(close_tag, from_index + len(open_tag))
+    if to_index == -1:
+        return html
+    to_index += len(close_tag)
+    to_encode = html[from_index:to_index]
+    encoded = b64encode(to_encode.encode()).decode()
+    img = '<img src="data:image/svg+xml;charset=utf-8;base64, {}" />'.format(
+        encoded
+    )
+
+    html = html[:from_index] + img + html[to_index:]
+    return _replace_inline_svg_with_img_tags(html, to_index)
 
 
 class VulnerabilityPDFReport(Report):

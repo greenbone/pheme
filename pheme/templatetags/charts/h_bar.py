@@ -28,7 +28,7 @@ __ORIENTATION_LINE_TEMPLATE = """
 """
 
 __ORIENTATION_LINE_TEXT_TEMPLATE = """
-<text class="orientation label" y="22" x="{}" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
+<text class="orientation label" y="22" x="{}" fill="#4C4C4D" dominant-baseline="central"
 style="text-anchor: middle;" width="{}">{}
 </text>
 """
@@ -38,7 +38,7 @@ __BAR_ELEMENT_TEMPLATE = """
 
 __BAR_TEMPLATE = """
 <g class="entry" transform="translate(0, {y})">
-<text class="label category" y="22" x="87.5" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
+<text class="label category" y="22" x="87.5" fill="#4C4C4D" dominant-baseline="central"
 style="text-anchor: middle;" width="175">{key}
 </text>
 <g transform="translate(175, 0)">
@@ -46,16 +46,17 @@ style="text-anchor: middle;" width="175">{key}
 {bar_elements}
 </g>
 <g transform="translate(700, 0)">
-<text class="sum" y="22" x="10" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
+<text class="sum" y="22" x="10" fill="#4C4C4D" dominant-baseline="central"
 style="text-anchor: left;" width="100">{total}</text>
 </g>
 </g>
 """
 __BAR_CHART_TEMPLATE = """
-<svg width="{width}" viewBox="0 0 1000 {height}" xmlns="http://www.w3.org/2000/svg">
+<svg width="{width}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
 {bars}
 <g transform="translate(175, {bar_legend_y})">
 {bar_legend}
+</g>
 </svg>
 """
 
