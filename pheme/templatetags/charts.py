@@ -137,16 +137,10 @@ def h_bar_chart(
             overhead = orientation_basis
         max_sum = max_sum + orientation_basis - overhead
 
-        for i in range(int(max_sum / orientation_basis)):
+        for i in range(int(max_sum / orientation_basis + 1)):
             orientation_lines, orientation_labels = __add_orientation(
                 i, orientation_lines, orientation_labels
             )
-
-        orientation_lines, orientation_labels = __add_orientation(
-            int(max_sum / orientation_basis),
-            orientation_lines,
-            orientation_labels,
-        )
 
     bars = ""
     for i, (key, counts) in enumerate(data.items()):
