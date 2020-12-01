@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pheme/templatetags/__init__.py
 # Copyright (C) 2020 Greenbone Networks GmbH
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
