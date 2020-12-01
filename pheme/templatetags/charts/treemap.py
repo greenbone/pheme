@@ -241,19 +241,37 @@ def treemap(
     fontsize=11,
     border_color="#ffffff",
     title_color=None,
-):
+) -> str:
     """
-    expects a descending sorted list of a dict.
+    Expects a sorted dict containing a str, and a dict with values in it.
 
-    It will transform given data to an useful format and than create
-    rectangle dimeniosn out of it. Thise dimensions will be used to create
-    the svg.
+    An example can be:
 
-    The color key within the data  must be consistant with the colors.
+    {
+        'host1': {'high': 12, 'medium': 4, 'low': 0},
+        'host2': {'high': 0, 'medium': 4, 'low': 0},
+    }
+
+    With that host1 and host2 will be used as a label, high and medium will be
+    used to find the color and values will be summed for the rectangle
+    calculation.
+
+    Data will be transformed to lits of labels, color_keys and the actual
+    values.
+
+    The color key within the data  must be consistant with title_color.
 
     Parameters:
+        data: needs to be an dict containing label, color_key and values.
+        width: width of the svg (default 1024)
+        height: height of the svg (default 768)
+        fontsize: used fontsize (default 11)
+        border_color: color of the rectangle border (default white)
+        title_color: the color_key to color lookup map
+            (default _severity_class_colors)
 
     Returns:
+        the treemap in svg as a SafeString.
     """
     if not title_color:
         title_color = _severity_class_colors

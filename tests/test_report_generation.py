@@ -82,15 +82,8 @@ def test_workaround_for_inline_svg_and_weasyprint(html_contains):
     assert contains in result
 
 
-@pytest.mark.parametrize(
-    "http_accept",
-    [
-        "application/pdf",
-        "text/html",
-    ],
-)
-def test_chart_keyswords(http_accept):
-    subtype = http_accept.split('/')[-1]
+def test_chart_keyswords():
+    subtype = "html"
     css_key = 'vulnerability_report_{}_css'.format(subtype)
     template_key = 'vulnerability_report_{}_template'.format(subtype)
     client = APIClient()
@@ -102,6 +95,7 @@ def test_chart_keyswords(http_accept):
     <html>
     {{ overview.nvts | pie_chart}}
     {{ overview.hosts | h_bar_chart  }}
+    {{ overview.hosts | treemap  }}
     </html>
     """
     response = client.put(
@@ -113,7 +107,9 @@ def test_chart_keyswords(http_accept):
         HTTP_X_API_KEY=SECRET_KEY,
     )
     assert response.status_code == 200
-    test_http_accept(http_accept)
+    response = test_http_accept("text/html")
+    html_report = response.getvalue().decode('utf-8')
+    assert html_report.count("<svg ") == 3
 
 
 @pytest.mark.parametrize(
