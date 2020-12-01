@@ -124,21 +124,24 @@ def _replace_inline_svg_with_img_tags(
 
     Please replace this method as soon as possible with a proper solution.
     """
-    from_index = html.find(open_tag, from_index)
-    if from_index == -1:
-        return html
-    to_index = html.find(close_tag, from_index + len(open_tag))
-    if to_index == -1:
-        return html
-    to_index += len(close_tag)
-    to_encode = html[from_index:to_index]
-    encoded = b64encode(to_encode.encode()).decode()
-    img = '<img src="data:image/svg+xml;charset=utf-8;base64, {}" />'.format(
-        encoded
-    )
-
-    html = html[:from_index] + img + html[to_index:]
-    return _replace_inline_svg_with_img_tags(html, to_index)
+    # abort condition is when either open_tag or close_tag was not found
+    while True:
+        from_index = html.find(open_tag, from_index)
+        if from_index == -1:
+            return html
+        to_index = html.find(close_tag, from_index + len(open_tag))
+        if to_index == -1:
+            return html
+        to_index += len(close_tag)
+        to_encode = html[from_index:to_index]
+        encoded = b64encode(to_encode.encode()).decode()
+        img = (
+            '<img src="data:image/svg+xml;charset=utf-8;base64, {}" />'.format(
+                encoded
+            )
+        )
+        html = html[:from_index] + img + html[to_index:]
+        from_index = to_index
 
 
 class VulnerabilityPDFReport(Report):
