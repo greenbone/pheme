@@ -70,7 +70,7 @@ def __create_rectangle(x, y, dx, dy) -> Rect:
     return Rect(x, y, dx, dy)
 
 
-def __layoutrow(sizes, rect: Rect) -> List[Rect]:
+def __layoutrow(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     covered_area = sum(sizes)
     width = covered_area / rect.dy
     rects = []
@@ -81,7 +81,7 @@ def __layoutrow(sizes, rect: Rect) -> List[Rect]:
     return rects
 
 
-def __layoutcol(sizes, rect: Rect) -> List[Rect]:
+def __layoutcol(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     covered_area = sum(sizes)
     height = covered_area / rect.dx
     rects = []
@@ -92,38 +92,37 @@ def __layoutcol(sizes, rect: Rect) -> List[Rect]:
     return rects
 
 
-def __layout(sizes, rect: Rect) -> List[Rect]:
+def __layout(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     if rect.dx >= rect.dy:
         return __layoutrow(sizes, rect)
     return __layoutcol(sizes, rect)
 
 
-def __leftoverrow(sizes, rect: Rect):
-    covered_area = sum(sizes)
+def __leftoverrow(covered_area, rect: Rect):
     width = covered_area / rect.dy
     return Rect(rect.x + width, rect.y, rect.dx - width, rect.dy)
 
 
 def __leftovercol(covered_area, rect: Rect) -> Rect:
-    height = covered_area / dx
+    height = covered_area / rect.dx
     return Rect(rect.x, rect.y + height, rect.dx, rect.dy - height)
 
 
-def __leftover(sizes, rect: Rect):
+def __leftover(sizes: List[numbers.Number], rect: Rect):
     covered_area = sum(sizes)
-    if rect.dx >=rect. dy:
+    if rect.dx >= rect.dy:
         return __leftoverrow(covered_area, rect)
     return __leftovercol(covered_area, rect)
 
 
-def __find_split(sizes, x, y, dx, dy) -> int:
+def __find_split(sizes: List[numbers.Number], rect: Rect) -> int:
     """
     returns the index to split the sizes based on worst ratio to get the
     remaining and current space.
 
     For an example the area ratio of 5, 3, 2, 1 with the area of 90 * 50
     >>> test_data = [2045.5, 1227.3, 818.2, 409.0 ]
-    >>> __find_split(test_data, 0, 0, 90, 50)
+    >>> __find_split(test_data, Rect(0, 0, 90, 50))
     1
 
     The first two elements can be put into the first space and the rest needs to
@@ -135,7 +134,7 @@ def __find_split(sizes, x, y, dx, dy) -> int:
         return max(
             [
                 max(rect.dx / rect.dy, rect.dy / rect.dx)
-                for rect in __layout(sizes[:i], x, y, dx, dy)
+                for rect in __layout(sizes[:i], rect)
             ]
         )
 
@@ -145,13 +144,13 @@ def __find_split(sizes, x, y, dx, dy) -> int:
     return len(sizes) - 1
 
 
-def __squarify(sizes, x, y, dx, dy) -> List[Rect]:
+def __squarify(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     """
     calculates treemap rectangles using an algorithm based on Bruls, Huizing,
     van Wijk, "Squarified Treemaps" and "squarify":
     https://github.com/laserson/squarify
 
-    >>> __squarify([5, 1], 0, 0, 90, 50)
+    >>> __squarify([5, 1], Rect(0, 0, 90, 50))
     [Rect(x=1, y=1, dx=73.0, dy=48.0), Rect(x=76.0, y=1, dx=13.0, dy=48.0)]
 
     Parameters:
@@ -168,24 +167,23 @@ def __squarify(sizes, x, y, dx, dy) -> List[Rect]:
             Each dict in the returned list represents a single rectangle in the
             treemap. The order corresponds to the input order.
     """
-
     if len(sizes) == 0:
         return []
 
     total_size = sum(sizes)
-    total_area = dx * dy
+    total_area = rect.dx * rect.dy
 
     sizes = list([size * total_area / total_size for size in sizes])
 
     if len(sizes) == 1:
-        return __layout(sizes, x, y, dx, dy)
+        return __layout(sizes, rect)
 
-    i = __find_split(sizes, x, y, dx, dy)
+    i = __find_split(sizes, rect)
     current = sizes[:i]
     remaining = sizes[i:]
 
-    return __layout(current, x, y, dx, dy) + __squarify(
-        remaining, *__leftover(current, x, y, dx, dy)
+    return __layout(current, rect) + __squarify(
+        remaining, __leftover(current, rect)
     )
 
 
@@ -269,7 +267,7 @@ def treemap(
     if not title_color:
         title_color = _severity_class_colors
     sizes, label, color_keys = __transform_to_tree_data(data)
-    sizes = __squarify(sizes, 0, 0, width, height)
+    sizes = __squarify(sizes, Rect(0, 0, width, height))
     elements = ""
     for i, d in enumerate(sizes):
         label_size_in_px = len(label[i]) * fontsize
