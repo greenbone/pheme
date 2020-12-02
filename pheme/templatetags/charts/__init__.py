@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pheme/asgi.py
 # Copyright (C) 2020 Greenbone Networks GmbH
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -16,19 +15,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-ASGI config for pheme project.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
+from django import template
 
-For more information on this file, see
-https://docs.djangoproject.com/en/3.1/howto/deployment/asgi/
-"""
+_severity_class_colors = {
+    'High': "#d4003e",
+    'Medium': "#fcb900",
+    'Low': "#7db4d0",
+}
 
-import os
-
-from django.core.asgi import get_asgi_application
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pheme.settings')
-
-application = get_asgi_application()
+register = template.Library()

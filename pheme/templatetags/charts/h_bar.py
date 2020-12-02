@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pheme/templatetags/charts.py
+# pheme/templatetags/bar_chart.py
 # Copyright (C) 2020 Greenbone Networks GmbH
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -16,40 +16,29 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import io
+
 import itertools
-from typing import Callable, Optional, Union, Dict
-
-from django import template
+from typing import Dict
 from django.utils.safestring import mark_safe
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
+from pheme.templatetags.charts import register, _severity_class_colors
 
-__severity_class_colors = {
-    'High': "#d4003e",
-    'Medium': "#fcb900",
-    'Low': "#7db4d0",
-}
-
-
-register = template.Library()
 
 __ORIENTATION_LINE_TEMPLATE = """
-<rect x="{}" y="0" height="{}" width="1" style="fill: #000000;"></rect>
+<rect x="{x}" y="0" height="{height}" width="1" style="fill: #000000;"></rect>
 """
 
 __ORIENTATION_LINE_TEXT_TEMPLATE = """
-<text class="orientation label" y="22" x="{}" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
-style="text-anchor: middle;" width="{}">{}
+<text class="orientation label" y="22" x="{x}" fill="#4C4C4D" dominant-baseline="central"
+style="text-anchor: middle;" width="{width}">{label}
 </text>
 """
 __BAR_ELEMENT_TEMPLATE = """
-<rect x="{}" y="17" height="10" width="{}" style="fill: {};"></rect>
+<rect x="{x}" y="17" height="10" width="{width}" style="fill: {color};"></rect>
 """
 
 __BAR_TEMPLATE = """
 <g class="entry" transform="translate(0, {y})">
-<text class="label category" y="22" x="87.5" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
+<text class="label category" y="22" x="87.5" fill="#4C4C4D" dominant-baseline="central"
 style="text-anchor: middle;" width="175">{key}
 </text>
 <g transform="translate(175, 0)">
@@ -57,16 +46,17 @@ style="text-anchor: middle;" width="175">{key}
 {bar_elements}
 </g>
 <g transform="translate(700, 0)">
-<text class="sum" y="22" x="10" fill="#4C4C4D" font-size="1rem" dominant-baseline="central"
+<text class="sum" y="22" x="10" fill="#4C4C4D" dominant-baseline="central"
 style="text-anchor: left;" width="100">{total}</text>
 </g>
 </g>
 """
 __BAR_CHART_TEMPLATE = """
-<svg width="{width}" viewBox="0 0 1000 {height}" xmlns="http://www.w3.org/2000/svg">
+<svg width="{width}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
 {bars}
 <g transform="translate(175, {bar_legend_y})">
 {bar_legend}
+</g>
 </svg>
 """
 
@@ -110,7 +100,7 @@ def h_bar_chart(
 
     data = dict(itertools.islice(chart_data.items(), limit))
     if not title_color:
-        title_color = __severity_class_colors
+        title_color = _severity_class_colors
     max_width = svg_width - 175 - 100  # key and total placeholder
     # highest sum of counts
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
@@ -123,10 +113,10 @@ def h_bar_chart(
         x_pos = i * orientation_basis / max_sum * max_width
         label = str(i * orientation_basis)
         orientation_lines += __ORIENTATION_LINE_TEMPLATE.format(
-            x_pos, bar_jump + 10
+            x=x_pos, height=bar_jump + 10
         )
         orientation_labels += __ORIENTATION_LINE_TEXT_TEMPLATE.format(
-            x_pos, len(label), label
+            x=x_pos, width=len(label), label=label
         )
         return orientation_lines, orientation_labels
 
@@ -149,7 +139,9 @@ def h_bar_chart(
         for category, count in counts.items():
             color = title_color.get(category)
             width = count / max_sum * max_width
-            elements += __BAR_ELEMENT_TEMPLATE.format(element_x, width, color)
+            elements += __BAR_ELEMENT_TEMPLATE.format(
+                x=element_x, width=width, color=color
+            )
             element_x += width
 
         bars += __BAR_TEMPLATE.format(
@@ -167,85 +159,3 @@ def h_bar_chart(
         bar_legend_y=len(data.keys()) * bar_jump + 20,
     )
     return mark_safe(svg_chart)
-
-
-def __create_default_figure():
-    return Figure()
-
-
-def __create_chart(
-    set_plot: Callable,
-    *,
-    fig: Union[Figure, Callable] = __create_default_figure,
-    modify_fig: Callable = None,
-) -> Optional[str]:
-    fig = fig() if callable(fig) else fig
-    # there is a bug in 3.0.2 (debian buster)
-    # that canvas is not set automatically
-    canvas = FigureCanvas(fig)
-    ax = fig.subplots()
-    set_plot(ax)
-    if modify_fig:
-        modify_fig(fig)
-    buf = io.BytesIO()
-    fig.canvas = canvas
-    fig.savefig(buf, format='svg', dpi=300)
-    buf.seek(0)
-    # base64_fig = base64.b64encode(buf.read())
-    # uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
-    return buf.read().decode()
-
-
-@register.filter
-def pie_chart(input_values, title_color=None, title=None) -> Optional[str]:
-    """
-    creates a pie chart svg.
-
-    The values parameter needs to be a dict with a categoryname: numeric_value.
-    E.g.:
-    {
-        "High": 5,
-        "Medium": 3,
-        "Low": 2
-    }
-
-    The keys need to match the title_color keys. As a default the
-    severity_classes: High , Medium, Low are getting used.
-    """
-    if not title_color:
-        title_color = __severity_class_colors
-    category_names = list(input_values.keys())
-    category_colors = list([title_color.get(key) for key in category_names])
-    values = list(input_values.values())
-
-    total = sum(values)
-
-    def raw_value_pct(pct):
-        value = pct * total / 100.0
-        return "{:d}".format(int(round(value)))
-
-    def modify_fig(fig: Figure):
-        for ax in fig.axes:
-            ax.set_axis_off()
-
-    def set_plot(ax):
-        ax.set_title(title)
-        wedges, _, _ = ax.pie(
-            values,
-            colors=category_colors,
-            autopct=raw_value_pct,
-            wedgeprops=dict(width=0.5),
-            startangle=-40,
-        )
-
-        ax.legend(
-            wedges,
-            category_names,
-            bbox_to_anchor=(1, 0, 0, 1),
-            loc='lower right',
-            fontsize='small',
-        )
-
-    if total == 0:
-        return None
-    return mark_safe(__create_chart(set_plot, modify_fig=modify_fig))
