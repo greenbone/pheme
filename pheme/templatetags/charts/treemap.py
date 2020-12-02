@@ -98,12 +98,12 @@ def __layout(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     return __layoutcol(sizes, rect)
 
 
-def __leftoverrow(covered_area, rect: Rect):
+def __leftoverrow(covered_area: float, rect: Rect):
     width = covered_area / rect.dy
     return Rect(rect.x + width, rect.y, rect.dx - width, rect.dy)
 
 
-def __leftovercol(covered_area, rect: Rect) -> Rect:
+def __leftovercol(covered_area: float, rect: Rect) -> Rect:
     height = covered_area / rect.dx
     return Rect(rect.x, rect.y + height, rect.dx, rect.dy - height)
 

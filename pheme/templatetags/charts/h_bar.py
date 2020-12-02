@@ -24,16 +24,16 @@ from pheme.templatetags.charts import register, _severity_class_colors
 
 
 __ORIENTATION_LINE_TEMPLATE = """
-<rect x="{}" y="0" height="{}" width="1" style="fill: #000000;"></rect>
+<rect x="{x}" y="0" height="{height}" width="1" style="fill: #000000;"></rect>
 """
 
 __ORIENTATION_LINE_TEXT_TEMPLATE = """
-<text class="orientation label" y="22" x="{}" fill="#4C4C4D" dominant-baseline="central"
-style="text-anchor: middle;" width="{}">{}
+<text class="orientation label" y="22" x="{x}" fill="#4C4C4D" dominant-baseline="central"
+style="text-anchor: middle;" width="{width}">{label}
 </text>
 """
 __BAR_ELEMENT_TEMPLATE = """
-<rect x="{}" y="17" height="10" width="{}" style="fill: {};"></rect>
+<rect x="{x}" y="17" height="10" width="{width}" style="fill: {color};"></rect>
 """
 
 __BAR_TEMPLATE = """
@@ -113,10 +113,10 @@ def h_bar_chart(
         x_pos = i * orientation_basis / max_sum * max_width
         label = str(i * orientation_basis)
         orientation_lines += __ORIENTATION_LINE_TEMPLATE.format(
-            x_pos, bar_jump + 10
+            x=x_pos, height=bar_jump + 10
         )
         orientation_labels += __ORIENTATION_LINE_TEXT_TEMPLATE.format(
-            x_pos, len(label), label
+            x=x_pos, width=len(label), label=label
         )
         return orientation_lines, orientation_labels
 
@@ -139,7 +139,9 @@ def h_bar_chart(
         for category, count in counts.items():
             color = title_color.get(category)
             width = count / max_sum * max_width
-            elements += __BAR_ELEMENT_TEMPLATE.format(element_x, width, color)
+            elements += __BAR_ELEMENT_TEMPLATE.format(
+                x=element_x, width=width, color=color
+            )
             element_x += width
 
         bars += __BAR_TEMPLATE.format(
