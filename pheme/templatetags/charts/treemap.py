@@ -98,7 +98,7 @@ def __layout(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     return __layoutcol(sizes, rect)
 
 
-def __leftoverrow(covered_area: float, rect: Rect):
+def __leftoverrow(covered_area: float, rect: Rect) -> Rect:
     width = covered_area / rect.dy
     return Rect(rect.x + width, rect.y, rect.dx - width, rect.dy)
 
@@ -108,7 +108,7 @@ def __leftovercol(covered_area: float, rect: Rect) -> Rect:
     return Rect(rect.x, rect.y + height, rect.dx, rect.dy - height)
 
 
-def __leftover(sizes: List[numbers.Number], rect: Rect):
+def __leftover(sizes: List[numbers.Number], rect: Rect) -> Rect:
     covered_area = sum(sizes)
     if rect.dx >= rect.dy:
         return __leftoverrow(covered_area, rect)
