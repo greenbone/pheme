@@ -70,56 +70,50 @@ def __create_rectangle(x, y, dx, dy) -> Rect:
     return Rect(x, y, dx, dy)
 
 
-def __layoutrow(sizes, x, y, _, dy) -> List[Rect]:
+def __layoutrow(sizes, rect: Rect) -> List[Rect]:
     covered_area = sum(sizes)
-    width = covered_area / dy
+    width = covered_area / rect.dy
     rects = []
+    y = rect.y
     for size in sizes:
-        rects.append(__create_rectangle(x, y, width, size / width))
+        rects.append(__create_rectangle(rect.x, y, width, size / width))
         y += size / width
     return rects
 
 
-def __layoutcol(sizes, x, y, dx, _) -> List[Rect]:
+def __layoutcol(sizes, rect: Rect) -> List[Rect]:
     covered_area = sum(sizes)
-    height = covered_area / dx
+    height = covered_area / rect.dx
     rects = []
+    x = rect.x
     for size in sizes:
-        rects.append(__create_rectangle(x, y, size / height, height))
+        rects.append(__create_rectangle(x, rect.y, size / height, height))
         x += size / height
     return rects
 
 
-def __layout(sizes, x, y, dx, dy) -> List[Rect]:
-    if dx >= dy:
-        return __layoutrow(sizes, x, y, dx, dy)
-    return __layoutcol(sizes, x, y, dx, dy)
+def __layout(sizes, rect: Rect) -> List[Rect]:
+    if rect.dx >= rect.dy:
+        return __layoutrow(sizes, rect)
+    return __layoutcol(sizes, rect)
 
 
-def __leftoverrow(sizes, x, y, dx, dy):
+def __leftoverrow(sizes, rect: Rect):
     covered_area = sum(sizes)
-    width = covered_area / dy
-    leftover_x = x + width
-    leftover_y = y
-    leftover_dx = dx - width
-    leftover_dy = dy
-    return leftover_x, leftover_y, leftover_dx, leftover_dy
+    width = covered_area / rect.dy
+    return Rect(rect.x + width, rect.y, rect.dx - width, rect.dy)
 
 
-def __leftovercol(sizes, x, y, dx, dy):
-    covered_area = sum(sizes)
+def __leftovercol(covered_area, rect: Rect) -> Rect:
     height = covered_area / dx
-    leftover_x = x
-    leftover_y = y + height
-    leftover_dx = dx
-    leftover_dy = dy - height
-    return leftover_x, leftover_y, leftover_dx, leftover_dy
+    return Rect(rect.x, rect.y + height, rect.dx, rect.dy - height)
 
 
-def __leftover(sizes, x, y, dx, dy):
-    if dx >= dy:
-        return __leftoverrow(sizes, x, y, dx, dy)
-    return __leftovercol(sizes, x, y, dx, dy)
+def __leftover(sizes, rect: Rect):
+    covered_area = sum(sizes)
+    if rect.dx >=rect. dy:
+        return __leftoverrow(covered_area, rect)
+    return __leftovercol(covered_area, rect)
 
 
 def __find_split(sizes, x, y, dx, dy) -> int:
