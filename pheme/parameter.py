@@ -21,13 +21,35 @@ import pheme.authentication
 logger = logging.getLogger(__name__)
 
 
-def load_params(from_path: str = settings.PARAMETER_FILE_ADDRESS) -> Dict:
+def __load_params(from_path: str) -> Dict:
+    """
+    either loads json file from given_path or returns an empty dict when file
+    does not exist.
+
+    """
     param_file_obj = Path(from_path)
     return (
         json.loads(param_file_obj.read_text())
         if param_file_obj.exists()
         else {}
     )
+
+
+def load_params(
+    system_parameter_path: str = settings.PARAMETER_FILE_ADDRESS,
+    default_parameter_path: str = settings.DEFAULT_PARAMETER_ADDRESS,
+) -> Dict:
+    """
+    loads default and system parameter and combines them so that system
+    parameter may override default parameter.
+
+    A system parameter is set and handled by an individual system while default
+    parameter usually come from data-objects.
+    """
+    return {
+        **__load_params(default_parameter_path),
+        **__load_params(system_parameter_path),
+    }
 
 
 def __store(params: Dict, *, from_path: str = None) -> Dict:
@@ -42,7 +64,7 @@ def __put(
     from_path: str = settings.PARAMETER_FILE_ADDRESS,
     store: Callable[[Dict, str], Dict] = __store
 ) -> Response:
-    params = load_params(from_path=from_path)
+    params = __load_params(from_path=from_path)
     username = request.META.get('GVM_USERNAME')
     if username:
         all_user = params.get('user_specific', {})
