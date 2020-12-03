@@ -40,9 +40,16 @@ BASE_DIR = (
 )
 STATIC_DIR = BASE_DIR / 'static'
 TEMPLATE_DIR = BASE_DIR / 'template'
+# set default to actual gos path instead of static dir
 PARAMETER_FILE_ADDRESS = os.environ.get(
     "PARAMETER_FILE_ADDRESS"
 ) or '//{}/parameter.json'.format(STATIC_DIR)
+
+DEFAULT_PARAMETER_ADDRESS = (
+    os.environ.get("DEFAULT_PARAMETER_FILE_ADDRESS")
+    or '/usr/local/var/lib/gvm/data-objects/21.04/pheme/default-parameter.json'
+)
+
 
 GSAD_URL = os.environ.get('GSAD_URL', "http://localhost:8080/gmp")
 
