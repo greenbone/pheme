@@ -33,9 +33,7 @@ __LEGEND_TEMPLATE = """
 </g>
 """
 __LEGEND_ELEMENT = """
-<!-- height, width = font-size -->
 <rect x="{x}" y="0" height="{font_size}" width="{font_size}" style="fill: {color};"></rect>
-<!-- y = font-size / 2 -->
 <text x="{text_x}" y="{half_font_size}" dominant-baseline="central">{label}</text>
 """
 
@@ -43,6 +41,23 @@ __LEGEND_ELEMENT = """
 def _build_legend(
     start_height: int, width: int, font_size: int, label_color: Dict
 ) -> str:
+    """
+    Generates a legend at     start_height y position and at
+    width / 2 - last_x of element / 2 x position.
+
+    By iterating through the the label_color dict and using the key as a label
+    and the value as a fill color for the rectangle.
+
+    Parameters:
+        start_height: x position of legend
+        width: width: of the svg, used as an indicator for the middle
+        font_size: size of used font, used to calculate x position of an element
+        label_color: key is used as a label and the value as a fill color for an
+            rectangle (font_size * font_size).
+    Returns:
+        A complete g element with legends as a string.
+
+    """
     legend_elements = ""
     x_pos = 0
     for label, color in label_color.items():
