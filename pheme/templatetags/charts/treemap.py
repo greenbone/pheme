@@ -31,7 +31,11 @@ from typing import Dict, List
 
 from django.utils.safestring import mark_safe
 
-from pheme.templatetags.charts import _severity_class_colors, register
+from pheme.templatetags.charts import (
+    _severity_class_colors,
+    register,
+    _build_legend,
+)
 
 __ELEMENT_TEMPLATE = """
 <g>
@@ -47,6 +51,7 @@ __TEMPLATE = """
      viewBox="0 0 {width} {height}"
      xmlns="http://www.w3.org/2000/svg">
      {rects}
+     {legend}
 </svg>
 """
 
@@ -229,7 +234,7 @@ def treemap(
     data: List[Dict],
     width=1024,
     height=768,
-    fontsize=11,
+    fontsize=16,
     border_color="#ffffff",
     title_color=None,
 ) -> str:
@@ -276,7 +281,7 @@ def treemap(
         # heights of characters (depends on font) to display the label
         # on the upper left corner of an rectangle.
         label_y = d.y + fontsize / 2 + 5
-        max_label_len = m.ceil(d.dx / label_size_in_px * len(label[i]))
+        max_label_len = m.ceil(d.dx / (label_size_in_px * 0.75) * len(label[i]))
         if d.dy <= fontsize:
             max_label_len = 0
 
@@ -292,5 +297,10 @@ def treemap(
             label=label[i][:max_label_len],
         )
     return mark_safe(
-        __TEMPLATE.format(width=width, height=height, rects=elements)
+        __TEMPLATE.format(
+            width=width,
+            height=height + 10 + fontsize,
+            rects=elements,
+            legend=_build_legend(height + 10, width, fontsize, title_color),
+        )
     )

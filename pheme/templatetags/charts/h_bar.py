@@ -20,7 +20,11 @@
 import itertools
 from typing import Dict
 from django.utils.safestring import mark_safe
-from pheme.templatetags.charts import register, _severity_class_colors
+from pheme.templatetags.charts import (
+    register,
+    _severity_class_colors,
+    _build_legend,
+)
 
 
 __ORIENTATION_LINE_TEMPLATE = """
@@ -57,6 +61,7 @@ __BAR_CHART_TEMPLATE = """
 <g transform="translate(175, {bar_legend_y})">
 {bar_legend}
 </g>
+{legend}
 </svg>
 """
 
@@ -151,11 +156,15 @@ def h_bar_chart(
             orientation_lines=orientation_lines,
             total=sum(counts.values()),
         )
+    svg_element_lengths = len(data.keys()) * bar_jump + 50
     svg_chart = __BAR_CHART_TEMPLATE.format(
         width=svg_width,
-        height=len(data.keys()) * bar_jump + 50,
+        height=svg_element_lengths + 30,
         bars=bars,
         bar_legend=orientation_labels,
         bar_legend_y=len(data.keys()) * bar_jump + 20,
+        legend=_build_legend(
+            svg_element_lengths + 10, svg_width, 16, title_color
+        ),
     )
     return mark_safe(svg_chart)
