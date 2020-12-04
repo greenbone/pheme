@@ -20,12 +20,11 @@ classifiers=[
 
 [tool.poetry.dependencies]
 python = "^3.7"
-django = "^3.1"
+django = "=2.2.2"
 xmltodict = "^0.12.0"
 pyyaml = "^5.3.1"
 uritemplate = "^3.0.1"
-djangorestframework-dataclasses = ">=0.6,<0.9"
-djangorestframework = "^3.11.1"
+djangorestframework = "=3.9.0"
 coreapi = "^2.3.3"
 weasyprint = ">=51,<53"
 matplotlib = "=3.0.2"

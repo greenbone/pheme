@@ -29,6 +29,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import secrets
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,9 +42,22 @@ BASE_DIR = (
 STATIC_DIR = BASE_DIR / 'static'
 TEMPLATE_DIR = BASE_DIR / 'template'
 # set default to actual gos path instead of static dir
-PARAMETER_FILE_ADDRESS = os.environ.get(
-    "PARAMETER_FILE_ADDRESS"
-) or '//{}/parameter.json'.format(STATIC_DIR)
+
+GSAD_URL = os.environ.get('GSAD_URL', "http://localhost:8080/gmp")
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+
+PHEME_CONFIGURATION_PATH = Path(
+    os.environ.get(
+        'PHEME_CONFIGURATION_PATH',
+        '/var/lib/pheme' if Path('/var/lib/pheme').exists() else Path('/tmp/'),
+    )
+)
+
+
+SECRET_KEY_LOCATION = PHEME_CONFIGURATION_PATH.joinpath('api_key')
+
+PARAMETER_FILE_ADDRESS = PHEME_CONFIGURATION_PATH.joinpath('parameter.json')
 
 DEFAULT_PARAMETER_ADDRESS = (
     os.environ.get("DEFAULT_PARAMETER_FILE_ADDRESS")
@@ -51,15 +65,17 @@ DEFAULT_PARAMETER_ADDRESS = (
 )
 
 
-GSAD_URL = os.environ.get('GSAD_URL', "http://localhost:8080/gmp")
+def __load_or_create_api_key() -> str:
+    if SECRET_KEY_LOCATION.exists():
+        may_token = SECRET_KEY_LOCATION.read_text()
+        if len(may_token.strip()) > 0:
+            return may_token
+    token = secrets.token_urlsafe(50)
+    SECRET_KEY_LOCATION.write_text(token)
+    return token
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY', 'SECRET_KEY_missing_using_default_not_suitable_in_production'
-)
-
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = os.environ.get('PHEME_API_KEY', __load_or_create_api_key())
 
 ENV_HOSTS = os.environ.get("ALLOWED_HOSTS")
 DEBUG = False if ENV_HOSTS else True
@@ -69,7 +85,6 @@ ALLOWED_HOSTS = ENV_HOSTS.split(' ') if ENV_HOSTS else []
 
 INSTALLED_APPS = [
     'pheme',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
