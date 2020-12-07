@@ -55,8 +55,8 @@ def measure_time(func):
 
 def __tansform_tags(item) -> List[Dict]:
     if isinstance(item, str):
-        splitted = [i.split('=') for i in item.split('|')]
-        return {i[0]: i[1] for i in splitted if len(i) == 2}
+        split = [i.split('=') for i in item.split('|')]
+        return {i[0]: i[1] for i in split if len(i) == 2}
     return None
 
 
