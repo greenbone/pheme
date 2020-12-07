@@ -252,10 +252,10 @@ def treemap(
     used to find the color and values will be summed for the rectangle
     calculation.
 
-    Data will be transformed to lits of labels, color_keys and the actual
+    Data will be transformed to lists of labels, color_keys and the actual
     values.
 
-    The color key within the data  must be consistant with title_color.
+    The color key within the data  must be consistent with title_color.
 
     Parameters:
         data: needs to be an dict containing label, color_key and values.
