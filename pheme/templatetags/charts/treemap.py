@@ -64,7 +64,7 @@ class Rect:
     dy: float
 
 
-def __create_rectangle(x, y, dx, dy) -> Rect:
+def __create_rectangle(x: float, y: float, dx: float, dy: float) -> Rect:
     # add spacing of 1px
     if dx > 2:
         x += 1
@@ -232,11 +232,11 @@ def __transform_to_tree_data(data) -> List[Dict]:
 @register.filter
 def treemap(
     data: List[Dict],
-    width=1024,
-    height=768,
-    fontsize=16,
-    border_color="#ffffff",
-    title_color=None,
+    width: int = 1024,
+    height: int = 768,
+    fontsize: int = 16,
+    border_color: str = "#ffffff",
+    title_color: Dict[str, str] = None,
 ) -> str:
     """
     Expects a sorted dict containing a str, and a dict with values in it.
