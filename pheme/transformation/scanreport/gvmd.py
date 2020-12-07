@@ -101,7 +101,7 @@ def __host_threat_overview(threat_count: List[int]) -> Dict:
 
 def __return_highest_severity(severities: List[int]) -> str:
     """
-    retuns the highest severity within a list
+    returns the highest severity within a list
     """
     for i in range(len(severities) - 1, -1, -1):
         if severities[i] > 0:

@@ -93,7 +93,7 @@ def h_bar_chart(
     }
 
     parameter:
-        chart_data - The dict containg the values for the chart
+        chart_data - The dict containing the values for the chart
         title_color - A colortable, defaulting to __severity_class_colors
         svg_width - The overall width of the output chart, default 800
         bar_jump - The amount of y pixels to jump from bar element to the next.
