@@ -39,6 +39,7 @@ def test_upload(args):
 @patch("pheme.scripts.parameter.http.client", new=_client_mock)
 @patch("pheme.scripts.parameter.pathlib", new=_pathmock)
 def test_fail_unsupported_mimetype():
+    _path_mock.name = "/tmp/shiny.css"
     _path_mock.read_bytes.return_value = b""
     _pathmock.Path.return_value = _path_mock
     parameter.PHEME_URL = "https://localhost:8000/pheme"
