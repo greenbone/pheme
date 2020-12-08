@@ -63,8 +63,9 @@ def __tansform_tags(item) -> List[Dict]:
 def __group_refs(refs: List[Dict]) -> Dict:
     refs_ref = {}
     for ref in refs.get('ref', []):
-        typus = ref.get('type', 'unknown')
-        refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
+        if isinstance(ref, dict):
+            typus = ref.get('type', 'unknown')
+            refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
     return refs_ref
 
 
