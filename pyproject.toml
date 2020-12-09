@@ -71,7 +71,7 @@ mode = "poetry"
 version-module-file = "pheme/version/__version__.py"
 
 [tool.poetry.scripts]
-pheme-create-parameter-json = 'pheme.scripts.parameter:main'
+pheme-parameter = 'pheme.scripts.parameter:main'
 
 [build-system]
 requires = ["poetry>=0.12"]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# pheme/scripts/parameter-json-from-dir.py
+# pheme/scripts/parameter.py
 # Copyright (C) 2020 Greenbone Networks GmbH
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -19,50 +19,105 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# Usage: pheme-parameter-json-from-dir $path > parameter.json
-
+# Usage: pheme-parameter $path
+import os
 import json
 import mimetypes
-import sys
-from pathlib import Path
+from argparse import ArgumentParser
+from urllib.parse import urlparse, ParseResult
 from typing import Dict
+import http.client
+import pathlib
 
 from pheme.datalink import as_datalink
 
+from pheme.settings import SECRET_KEY
 
-def load_data(parent: Path) -> Dict:
+PHEME_URL = os.getenv('PHEME_URL', 'https://localhost:8443/pheme')
+COLOR_KEYS = ['main_color']
+PICTURE_KEYS = ['logo', 'background']
+ALLOWED_KEYS = COLOR_KEYS + PICTURE_KEYS
+
+
+def __init_argument_parser() -> ArgumentParser:
+    value_description = f"""The value for given key.
+    If key is in {COLOR_KEYS} than it must represent color (e.g. #66c430).
+    If the key is in {PICTURE_KEYS} than it must be a path to a svg, png or jpeg file.
+    """
+    key_description = (
+        f'Identifier of a parameter to set. Valid keys are: {ALLOWED_KEYS}'
+    )
+    parser = ArgumentParser(
+        description='Adds parameter to pheme.',
+        prog='pheme-parameter',
+    )
+    parser.add_argument(
+        '-k',
+        '--key',
+        help=key_description,
+        required=True,
+    )
+    parser.add_argument(
+        '-v',
+        '--value',
+        help=value_description,
+        required=True,
+    )
+    return parser
+
+
+def __load_data(parent: pathlib.Path) -> Dict:
     data = {}
-    for i in parent.glob("*"):
-        file_type, _ = mimetypes.guess_type(i.name)
-        key = (
-            i.name[: -len(i.suffix)]
-            if not 'css' in i.suffix
-            else "{}_css".format(i.name[: -len(i.suffix)])
-        )
-        if i.is_dir():
-            data = {**data, **load_data(i)}
-        elif file_type and file_type.startswith('image'):
-            data[key] = as_datalink(i.read_bytes(), file_type)
-        elif file_type and file_type.startswith('text'):
-            data[key] = i.read_text()
-        elif file_type and file_type == 'application/json':
-            data = {**data, **json.loads(i.read_text())}
-        else:
-            sys.stderr.write("skipping {} -> {}".format(i, file_type))
+    file_type, _ = mimetypes.guess_type(parent.name)
+    key = parent.name[: -len(parent.suffix)]
+    if file_type and file_type.startswith('image'):
+        data[key] = as_datalink(parent.read_bytes(), file_type)
+    else:
+        raise ValueError(f"Unknown mimetype {file_type} for {parent}.")
     return data
 
 
-def main():
-    if len(sys.argv) != 2:
-        sys.stderr.write("need exactly one one path parameter. Aborting.")
-        sys.exit(1)
+def __put(data: Dict) -> (ParseResult, Dict):
+    def connection():
+        parsed = urlparse(PHEME_URL)
+        if parsed.scheme == 'https':
+            return parsed, http.client.HTTPSConnection(parsed.netloc)
+        else:
+            return parsed, http.client.HTTPConnection(parsed.netloc)
+
+    url, conn = connection()
+    headers = {
+        'Content-Type': 'application/json',
+        'x-api-key': SECRET_KEY,
+    }
+    params = json.dumps(data)
+    print(headers)
+    conn.request('PUT', url.path + '/parameter', params, headers)
+    response = conn.getresponse()
+    if response.status != 200:
+        raise ValueError(
+            f"failed to upload parameter. Response code is {response.status}."
+        )
+    response_txt = response.read()
+    response.close()
+    conn.close()
+    return json.loads(response_txt)
+
+
+def main(args=None):
     data = {}
-    paths = sys.argv[1:]
-    for i in paths:
-        parent = Path(i)
-        data = {**data, **load_data(parent)}
-    print(json.dumps(data))
+    parser = __init_argument_parser()
+    arguments = parser.parse_args(args)
+    if arguments.key in COLOR_KEYS:
+        data[arguments.key] = arguments.value
+    elif arguments.key in PICTURE_KEYS:
+        parent = pathlib.Path(arguments.value)
+        data = {**data, **__load_data(parent)}
+    else:
+        raise ValueError(f"{arguments.key} is not defined")
+    return (arguments, __put(data))
 
 
 if __name__ == "__main__":
-    main()
+    parsed_args, _ = main()
+    print(f"successfully changed {parsed_args.key} to {parsed_args.value}")
