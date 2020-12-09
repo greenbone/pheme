@@ -44,6 +44,9 @@ def __init_argument_parser() -> ArgumentParser:
     If key is in {COLOR_KEYS} than it must represent color (e.g. #66c430).
     If the key is in {PICTURE_KEYS} than it must be a path to a svg, png or jpeg file.
     """
+    key_description = (
+        f'Identifier of a parameter to set. Valid keys are: {ALLOWED_KEYS}'
+    )
     parser = ArgumentParser(
         description='Adds parameter to pheme.',
         prog='pheme-parameter',
@@ -51,7 +54,7 @@ def __init_argument_parser() -> ArgumentParser:
     parser.add_argument(
         '-k',
         '--key',
-        help=f'Identifier of a parameter to set. Valid keys are: {ALLOWED_KEYS}',
+        help=key_description,
         required=True,
     )
     parser.add_argument(
@@ -70,9 +73,7 @@ def __load_data(parent: pathlib.Path) -> Dict:
     if file_type and file_type.startswith('image'):
         data[key] = as_datalink(parent.read_bytes(), file_type)
     else:
-        raise ValueError(
-            "Unknown mimetype {file_type} for {parent}."
-        )
+        raise ValueError(f"Unknown mimetype {file_type} for {parent}.")
     return data
 
 
@@ -90,11 +91,12 @@ def __put(data: Dict) -> (ParseResult, Dict):
         'x-api-key': SECRET_KEY,
     }
     params = json.dumps(data)
+    print(headers)
     conn.request('PUT', url.path + '/parameter', params, headers)
     response = conn.getresponse()
     if response.status != 200:
         raise ValueError(
-            "failed to upload parameter. Response code is {response.status}."
+            f"failed to upload parameter. Response code is {response.status}."
         )
     response_txt = response.read()
     response.close()
@@ -112,10 +114,10 @@ def main(args=None):
         parent = pathlib.Path(arguments.value)
         data = {**data, **__load_data(parent)}
     else:
-        raise ValueError("{arguments.key} is not defined")
-    return __put(data)
+        raise ValueError(f"{arguments.key} is not defined")
+    return (arguments, __put(data))
 
 
 if __name__ == "__main__":
-    main()
-    print("success")
+    parsed_args, _ = main()
+    print(f"successfully changed {parsed_args.key} to {parsed_args.value}")
