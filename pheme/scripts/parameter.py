@@ -40,24 +40,22 @@ ALLOWED_KEYS = COLOR_KEYS + PICTURE_KEYS
 
 
 def __init_argument_parser() -> ArgumentParser:
-    value_description = """The value for given key.
-    If key is in {color} than it must represent color (e.g. #66c430).
-    If the key is in {pics} than it must be a path to a svg, png or jpeg file.
-    """.format(
-        color=COLOR_KEYS, pics=PICTURE_KEYS
-    )
+    value_description = f"""The value for given key.
+    If key is in {COLOR_KEYS} than it must represent color (e.g. #66c430).
+    If the key is in {PICTURE_KEYS} than it must be a path to a svg, png or jpeg file.
+    """
     parser = ArgumentParser(
         description='Adds parameter to pheme.',
         prog='pheme-parameter',
     )
     parser.add_argument(
+        '-k',
         '--key',
-        help='Identifier of a parameter to set. Valid keys are: {}'.format(
-            ALLOWED_KEYS
-        ),
+        help=f'Identifier of a parameter to set. Valid keys are: {ALLOWED_KEYS}',
         required=True,
     )
     parser.add_argument(
+        '-v',
         '--value',
         help=value_description,
         required=True,
@@ -73,7 +71,7 @@ def __load_data(parent: pathlib.Path) -> Dict:
         data[key] = as_datalink(parent.read_bytes(), file_type)
     else:
         raise ValueError(
-            "Unknown mimetype {} for {}.".format(file_type, parent)
+            "Unknown mimetype {file_type} for {parent}."
         )
     return data
 
@@ -96,9 +94,7 @@ def __put(data: Dict) -> (ParseResult, Dict):
     response = conn.getresponse()
     if response.status != 200:
         raise ValueError(
-            "failed to upload parameter. Response code is {}.".format(
-                response.status
-            )
+            "failed to upload parameter. Response code is {response.status}."
         )
     response_txt = response.read()
     response.close()
@@ -116,7 +112,7 @@ def main(args=None):
         parent = pathlib.Path(arguments.value)
         data = {**data, **__load_data(parent)}
     else:
-        raise ValueError("{} is not defined".format(arguments.key))
+        raise ValueError("{arguments.key} is not defined")
     return __put(data)
 
 
