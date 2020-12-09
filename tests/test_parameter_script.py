@@ -6,7 +6,6 @@ import pytest
 from pheme.scripts import parameter
 
 _client_mock = MagicMock(spec=http.client)
-
 _connection_mock = MagicMock(spec=http.client.HTTPSConnection)
 _response_mock = MagicMock(spec=http.client.HTTPResponse)
 _pathmock = MagicMock(spec=pathlib)
