@@ -61,7 +61,7 @@ PARAMETER_FILE_ADDRESS = PHEME_CONFIGURATION_PATH.joinpath('parameter.json')
 
 DEFAULT_PARAMETER_ADDRESS = (
     os.environ.get("DEFAULT_PARAMETER_FILE_ADDRESS")
-    or '/usr/local/var/lib/gvm/data-objects/21.04/pheme/default-parameter.json'
+    or '/usr/local/var/lib/gvm/data-objects/gvmd/21.04/pheme/default-parameter.json'
 )
 
 
