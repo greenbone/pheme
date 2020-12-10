@@ -82,6 +82,39 @@ def test_workaround_for_inline_svg_and_weasyprint(html_contains):
     assert contains in result
 
 
+def test_dynamic_template():
+    subtype = "html"
+    css_key = f'vulnerability_report_{subtype}_css'
+    template_key = f'vulnerability_report_{subtype}_template'
+    client = APIClient()
+    url = reverse(
+        'put_parameter',
+    )
+    nvts_template = """
+    <h1>{{ High }}</h1>
+    """
+    render_charts = """
+    {% load dynamic_template %}
+    <html>
+    {{ overview.nvts | dynamic_template:"nvts_template" }}
+    </html>
+    """
+    response = client.put(
+        url,
+        data={
+            css_key: "html { background: #000; }",
+            'nvts_template': nvts_template,
+            template_key: render_charts,
+        },
+        HTTP_X_API_KEY=SECRET_KEY,
+    )
+    assert response.status_code == 200
+    response = test_http_accept("text/html")
+    nvts = response.data['overview']['nvts']
+    html_report = response.getvalue().decode('utf-8')
+    assert f"<h1>{nvts['High']}</h1>" in html_report
+
+
 def test_chart_keyswords():
     subtype = "html"
     css_key = 'vulnerability_report_{}_css'.format(subtype)
