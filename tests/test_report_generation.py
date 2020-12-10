@@ -84,8 +84,8 @@ def test_workaround_for_inline_svg_and_weasyprint(html_contains):
 
 def test_dynamic_template():
     subtype = "html"
-    css_key = 'vulnerability_report_{}_css'.format(subtype)
-    template_key = 'vulnerability_report_{}_template'.format(subtype)
+    css_key = f'vulnerability_report_{subtype}_css'
+    template_key = f'vulnerability_report_{subtype}_template'
     client = APIClient()
     url = reverse(
         'put_parameter',
