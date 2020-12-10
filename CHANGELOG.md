@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [21.04-rc1] - 2020-12-10
 ### Added
 - nvt threat information in host result [114](https://github.com/greenbone/pheme/pull/114)
 - nvt severity information in host result [121](https://github.com/greenbone/pheme/pull/121)
@@ -15,15 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add workaround for svg in pdf with wasyprint [120](https://github.com/greenbone/pheme/pull/120)
 - charts are not produced in the data struct but within a template [122](https://github.com/greenbone/pheme/pull/122)
 
-### Deprecated
 ### Removed
 - libsass support: https://sass-lang.com/blog/libsass-is-deprecated [111](https://github.com/greenbone/pheme/pull/111)
 - equipment treemap [112](https://github.com/greenbone/pheme/pull/112)
 - openapi [127](https://github.com/greenbone/pheme/pull/127)
-### Fixed
-
-[Unreleased]: https://github.com/greenbone/pheme/compare/v0.0.1a3...HEAD
-
+[21.04-rc1]: https://github.com/greenbone/pheme/compare/v0.0.1a3...HEAD
 
 ## [0.0.1a3] - 2020-11-06
 ### Added
