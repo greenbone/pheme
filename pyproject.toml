@@ -33,7 +33,7 @@ rope = ">=0.17,<0.19"
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
 pylint-django = "^2.3.0"
-pytest = "^6.0.1"
+pytest = "^6.2.0"
 pytest-cov = "^2.10.0"
 pytest-django = ">=3.9,<5.0"
 pytest-env = "^0.6.2"
