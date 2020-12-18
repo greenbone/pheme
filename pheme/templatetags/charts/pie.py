@@ -45,8 +45,8 @@ def pie_chart(
     input_values: Dict,
     title_color: Dict = None,
     chart_size: int = 320,
-    border_size: int = 1,
-    slice_width: int = 30,
+    border_size: int = 0,
+    slice_width: int = 60,
 ) -> SafeText:
     """
     creates a pie chart svg.
@@ -81,8 +81,8 @@ def pie_chart(
 
     cx = chart_size / 2  # shift x
     cy = chart_size / 2  # shift y
-    # need to cut out 30 px of the size, otherwise edges will be cut off
-    radius = (chart_size - 30) / 2
+    # need to cut out size of the slice_width, otherwise edges will be cut off
+    radius = (chart_size - slice_width) / 2
     circumference = 2 * math.pi * radius
     dash_array = circumference - border_size
 
