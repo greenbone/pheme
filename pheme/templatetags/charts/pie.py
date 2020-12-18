@@ -16,44 +16,38 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import io
-from typing import Callable, Optional, Union
+import math
+from typing import Dict
+from django.utils.safestring import SafeText
+from pheme.templatetags.charts import (
+    register,
+    _severity_class_colors,
+    _build_legend,
+)
 
-from django.utils.safestring import mark_safe
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-from pheme.templatetags.charts import register, _severity_class_colors
+__PIE_CHART_TEMPLATE = """
+<svg width="{size}" viewBox="0 0 {size} {height}" xmlns="http://www.w3.org/2000/svg">
+{donut}
+{legend}
+</svg>
+"""
 
-
-def __create_default_figure():
-    return Figure()
-
-
-def __create_chart(
-    set_plot: Callable,
-    *,
-    fig: Union[Figure, Callable] = __create_default_figure,
-    modify_fig: Callable = None,
-) -> Optional[str]:
-    fig = fig() if callable(fig) else fig
-    # there is a bug in 3.0.2 (debian buster)
-    # that canvas is not set automatically
-    canvas = FigureCanvas(fig)
-    ax = fig.subplots()
-    set_plot(ax)
-    if modify_fig:
-        modify_fig(fig)
-    buf = io.BytesIO()
-    fig.canvas = canvas
-    fig.savefig(buf, format='svg', dpi=300)
-    buf.seek(0)
-    # base64_fig = base64.b64encode(buf.read())
-    # uri = 'data:image/png;base64,' + urllib.parse.quote(base64_fig)
-    return buf.read().decode()
+__SLICE_TEMPLATE = """
+<g>
+<circle cx="{cx}" cy="{cy}" r="{radius}" stroke="{color}" stroke-width="{stroke_width}" stroke-dasharray="{d_array}" stroke-dashoffset="{s_offset}" transform="rotate({r_start}, {cx}, {cy})" fill="transparent"></circle>
+<text x="{t_x}" y="{t_y}" text-anchor="middle">{label}</text>
+</g>
+"""
 
 
 @register.filter
-def pie_chart(input_values, title_color=None, title=None) -> Optional[str]:
+def pie_chart(
+    input_values: Dict,
+    title_color: Dict = None,
+    chart_size: int = 320,
+    border_size: int = 1,
+    slice_width: int = 30,
+) -> SafeText:
     """
     creates a pie chart svg.
 
@@ -67,41 +61,60 @@ def pie_chart(input_values, title_color=None, title=None) -> Optional[str]:
 
     The keys need to match the title_color keys. As a default the
     severity_classes: High , Medium, Low are getting used.
+
+    Parameters:
+        input_values: dict containing the data as label: numeric_value
+        title_color: dict containing the data as label: color
+        chart_size: int the height and width of the
+        border_size: int size of the border of slice
+        slice_width: int the width of slice
+
+    Returns:
+    A SafeString with SVG
     """
     if not title_color:
         title_color = _severity_class_colors
-    category_names = list(input_values.keys())
-    category_colors = list([title_color.get(key) for key in category_names])
-    values = list(input_values.values())
+    total = sum(input_values.values())
+    # pylint: disable=C0103
+    # we start at 12' o clock
+    angle_offset = -90
 
-    total = sum(values)
+    cx = chart_size / 2  # shift x
+    cy = chart_size / 2  # shift y
+    # need to cut out 30 px of the size, otherwise edges will be cut off
+    radius = (chart_size - 30) / 2
+    circumference = 2 * math.pi * radius
+    dash_array = circumference - border_size
 
-    def raw_value_pct(pct):
-        value = pct * total / 100.0
-        return "{:d}".format(int(round(value)))
+    donut = ""
+    for (category, amount) in input_values.items():
+        percent = amount / total
+        color = title_color.get(category)
+        dash_offset = circumference - percent * circumference
+        degrees = angle_offset
+        t_angle = (percent * 360) / 2 + angle_offset
+        t_radians = t_angle * (math.pi / 180)
+        t_x = radius * math.cos(t_radians) + cx
+        t_y = radius * math.sin(t_radians) + cy
 
-    def modify_fig(fig: Figure):
-        for ax in fig.axes:
-            ax.set_axis_off()
+        angle_offset += percent * 360
+        donut += __SLICE_TEMPLATE.format(
+            cx=cx,
+            cy=cy,
+            radius=radius,
+            color=color,
+            stroke_width=slice_width,
+            d_array=dash_array,
+            s_offset=dash_offset,
+            r_start=degrees,
+            t_x=t_x,
+            t_y=t_y,
+            label=f"{round(percent * 100)}%",
+        ).strip()
 
-    def set_plot(ax):
-        ax.set_title(title)
-        wedges, _, _ = ax.pie(
-            values,
-            colors=category_colors,
-            autopct=raw_value_pct,
-            wedgeprops=dict(width=0.5),
-            startangle=-40,
-        )
-
-        ax.legend(
-            wedges,
-            category_names,
-            bbox_to_anchor=(1, 0, 0, 1),
-            loc='lower right',
-            fontsize='small',
-        )
-
-    if total == 0:
-        return None
-    return mark_safe(__create_chart(set_plot, modify_fig=modify_fig))
+    legend = _build_legend(chart_size + 10, chart_size, 16, title_color)
+    return SafeText(
+        __PIE_CHART_TEMPLATE.format(
+            size=chart_size, height=chart_size + 26, donut=donut, legend=legend
+        ).strip()
+    )

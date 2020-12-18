@@ -27,7 +27,6 @@ uritemplate = "^3.0.1"
 djangorestframework = "=3.9.0"
 coreapi = "^2.3.3"
 weasyprint = ">=51,<53"
-matplotlib = "=3.0.2"
 rope = ">=0.17,<0.19"
 
 [tool.poetry.dev-dependencies]
