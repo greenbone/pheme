@@ -43,7 +43,7 @@ STATIC_DIR = BASE_DIR / 'static'
 TEMPLATE_DIR = BASE_DIR / 'template'
 # set default to actual gos path instead of static dir
 
-GSAD_URL = os.environ.get('GSAD_URL', "http://localhost:8080/gmp")
+GSAD_URL = os.environ.get('GSAD_URL', "https://localhost/gmp")
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
@@ -58,7 +58,7 @@ PHEME_CONFIGURATION_PATH = Path(
 SECRET_KEY_LOCATION = PHEME_CONFIGURATION_PATH.joinpath('api_key')
 
 PARAMETER_FILE_ADDRESS = PHEME_CONFIGURATION_PATH.joinpath('parameter.json')
-DATA_OBJECT_PATH = "/usr/local/var/lib/gvm/data-objects/gvmd"
+DATA_OBJECT_PATH = "/opt/greenbone/feed/gvmd"
 GOS_VERSION = "21.04"
 DEFAULT_PARAMETER_ADDRESS = (
     os.environ.get("DEFAULT_PARAMETER_FILE_ADDRESS")
@@ -78,8 +78,8 @@ def __load_or_create_api_key() -> str:
 
 SECRET_KEY = os.environ.get('PHEME_API_KEY', __load_or_create_api_key())
 
-ENV_HOSTS = os.environ.get("ALLOWED_HOSTS")
-DEBUG = False if ENV_HOSTS else True
+ENV_HOSTS = os.environ.get("ALLOWED_HOSTS", "*")
+DEBUG = os.environ.get("PHEME_DEBUG", "").lower() == "true"
 ALLOWED_HOSTS = ENV_HOSTS.split(' ') if ENV_HOSTS else []
 
 # Application definition
@@ -173,6 +173,12 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
+        'syslog': {
+            'class': 'logging.handlers.SysLogHandler',
+            'formatter': 'standard',
+            'facility': 'user',
+            'address': '/dev/log',
+        },
     },
     'formatters': {
         'standard': {
@@ -181,7 +187,7 @@ LOGGING = {
         },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['syslog'],
         'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
     },
 }
