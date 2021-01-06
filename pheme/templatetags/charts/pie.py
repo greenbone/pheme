@@ -75,6 +75,8 @@ def pie_chart(
     if not title_color:
         title_color = _severity_class_colors
     total = sum(input_values.values())
+    if total == 0:
+        return SafeText("")
     # pylint: disable=C0103
     # we start at 12' o clock
     angle_offset = -90
