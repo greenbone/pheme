@@ -108,9 +108,10 @@ def h_bar_chart(
         title_color = _severity_class_colors
     max_width = svg_width - 175 - 100  # key and total placeholder
     # highest sum of counts
+    if not data.values():
+        return mark_safe("")
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
-    if max_sum == 0:
-        return None
+
     orientation_lines = ""
     orientation_labels = ""
 

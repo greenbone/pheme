@@ -115,7 +115,16 @@ def test_dynamic_template():
     assert f"<h1>{nvts['High']}</h1>" in html_report
 
 
-def test_chart_keyswords():
+def test_charts_generation_on_zero_result_report():
+    report = gen_report(
+        generate('host', 0),
+        generate('oid', 0),
+        name='http_accept_test',
+    )
+    test_chart_keyword(report, 1) 
+
+
+def test_chart_keyword(report=None, expected=3):
     subtype = "html"
     css_key = 'vulnerability_report_{}_css'.format(subtype)
     template_key = 'vulnerability_report_{}_template'.format(subtype)
@@ -140,9 +149,9 @@ def test_chart_keyswords():
         HTTP_X_API_KEY=SECRET_KEY,
     )
     assert response.status_code == 200
-    response = test_http_accept("text/html")
+    response = test_http_accept("text/html", report)
     html_report = response.getvalue().decode('utf-8')
-    assert html_report.count("<svg ") == 3
+    assert html_report.count("<svg ") == expected 
 
 
 @pytest.mark.parametrize(
@@ -180,17 +189,18 @@ def test_http_accept_visual(http_accept):
         "text/csv",
     ],
 )
-def test_http_accept(http_accept):
+def test_http_accept(
+    http_accept,
+    report=None,
+):
+    if not report:
+        report = gen_report(
+            generate('host', 1),
+            generate('oid', 1),
+            name='http_accept_test',
+        )
     url = reverse('transform')
-    report = {
-        'report': {
-            'report': gen_report(
-                generate('host', 1),
-                generate('oid', 1),
-                name='http_accept_test',
-            )
-        }
-    }
+    report = {'report': {'report': report}}
     client = APIClient()
     response = client.post(url, data=report, format='xml')
     assert response.status_code == 200

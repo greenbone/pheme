@@ -187,7 +187,7 @@ LOGGING = {
         },
     },
     'root': {
-        'handlers': ['syslog'],
+        'handlers': ['syslog' if Path('/dev/log').exists() else 'console'],
         'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
     },
 }

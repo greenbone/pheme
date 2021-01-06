@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 ### Changed
+- settings to default to GOS settings [153](https://github.com/greenbone/pheme/pull/153)
 ### Deprecated
 ### Removed
 ### Fixed
+- division by zero when a report does not contain results [154](https://github.com/greenbone/pheme/pull/154)
 
 [Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc1...HEAD
 
