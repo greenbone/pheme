@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 - settings to default to GOS settings [153](https://github.com/greenbone/pheme/pull/153)
+- KeyError to TemplateNotFoundError [155](https://github.com/greenbone/pheme/pull/155)
+- move get_user_role to authentication [155](https://github.com/greenbone/pheme/pull/155)
 ### Deprecated
 ### Removed
 ### Fixed
