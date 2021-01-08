@@ -155,7 +155,7 @@ class VulnerabilityPDFReport(Report):
     the html document to PDF
     """
 
-    __template = "vvulnerability_report_pdf_template"
+    __template = "vulnerability_report_pdf_template"
     __css_template = "vulnerability_report_pdf_css"
     media_type = "application/pdf"
     format = "binary"

@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from pheme.get_user_information import get_username_role
+from pheme.authentication import get_username_role
 
 GSAD_FAKE_RESPONSE = """
 <envelope>
@@ -76,8 +76,8 @@ GSAD_FAKE_RESPONSE = """
 """
 
 
-@patch('rest_framework.request.HttpRequest')
-@patch('requests.models.Response')
+@patch("rest_framework.request.HttpRequest")
+@patch("requests.models.Response")
 def test_get_username_and_role(request, response):
     # pylint: disable=W0613
     def fake_get(url, params, **kwargs):
@@ -87,18 +87,18 @@ def test_get_username_and_role(request, response):
     request.query_params = dict(token="TOKEN")
     request.COOKIES = dict(GSAD_SID="GSAD_SID")
     username, role = get_username_role(request, get=fake_get)
-    assert username == 'admin'
-    assert role == 'Admin'
+    assert username == "admin"
+    assert role == "Admin"
 
 
-@patch('rest_framework.request.HttpRequest')
+@patch("rest_framework.request.HttpRequest")
 def test_return_none_on_missing_url(request):
     username, role = get_username_role(request, gsad_url=None)
     assert username is None
     assert role is None
 
 
-@patch('rest_framework.request.HttpRequest')
+@patch("rest_framework.request.HttpRequest")
 def test_not_call_on_missing_token_gsadsid(request):
     def fake_get(url, params, **kwargs):
         raise Exception("should not be called")
