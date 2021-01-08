@@ -27,6 +27,7 @@ unsafe-load-any-extension=no
 # Pylint plugins to load
 load-plugins=pylint_django
 
+django-settings-module=pheme.settings
 
 [MESSAGES CONTROL]
 
