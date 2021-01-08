@@ -33,36 +33,36 @@ import secrets
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-__configured_base = os.environ.get('PHEME_BASE_PATH')
+__configured_base = os.environ.get("PHEME_BASE_PATH")
 BASE_DIR = (
     Path(__configured_base)
     if __configured_base
     else Path(__file__).resolve(strict=True).parent.parent
 )
-STATIC_DIR = BASE_DIR / 'static'
-TEMPLATE_DIR = BASE_DIR / 'template'
+STATIC_DIR = BASE_DIR / "static"
+TEMPLATE_DIR = BASE_DIR / "template"
 # set default to actual gos path instead of static dir
 
-GSAD_URL = os.environ.get('GSAD_URL', "https://localhost/gmp")
+GSAD_URL = os.environ.get("GSAD_URL", "https://localhost/gmp")
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 PHEME_CONFIGURATION_PATH = Path(
     os.environ.get(
-        'PHEME_CONFIGURATION_PATH',
-        '/var/lib/pheme' if Path('/var/lib/pheme').exists() else Path('/tmp/'),
+        "PHEME_CONFIGURATION_PATH",
+        "/var/lib/pheme" if Path("/var/lib/pheme").exists() else Path("/tmp/"),
     )
 )
 
 
-SECRET_KEY_LOCATION = PHEME_CONFIGURATION_PATH.joinpath('api_key')
+SECRET_KEY_LOCATION = PHEME_CONFIGURATION_PATH.joinpath("api_key")
 
-PARAMETER_FILE_ADDRESS = PHEME_CONFIGURATION_PATH.joinpath('parameter.json')
+PARAMETER_FILE_ADDRESS = PHEME_CONFIGURATION_PATH.joinpath("parameter.json")
 DATA_OBJECT_PATH = "/opt/greenbone/feed/gvmd"
 GOS_VERSION = "21.04"
 DEFAULT_PARAMETER_ADDRESS = (
     os.environ.get("DEFAULT_PARAMETER_FILE_ADDRESS")
-    or f'{DATA_OBJECT_PATH}/{GOS_VERSION}/pheme/default-parameter.json'
+    or f"{DATA_OBJECT_PATH}/{GOS_VERSION}/pheme/default-parameter.json"
 )
 
 
@@ -76,55 +76,55 @@ def __load_or_create_api_key() -> str:
     return token
 
 
-SECRET_KEY = os.environ.get('PHEME_API_KEY', __load_or_create_api_key())
+SECRET_KEY = os.environ.get("PHEME_API_KEY", __load_or_create_api_key())
 
 ENV_HOSTS = os.environ.get("ALLOWED_HOSTS", "*")
 DEBUG = os.environ.get("PHEME_DEBUG", "").lower() == "true"
-ALLOWED_HOSTS = ENV_HOSTS.split(' ') if ENV_HOSTS else []
+ALLOWED_HOSTS = ENV_HOSTS.split(" ") if ENV_HOSTS else []
 
 # Application definition
 
 INSTALLED_APPS = [
-    'pheme',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
+    "pheme",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'pheme.urls'
+ROOT_URLCONF = "pheme.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
             TEMPLATE_DIR,
         ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'pheme.wsgi.application'
+WSGI_APPLICATION = "pheme.wsgi.application"
 
 
 # Database
@@ -142,9 +142,9 @@ AUTH_PASSWORD_VALIDATORS = []
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -156,7 +156,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     STATIC_DIR,
     TEMPLATE_DIR,
@@ -166,45 +166,55 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/3.1/topics/logging/
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
         },
-        'syslog': {
-            'class': 'logging.handlers.SysLogHandler',
-            'formatter': 'standard',
-            'facility': 'user',
-            'address': '/dev/log',
+        "syslog": {
+            "class": "logging.handlers.SysLogHandler",
+            "formatter": "standard",
+            "facility": "user",
+            "address": "/dev/log",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "formatter": "standard",
+            "filename": "/var/log/pheme/pheme.log"
+            if Path("/var/log/pheme").exists()
+            else "/tmp/pheme.log",
         },
     },
-    'formatters': {
-        'standard': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
+    "formatters": {
+        "standard": {
+            "format": "{module}#{funcName} {levelname} {asctime}: {message}",
+            "style": "{",
         },
     },
-    'root': {
-        'handlers': ['syslog' if Path('/dev/log').exists() else 'console'],
-        'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+    "root": {
+        "handlers": [
+            "syslog" if Path("/dev/log").exists() else "console",
+            "file",
+        ],
+        "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
     },
 }
 # https://docs.djangoproject.com/en/3.1/topics/cache/
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
-        'TIMEOUT': 1 * 60 * 2 * 60,  # 2 hours
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "/tmp/django_cache",
+        "TIMEOUT": 1 * 60 * 2 * 60,  # 2 hours
     }
 }
 
 # testing
 REST_FRAMEWORK = {
-    'TEST_REQUEST_RENDERER_CLASSES': [
-        'pheme.renderer.XMLRenderer',
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.MultiPartRenderer',
-    ]
+    "TEST_REQUEST_RENDERER_CLASSES": [
+        "pheme.renderer.XMLRenderer",
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.MultiPartRenderer",
+    ],
 }

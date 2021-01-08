@@ -28,7 +28,8 @@ from rest_framework.request import Request
 from weasyprint import CSS, HTML
 from pheme.settings import DEBUG
 from pheme.parameter import load_params
-from pheme.get_user_information import get_username_role
+from pheme.authentication import get_username_role
+from pheme.errors import TemplateNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -36,27 +37,30 @@ logger = logging.getLogger(__name__)
 def _load_template(name: str, params: Dict = None) -> Template:
     if not params:
         params = load_params()
-    return Template(params[name])
+    templ = params.get(name)
+    if not templ:
+        raise TemplateNotFoundError(name)
+    return Template(templ)
 
 
 def _enrich(name: str, data: Dict, parameter: Dict) -> Dict:
-    data['internal_name'] = name
+    data["internal_name"] = name
     return {**parameter, **data}
 
 
 def _get_request(renderer_context: Dict) -> Request:
     renderer_context = renderer_context or {}  # to throw key error
-    return renderer_context['request']
+    return renderer_context["request"]
 
 
 def _default_not_found_response(
     renderer_context: Dict, request: Request
 ) -> str:
-    resp = renderer_context['response']
+    resp = renderer_context["response"]
     resp.status_code = 404
     # pylint: disable=W0212
     path = request._request.path
-    report_id = path[path.rfind('/') + 1 :]
+    report_id = path[path.rfind("/") + 1 :]
     return '"not data found for %s"' % report_id
 
 
@@ -66,7 +70,7 @@ class Report(renderers.BaseRenderer):
         if not data:
             return _default_not_found_response(renderer_context, request)
 
-        name = data.get('internal_name')
+        name = data.get("internal_name")
         cache_key = "{}/{}".format(self.media_type, name) if name else None
         logger.debug("generating report %s", cache_key)
 
@@ -76,7 +80,7 @@ class Report(renderers.BaseRenderer):
                 return cached
         params = load_params()
         # separate user specific parameter
-        user_parameter = params.pop('user_specific', {})
+        user_parameter = params.pop("user_specific", {})
         username, _ = get_username_role(request)
         if username:
             params = {**params, **user_parameter.get(username, {})}
@@ -88,21 +92,21 @@ class Report(renderers.BaseRenderer):
 
     def apply(self, name: str, data: Dict, parameter: Dict):
         raise NotImplementedError(
-            'Report class requires .apply() to be implemented'
+            "Report class requires .apply() to be implemented"
         )
 
 
 class VulnerabilityHTMLReport(Report):
-    __template = 'vulnerability_report_html_template'
-    __css_template = 'vulnerability_report_html_css'
-    media_type = 'text/html'
-    format = 'html'
+    __template = "vulnerability_report_html_template"
+    __css_template = "vulnerability_report_html_css"
+    media_type = "text/html"
+    format = "html"
 
     def apply(self, name: str, data: Dict, parameter: Dict):
         css = _load_template(self.__css_template, parameter).render(
             Context(parameter)
         )
-        data['css'] = css
+        data["css"] = css
 
         return _load_template(self.__template).render(
             Context(_enrich(name, data, parameter))
@@ -110,7 +114,7 @@ class VulnerabilityHTMLReport(Report):
 
 
 def _replace_inline_svg_with_img_tags(
-    html: str, from_index: int = 0, open_tag='<svg ', close_tag='</svg>'
+    html: str, from_index: int = 0, open_tag="<svg ", close_tag="</svg>"
 ) -> str:
     """
     Is a workaround because WeasyPrint is not capable of dealing with inline svg
@@ -151,10 +155,10 @@ class VulnerabilityPDFReport(Report):
     the html document to PDF
     """
 
-    __template = 'vulnerability_report_pdf_template'
-    __css_template = 'vulnerability_report_pdf_css'
-    media_type = 'application/pdf'
-    format = 'binary'
+    __template = "vvulnerability_report_pdf_template"
+    __css_template = "vulnerability_report_pdf_css"
+    media_type = "application/pdf"
+    format = "binary"
 
     def apply(self, name: str, data: Dict, parameter: Dict):
         logger.debug("got template: %s", self.__template)
@@ -171,36 +175,36 @@ class VulnerabilityPDFReport(Report):
 
 
 class ReportFormatHTMLReport(renderers.BaseRenderer):
-    media_type = 'text/html+report_format_editor'
-    format = 'html'
+    media_type = "text/html+report_format_editor"
+    format = "html"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         request = _get_request(renderer_context)
         if not data:
             return _default_not_found_response(renderer_context, request)
-        template = Template(data['template'])
-        data['vulnerability_report']['css'] = data['html_css']
-        data['vulnerability_report']['images'] = data.get('images')
-        context = Context(data['vulnerability_report'])
+        template = Template(data["template"])
+        data["vulnerability_report"]["css"] = data["html_css"]
+        data["vulnerability_report"]["images"] = data.get("images")
+        context = Context(data["vulnerability_report"])
         html = template.render(context)
         logger.debug("created html")
         return html
 
 
 class ReportFormatPDFReport(renderers.BaseRenderer):
-    media_type = 'application/pdf+report_format_editor'
-    format = 'binary'
+    media_type = "application/pdf+report_format_editor"
+    format = "binary"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         request = _get_request(renderer_context)
         if not data:
             return _default_not_found_response(renderer_context, request)
-        data['vulnerability_report']['images'] = data.get('images')
-        template = Template(data['template'])
-        context = Context(data['vulnerability_report'])
+        data["vulnerability_report"]["images"] = data.get("images")
+        template = Template(data["template"])
+        context = Context(data["vulnerability_report"])
         html = template.render(context)
         logger.debug("created html")
-        css = Template(data['pdf_css']).render(context)
+        css = Template(data["pdf_css"]).render(context)
         pdf = HTML(string=html).write_pdf(stylesheets=[CSS(string=css)])
         logger.debug("created pdf")
         return pdf
