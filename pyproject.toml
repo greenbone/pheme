@@ -69,9 +69,6 @@ mode = "poetry"
 [tool.pontos.version]
 version-module-file = "pheme/version/__version__.py"
 
-[tool.poetry.scripts]
-pheme-parameter = 'pheme.scripts.parameter:main'
-
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"

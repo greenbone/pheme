@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - move get_user_role to authentication [155](https://github.com/greenbone/pheme/pull/155)
 ### Deprecated
 ### Removed
+- parameter script [156](https://github.com/greenbone/pheme/pull/156)
 ### Fixed
 - division by zero when a report does not contain results [154](https://github.com/greenbone/pheme/pull/154)
 
