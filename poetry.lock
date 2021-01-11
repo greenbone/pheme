@@ -275,18 +275,6 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
-name = "faker"
-version = "5.0.1"
-description = "Faker is a Python package that generates fake data for you."
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-python-dateutil = ">=2.4"
-text-unidecode = "1.3"
-
-[[package]]
 name = "html5lib"
 version = "1.1"
 description = "HTML parser based on the WHATWG HTML specification"
@@ -490,19 +478,18 @@ toml = ">=0.7.1"
 
 [[package]]
 name = "pylint-django"
-version = "2.4.1"
+version = "2.4.2"
 description = "A Pylint plugin to help Pylint understand the Django web framework"
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-Faker = "<=5.0.1"
 pylint = ">=2.0"
 pylint-plugin-utils = ">=0.5"
 
 [package.extras]
-for_tests = ["coverage", "django-tables2", "factory-boy", "pytest"]
+for_tests = ["Faker (<=5.0.1)", "coverage", "django-tables2", "factory-boy", "pytest"]
 with_django = ["django"]
 
 [[package]]
@@ -596,17 +583,6 @@ python-versions = "*"
 pytest = ">=2.6.0"
 
 [[package]]
-name = "python-dateutil"
-version = "2.8.1"
-description = "Extensions to the standard Python datetime module"
-category = "dev"
-optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-
-[package.dependencies]
-six = ">=1.5"
-
-[[package]]
 name = "pytz"
 version = "2020.5"
 description = "World timezone definitions, modern and historical"
@@ -674,14 +650,6 @@ description = "A non-validating SQL parser."
 category = "main"
 optional = false
 python-versions = ">=3.5"
-
-[[package]]
-name = "text-unidecode"
-version = "1.3"
-description = "The most basic Text::Unidecode port"
-category = "dev"
-optional = false
-python-versions = "*"
 
 [[package]]
 name = "tinycss2"
@@ -812,7 +780,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "05ec9cbca878680e212769a003f09dbeca39c7a2f488b82f88561fb147370d8b"
+content-hash = "54bddc2ad4c6daa80eba6794ae2e6d2bb906f021b9f3f414f982fb0e5047ddae"
 
 [metadata.files]
 appdirs = [
@@ -986,10 +954,6 @@ djangorestframework = [
     {file = "djangorestframework-3.9.0-py2.py3-none-any.whl", hash = "sha256:63f76cbe1e7d12b94c357d7e54401103b2e52aef0f7c1650d6c820ad708776e5"},
     {file = "djangorestframework-3.9.0.tar.gz", hash = "sha256:607865b0bb1598b153793892101d881466bd5a991de12bd6229abb18b1c86136"},
 ]
-faker = [
-    {file = "Faker-5.0.1-py3-none-any.whl", hash = "sha256:1fcb415562ee6e2395b041e85fa6901d4708d30b84d54015226fa754ed0822c3"},
-    {file = "Faker-5.0.1.tar.gz", hash = "sha256:e8beccb398ee9b8cc1a91d9295121d66512b6753b4846eb1e7370545d46b3311"},
-]
 html5lib = [
     {file = "html5lib-1.1-py2.py3-none-any.whl", hash = "sha256:0d78f8fde1c230e99fe37986a60526d7049ed4bf8a9fadbad5f00e22e58e041d"},
     {file = "html5lib-1.1.tar.gz", hash = "sha256:b2e5b40261e20f354d198eae92afc10d750afb487ed5e50f9c4eaf07c184146f"},
@@ -1143,8 +1107,8 @@ pylint = [
     {file = "pylint-2.6.0.tar.gz", hash = "sha256:bb4a908c9dadbc3aac18860550e870f58e1a02c9f2c204fdf5693d73be061210"},
 ]
 pylint-django = [
-    {file = "pylint-django-2.4.1.tar.gz", hash = "sha256:957635db537509f7304627845270119f45dad8c708050209646b639fce97d763"},
-    {file = "pylint_django-2.4.1-py3-none-any.whl", hash = "sha256:f635dbfa72e14158d107b594bec75f006ec8280af79c6e51b825e9d2cfdee7f6"},
+    {file = "pylint-django-2.4.2.tar.gz", hash = "sha256:f8d77f7da47a7019cda5cb669c214f03033208f9e945094661299d2637c0da06"},
+    {file = "pylint_django-2.4.2-py3-none-any.whl", hash = "sha256:355dddb25ef07dbdb77a818b0860ada722aab654c24da34aab916ec26d6390ba"},
 ]
 pylint-plugin-utils = [
     {file = "pylint-plugin-utils-0.6.tar.gz", hash = "sha256:57625dcca20140f43731311cd8fd879318bf45a8b0fd17020717a8781714a25a"},
@@ -1172,10 +1136,6 @@ pytest-django = [
 ]
 pytest-env = [
     {file = "pytest-env-0.6.2.tar.gz", hash = "sha256:7e94956aef7f2764f3c147d216ce066bf6c42948bb9e293169b1b1c880a580c2"},
-]
-python-dateutil = [
-    {file = "python-dateutil-2.8.1.tar.gz", hash = "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"},
-    {file = "python_dateutil-2.8.1-py2.py3-none-any.whl", hash = "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"},
 ]
 pytz = [
     {file = "pytz-2020.5-py2.py3-none-any.whl", hash = "sha256:16962c5fb8db4a8f63a26646d8886e9d769b6c511543557bc84e9569fb9a9cb4"},
@@ -1253,10 +1213,6 @@ six = [
 sqlparse = [
     {file = "sqlparse-0.4.1-py3-none-any.whl", hash = "sha256:017cde379adbd6a1f15a61873f43e8274179378e95ef3fede90b5aa64d304ed0"},
     {file = "sqlparse-0.4.1.tar.gz", hash = "sha256:0f91fd2e829c44362cbcfab3e9ae12e22badaa8a29ad5ff599f9ec109f0454e8"},
-]
-text-unidecode = [
-    {file = "text-unidecode-1.3.tar.gz", hash = "sha256:bad6603bb14d279193107714b288be206cac565dfa49aa5b105294dd5c4aab93"},
-    {file = "text_unidecode-1.3-py2.py3-none-any.whl", hash = "sha256:1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8"},
 ]
 tinycss2 = [
     {file = "tinycss2-1.1.0-py3-none-any.whl", hash = "sha256:0353b5234bcaee7b1ac7ca3dea7e02cd338a9f8dcbb8f2dcd32a5795ec1e5f9a"},
