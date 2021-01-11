@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+
+[Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc2...HEAD
+
+
 ## [21.04-rc2] - 2021-01-11
 ### Changed
 - settings to default to GOS settings [153](https://github.com/greenbone/pheme/pull/153)
