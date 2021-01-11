@@ -4,20 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-### Added
+## [21.04-rc2] - 2021-01-11
 ### Changed
 - settings to default to GOS settings [153](https://github.com/greenbone/pheme/pull/153)
 - KeyError to TemplateNotFoundError [155](https://github.com/greenbone/pheme/pull/155)
 - move get_user_role to authentication [155](https://github.com/greenbone/pheme/pull/155)
-### Deprecated
 ### Removed
 - parameter script [156](https://github.com/greenbone/pheme/pull/156)
 ### Fixed
 - division by zero when a report does not contain results [154](https://github.com/greenbone/pheme/pull/154)
 
-[Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc1...HEAD
-
+[21.04-rc2]: https://github.com/greenbone/pheme/compare/v21.04-rc1...v21.04-rc2
 
 ## [21.04-rc1] - 2020-12-10
 ### Added
