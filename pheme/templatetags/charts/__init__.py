@@ -20,9 +20,9 @@ from typing import Dict
 from django import template
 
 _severity_class_colors = {
-    'High': "#d4003e",
-    'Medium': "#fcb900",
-    'Low': "#7db4d0",
+    "High": "#d4003e",
+    "Medium": "#fcb900",
+    "Low": "#7db4d0",
 }
 
 register = template.Library()
@@ -34,12 +34,16 @@ __LEGEND_TEMPLATE = """
 """
 __LEGEND_ELEMENT = """
 <rect x="{x}" y="0" height="{font_size}" width="{font_size}" style="fill: {color};"></rect>
-<text x="{text_x}" y="{half_font_size}" dominant-baseline="central">{label}</text>
+<text style="font-size:{font_size};font-family:{font_family}" x="{text_x}" y="{half_font_size}" dominant-baseline="central">{label}</text>
 """
 
 
 def _build_legend(
-    start_height: int, width: int, font_size: int, label_color: Dict
+    start_height: int,
+    width: int,
+    label_color: Dict,
+    font_family: str = "Droid Sans",
+    font_size: int = 10,
 ) -> str:
     """
     Generates a legend at     start_height y position and at
@@ -54,6 +58,8 @@ def _build_legend(
         font_size: size of used font, used to calculate x position of an element
         label_color: key is used as a label and the value as a fill color for an
             rectangle (font_size * font_size).
+        font_family - the font family used within text elements
+        font_size - the font size used within text elements
     Returns:
         A complete g element with legends as a string.
 
@@ -65,6 +71,7 @@ def _build_legend(
         legend_elements += __LEGEND_ELEMENT.format(
             x=x_pos,
             font_size=font_size,
+            font_family=font_family,
             color=color,
             half_font_size=font_size / 2,
             label=label,

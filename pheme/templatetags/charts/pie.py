@@ -35,7 +35,7 @@ __PIE_CHART_TEMPLATE = """
 __SLICE_TEMPLATE = """
 <g>
 <circle cx="{cx}" cy="{cy}" r="{radius}" stroke="{color}" stroke-width="{stroke_width}" stroke-dasharray="{d_array}" stroke-dashoffset="{s_offset}" transform="rotate({r_start}, {cx}, {cy})" fill="transparent"></circle>
-<text x="{t_x}" y="{t_y}" text-anchor="middle">{label}</text>
+<text style="font-size:{font_size};font-family:{font_family}" x="{t_x}" y="{t_y}" text-anchor="middle">{label}</text>
 </g>
 """
 
@@ -46,7 +46,9 @@ def pie_chart(
     title_color: Dict = None,
     chart_size: int = 320,
     border_size: int = 0,
-    slice_width: int = 60,
+    slice_width: int = 90,
+    font_family: str = "Droid Sans",
+    font_size: int = 10,
 ) -> SafeText:
     """
     creates a pie chart svg.
@@ -68,6 +70,8 @@ def pie_chart(
         chart_size: int the height and width of the
         border_size: int size of the border of slice
         slice_width: int the width of slice
+        font_family - the font family used within text elements
+        font_size - the font size used within text elements
 
     Returns:
     A SafeString with SVG
@@ -112,9 +116,11 @@ def pie_chart(
             t_x=t_x,
             t_y=t_y,
             label=f"{round(percent * 100)}%",
+            font_family=font_family,
+            font_size=font_size,
         ).strip()
 
-    legend = _build_legend(chart_size + 10, chart_size, 16, title_color)
+    legend = _build_legend(chart_size + 10, chart_size, title_color)
     return SafeText(
         __PIE_CHART_TEMPLATE.format(
             size=chart_size, height=chart_size + 26, donut=donut, legend=legend
