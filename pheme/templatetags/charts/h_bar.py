@@ -43,9 +43,9 @@ __BAR_ELEMENT_TEMPLATE = """
 __BAR_TEMPLATE = """
 <g class="entry" transform="translate(0, {y})">
 <text class="label category" y="22" x="87.5" fill="#4C4C4D" dominant-baseline="central"
-style="font-size:{font_size};font-family:{font_family};text-anchor: right;" width="175">{key}
+style="font-size:{font_size};font-family:{font_family};text-anchor: right;" width="{max_hostname_len}">{key}
 </text>
-<g transform="translate(175, 0)">
+<g transform="translate({max_hostname_len}, 0)">
 {orientation_lines}
 {bar_elements}
 </g>
@@ -58,7 +58,7 @@ style="font-size:{font_size};font-family:{font_family};text-anchor: left;" width
 __BAR_CHART_TEMPLATE = """
 <svg width="{width}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
 {bars}
-<g transform="translate(175, {bar_legend_y})">
+<g transform="translate({max_hostname_len}, {bar_legend_y})">
 {bar_legend}
 </g>
 {legend}
@@ -103,17 +103,20 @@ def h_bar_chart(
         orientation_basis - if higher than 0 than there will be a vertical line
             each orientation_basis.
         limit - limits the data by N first elements
+        font_family - the font family used within text elements
+        font_size - the font size used within text elements
     """
 
     data = dict(itertools.islice(chart_data.items(), limit))
     if not title_color:
         title_color = _severity_class_colors
-    max_width = svg_width - 175 - 100  # key and total placeholder
-    # highest sum of counts
     if not data.values():
         return SafeText("")
+    # multiply by 1.25 for kerning
+    max_hostname_len = max(len(k) for k in data.keys()) * font_size * 1.25
+    max_width = svg_width - max_hostname_len - 100  # key and total placeholder
+    # highest sum of counts
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
-
     orientation_lines = ""
     orientation_labels = ""
 
@@ -160,6 +163,7 @@ def h_bar_chart(
                 color=color,
                 font_family=font_family,
                 font_size=font_size,
+                max_hostname_len=max_hostname_len,
             )
             element_x += width
 
@@ -171,6 +175,7 @@ def h_bar_chart(
             total=sum(counts.values()),
             font_family=font_family,
             font_size=font_size,
+            max_hostname_len=max_hostname_len,
         )
     svg_element_lengths = len(data.keys()) * bar_jump + 50
     svg_chart = __BAR_CHART_TEMPLATE.format(
@@ -182,5 +187,6 @@ def h_bar_chart(
         legend=_build_legend(svg_element_lengths + 10, svg_width, title_color),
         font_family=font_family,
         font_size=font_size,
+        max_hostname_len=max_hostname_len,
     )
     return SafeText(svg_chart)

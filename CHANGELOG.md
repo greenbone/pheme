@@ -6,7 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- font-family and font-size to charts []()
 ### Changed
+- replaced hardcoded 175 in favor of max len hostname * font size * 1.25 in bar chart []()
 ### Deprecated
 ### Removed
 ### Fixed

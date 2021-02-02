@@ -262,10 +262,11 @@ def treemap(
         data: needs to be an dict containing label, color_key and values.
         width: width of the svg (default 1024)
         height: height of the svg (default 768)
-        font_size: used font_size (default 11)
         border_color: color of the rectangle border (default white)
         title_color: the color_key to color lookup map
             (default _severity_class_colors)
+        font_family - the font family used within text elements
+        font_size - the font size used within text elements
 
     Returns:
         the treemap in svg as a SafeString.

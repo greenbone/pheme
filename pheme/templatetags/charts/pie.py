@@ -70,6 +70,8 @@ def pie_chart(
         chart_size: int the height and width of the
         border_size: int size of the border of slice
         slice_width: int the width of slice
+        font_family - the font family used within text elements
+        font_size - the font size used within text elements
 
     Returns:
     A SafeString with SVG

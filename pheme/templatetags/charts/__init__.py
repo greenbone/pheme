@@ -58,6 +58,8 @@ def _build_legend(
         font_size: size of used font, used to calculate x position of an element
         label_color: key is used as a label and the value as a fill color for an
             rectangle (font_size * font_size).
+        font_family - the font family used within text elements
+        font_size - the font size used within text elements
     Returns:
         A complete g element with legends as a string.
 
