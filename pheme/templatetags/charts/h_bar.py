@@ -19,7 +19,7 @@
 
 import itertools
 from typing import Dict
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeText
 from pheme.templatetags.charts import (
     register,
     _severity_class_colors,
@@ -33,7 +33,7 @@ __ORIENTATION_LINE_TEMPLATE = """
 
 __ORIENTATION_LINE_TEXT_TEMPLATE = """
 <text class="orientation label" y="22" x="{x}" fill="#4C4C4D" dominant-baseline="central"
-style="text-anchor: middle;" width="{width}">{label}
+style="font-size:{font_size};font-family:{font_family};text-anchor: middle;" width="{width}">{label}
 </text>
 """
 __BAR_ELEMENT_TEMPLATE = """
@@ -43,7 +43,7 @@ __BAR_ELEMENT_TEMPLATE = """
 __BAR_TEMPLATE = """
 <g class="entry" transform="translate(0, {y})">
 <text class="label category" y="22" x="87.5" fill="#4C4C4D" dominant-baseline="central"
-style="text-anchor: middle;" width="175">{key}
+style="font-size:{font_size};font-family:{font_family};text-anchor: right;" width="175">{key}
 </text>
 <g transform="translate(175, 0)">
 {orientation_lines}
@@ -51,7 +51,7 @@ style="text-anchor: middle;" width="175">{key}
 </g>
 <g transform="translate(700, 0)">
 <text class="sum" y="22" x="10" fill="#4C4C4D" dominant-baseline="central"
-style="text-anchor: left;" width="100">{total}</text>
+style="font-size:{font_size};font-family:{font_family};text-anchor: left;" width="100">{total}</text>
 </g>
 </g>
 """
@@ -74,7 +74,9 @@ def h_bar_chart(
     bar_jump=44,
     orientation_basis=20,
     limit=10,
-) -> str:
+    font_family="Droid Sans",
+    font_size=10,
+) -> SafeText:
 
     """
     Returns a stacked horizontal bar chart in svg.
@@ -109,7 +111,7 @@ def h_bar_chart(
     max_width = svg_width - 175 - 100  # key and total placeholder
     # highest sum of counts
     if not data.values():
-        return mark_safe("")
+        return SafeText("")
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
 
     orientation_lines = ""
@@ -119,10 +121,17 @@ def h_bar_chart(
         x_pos = i * orientation_basis / max_sum * max_width
         label = str(i * orientation_basis)
         orientation_lines += __ORIENTATION_LINE_TEMPLATE.format(
-            x=x_pos, height=bar_jump + 10
+            x=x_pos,
+            height=bar_jump + 10,
+            font_family=font_family,
+            font_size=font_size,
         )
         orientation_labels += __ORIENTATION_LINE_TEXT_TEMPLATE.format(
-            x=x_pos, width=len(label), label=label
+            x=x_pos,
+            width=len(label),
+            label=label,
+            font_family=font_family,
+            font_size=font_size,
         )
         return orientation_lines, orientation_labels
 
@@ -146,7 +155,11 @@ def h_bar_chart(
             color = title_color.get(category)
             width = count / max_sum * max_width
             elements += __BAR_ELEMENT_TEMPLATE.format(
-                x=element_x, width=width, color=color
+                x=element_x,
+                width=width,
+                color=color,
+                font_family=font_family,
+                font_size=font_size,
             )
             element_x += width
 
@@ -156,6 +169,8 @@ def h_bar_chart(
             bar_elements=elements,
             orientation_lines=orientation_lines,
             total=sum(counts.values()),
+            font_family=font_family,
+            font_size=font_size,
         )
     svg_element_lengths = len(data.keys()) * bar_jump + 50
     svg_chart = __BAR_CHART_TEMPLATE.format(
@@ -164,8 +179,8 @@ def h_bar_chart(
         bars=bars,
         bar_legend=orientation_labels,
         bar_legend_y=len(data.keys()) * bar_jump + 20,
-        legend=_build_legend(
-            svg_element_lengths + 10, svg_width, 16, title_color
-        ),
+        legend=_build_legend(svg_element_lengths + 10, svg_width, title_color),
+        font_family=font_family,
+        font_size=font_size,
     )
-    return mark_safe(svg_chart)
+    return SafeText(svg_chart)

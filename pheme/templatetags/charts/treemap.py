@@ -29,7 +29,7 @@ import numbers
 from dataclasses import dataclass
 from typing import Dict, List
 
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeText
 
 from pheme.templatetags.charts import (
     _severity_class_colors,
@@ -40,7 +40,7 @@ from pheme.templatetags.charts import (
 __ELEMENT_TEMPLATE = """
 <g>
     <rect x="{x}" y="{y}" width="{width}" height="{height}" fill="{color}" stroke="{border_color}" strokeWidth="1" />
-    <text x="{label_x}" y="{label_y}" width="{width}" height="{height}" dominant-baseline="central">{label}</text>
+    <text style="font-size:{font_size};font-family:{font_family}" x="{label_x}" y="{label_y}" width="{width}" height="{height}" dominant-baseline="central">{label}</text>
 </g>
 """
 
@@ -234,10 +234,11 @@ def treemap(
     data: List[Dict],
     width: int = 1024,
     height: int = 768,
-    fontsize: int = 16,
     border_color: str = "#ffffff",
     title_color: Dict[str, str] = None,
-) -> str:
+    font_size: int = 10,
+    font_family: str = "Droid Sans",
+) -> SafeText:
     """
     Expects a sorted dict containing a str, and a dict with values in it.
 
@@ -261,7 +262,7 @@ def treemap(
         data: needs to be an dict containing label, color_key and values.
         width: width of the svg (default 1024)
         height: height of the svg (default 768)
-        fontsize: used fontsize (default 11)
+        font_size: used font_size (default 11)
         border_color: color of the rectangle border (default white)
         title_color: the color_key to color lookup map
             (default _severity_class_colors)
@@ -275,14 +276,14 @@ def treemap(
     sizes = __squarify(sizes, Rect(0, 0, width, height))
     elements = ""
     for i, d in enumerate(sizes):
-        label_size_in_px = len(label[i]) * fontsize
+        label_size_in_px = len(label[i]) * font_size
         label_x = d.x + 1
         # move half of the font size down and add a buffer for different
         # heights of characters (depends on font) to display the label
         # on the upper left corner of an rectangle.
-        label_y = d.y + fontsize / 2 + 5
+        label_y = d.y + font_size / 2 + 5
         max_label_len = m.ceil(d.dx / (label_size_in_px * 0.75) * len(label[i]))
-        if d.dy <= fontsize:
+        if d.dy <= font_size:
             max_label_len = 0
 
         elements += __ELEMENT_TEMPLATE.format(
@@ -295,12 +296,14 @@ def treemap(
             label_x=label_x,
             label_y=label_y,
             label=label[i][:max_label_len],
+            font_size=font_size,
+            font_family=font_family,
         )
-    return mark_safe(
+    return SafeText(
         __TEMPLATE.format(
             width=width,
-            height=height + 10 + fontsize,
+            height=height + 10 + font_size,
             rects=elements,
-            legend=_build_legend(height + 10, width, fontsize, title_color),
+            legend=_build_legend(height + 10, width, title_color),
         )
     )
