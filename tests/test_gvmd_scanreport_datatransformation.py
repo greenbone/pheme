@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # tests/test_gvmd_scanreport_datatransformation.py
-# Copyright (C) 2020 Greenbone Networks GmbH
+# Copyright (C) 2020-2021 Greenbone Networks GmbH
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #

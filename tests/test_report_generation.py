@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # tests/test_report_generation.py
-# Copyright (C) 2020 Greenbone Networks GmbH
+# Copyright (C) 2020-2021 Greenbone Networks GmbH
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
@@ -121,7 +121,7 @@ def test_charts_generation_on_zero_result_report():
         generate('oid', 0),
         name='http_accept_test',
     )
-    test_chart_keyword(report, 1) 
+    test_chart_keyword(report, 1)
 
 
 def test_chart_keyword(report=None, expected=3):
@@ -151,7 +151,7 @@ def test_chart_keyword(report=None, expected=3):
     assert response.status_code == 200
     response = test_http_accept("text/html", report)
     html_report = response.getvalue().decode('utf-8')
-    assert html_report.count("<svg ") == expected 
+    assert html_report.count("<svg ") == expected
 
 
 @pytest.mark.parametrize(
