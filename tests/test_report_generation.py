@@ -169,11 +169,19 @@ def test_http_accept_visual(http_accept):
     url = reverse(
         'put_parameter',
     )
+    render_charts = """
+    {% load charts %}
+    <html>
+    {{ overview.nvts | pie_chart}}
+    {{ overview.hosts | h_bar_chart  }}
+    {{ overview.hosts | treemap  }}
+    </html>
+    """
     response = client.put(
         url,
         data={
             css_key: "html { background: #000; }",
-            template_key: "<html><h1>Holla</h1></html>",
+            template_key: render_charts,
         },
         HTTP_X_API_KEY=SECRET_KEY,
     )
