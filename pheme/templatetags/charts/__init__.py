@@ -33,14 +33,19 @@ __LEGEND_TEMPLATE = """
 </g>
 """
 __LEGEND_ELEMENT = """
-<rect x="{x}" y="0" height="{font_size}" width="{font_size}" style="fill: {color};"></rect>
-<text style="font-size:{font_size};font-family:{font_family}" x="{text_x}" y="{half_font_size}" dominant-baseline="central">{label}</text>
+<rect x="{x}" y="{y}" height="{font_size}" width="{font_size}" style="fill: {color};"></rect>
+<text style="font-size:{font_size};font-family:{font_family}" x="{text_x}" y="{text_y}" dominant-baseline="central">{label}</text>
 """
 
 
-def _build_legend(
+def calculate_legend_start_height(
+    height: int, label_color: Dict, font_size: int
+) -> int:
+    return int(height / 2 - (len(label_color) * font_size) / 2)
+
+
+def build_legend(
     start_height: int,
-    width: int,
     label_color: Dict,
     font_family: str = "Droid Sans",
     font_size: int = 10,
@@ -66,19 +71,19 @@ def _build_legend(
     """
     legend_elements = ""
     x_pos = 0
+    y_pos = 0
+    text_x = font_size + 2
     for label, color in label_color.items():
-        text_x = x_pos + font_size + 2
         legend_elements += __LEGEND_ELEMENT.format(
             x=x_pos,
+            y=y_pos,
             font_size=font_size,
             font_family=font_family,
             color=color,
-            half_font_size=font_size / 2,
+            text_y=y_pos + 5,
             label=label,
             text_x=text_x,
         )
-        x_pos = text_x + len(label) * font_size
+        y_pos += font_size + font_size / 2
 
-    return __LEGEND_TEMPLATE.format(
-        x=width / 2 - x_pos / 2, y=start_height, legend=legend_elements
-    )
+    return __LEGEND_TEMPLATE.format(x=0, y=start_height, legend=legend_elements)

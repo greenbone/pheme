@@ -20,14 +20,17 @@ import math
 from typing import Dict
 from django.utils.safestring import SafeText
 from pheme.templatetags.charts import (
+    calculate_legend_start_height,
     register,
     _severity_class_colors,
-    _build_legend,
+    build_legend,
 )
 
 __PIE_CHART_TEMPLATE = """
 <svg width="{size}" viewBox="0 0 {size} {height}" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate({start_pie}, 0)">
 {donut}
+</g>
 {legend}
 </svg>
 """
@@ -44,7 +47,7 @@ __SLICE_TEMPLATE = """
 def pie_chart(
     input_values: Dict,
     title_color: Dict = None,
-    chart_size: int = 320,
+    width: int = 390,
     border_size: int = 0,
     slice_width: int = 90,
     font_family: str = "Droid Sans",
@@ -85,6 +88,9 @@ def pie_chart(
     # we start at 12' o clock
     angle_offset = -90
 
+    max_legend_len = max([len(k) for k in title_color.keys()])
+    chart_size = width - max_legend_len * font_size - font_size
+
     cx = chart_size / 2  # shift x
     cy = chart_size / 2  # shift y
     # need to cut out size of the slice_width, otherwise edges will be cut off
@@ -120,9 +126,16 @@ def pie_chart(
             font_size=font_size,
         ).strip()
 
-    legend = _build_legend(chart_size + 10, chart_size, title_color)
+    legend_start = calculate_legend_start_height(
+        chart_size, title_color, font_size
+    )
+    legend = build_legend(legend_start, title_color)
     return SafeText(
         __PIE_CHART_TEMPLATE.format(
-            size=chart_size, height=chart_size + 26, donut=donut, legend=legend
+            start_pie=width - chart_size,
+            size=chart_size + (width - chart_size),
+            height=chart_size,
+            donut=donut,
+            legend=legend,
         ).strip()
     )
