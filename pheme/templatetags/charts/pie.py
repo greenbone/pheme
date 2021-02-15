@@ -70,7 +70,7 @@ def pie_chart(
     Parameters:
         input_values: dict containing the data as label: numeric_value
         title_color: dict containing the data as label: color
-        chart_size: int the height and width of the
+        width: int the height and width of the
         border_size: int size of the border of slice
         slice_width: int the width of slice
         font_family - the font family used within text elements
@@ -133,7 +133,7 @@ def pie_chart(
     return SafeText(
         __PIE_CHART_TEMPLATE.format(
             start_pie=width - chart_size,
-            size=chart_size + (width - chart_size),
+            size=width,
             height=chart_size,
             donut=donut,
             legend=legend,

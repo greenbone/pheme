@@ -59,8 +59,6 @@ def build_legend(
 
     Parameters:
         start_height: x position of legend
-        width: width: of the svg, used as an indicator for the middle
-        font_size: size of used font, used to calculate x position of an element
         label_color: key is used as a label and the value as a fill color for an
             rectangle (font_size * font_size).
         font_family - the font family used within text elements
@@ -72,7 +70,8 @@ def build_legend(
     legend_elements = ""
     x_pos = 0
     y_pos = 0
-    text_x = font_size + 2
+    # offset of two to the rect element
+    text_x_pos = font_size + 2
     for label, color in label_color.items():
         legend_elements += __LEGEND_ELEMENT.format(
             x=x_pos,
@@ -80,9 +79,10 @@ def build_legend(
             font_size=font_size,
             font_family=font_family,
             color=color,
-            text_y=y_pos + 5,
             label=label,
-            text_x=text_x,
+            text_x=text_x_pos,
+            # text position needs to aligned in the middle of the rect
+            text_y=y_pos + font_size / 2,
         )
         y_pos += font_size + font_size / 2
 
