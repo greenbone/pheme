@@ -23,7 +23,8 @@ from django.utils.safestring import SafeText
 from pheme.templatetags.charts import (
     register,
     _severity_class_colors,
-    _build_legend,
+    build_legend,
+    calculate_legend_start_height,
 )
 
 
@@ -49,7 +50,7 @@ style="font-size:{font_size};font-family:{font_family};text-anchor: right;" widt
 {orientation_lines}
 {bar_elements}
 </g>
-<g transform="translate(700, 0)">
+<g transform="translate({begin_total}, 0)">
 <text class="sum" y="22" x="10" fill="#4C4C4D" dominant-baseline="central"
 style="font-size:{font_size};font-family:{font_family};text-anchor: left;" width="100">{total}</text>
 </g>
@@ -176,15 +177,19 @@ def h_bar_chart(
             font_family=font_family,
             font_size=font_size,
             max_hostname_len=max_hostname_len,
+            begin_total=svg_width - 100,
         )
     svg_element_lengths = len(data.keys()) * bar_jump + 50
+    legend_start = calculate_legend_start_height(
+        svg_element_lengths, title_color, font_size
+    )
     svg_chart = __BAR_CHART_TEMPLATE.format(
         width=svg_width,
-        height=svg_element_lengths + 30,
+        height=svg_element_lengths,
         bars=bars,
         bar_legend=orientation_labels,
         bar_legend_y=len(data.keys()) * bar_jump + 20,
-        legend=_build_legend(svg_element_lengths + 10, svg_width, title_color),
+        legend=build_legend(legend_start, title_color),
         font_family=font_family,
         font_size=font_size,
         max_hostname_len=max_hostname_len,

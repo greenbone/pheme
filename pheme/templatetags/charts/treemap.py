@@ -34,7 +34,8 @@ from django.utils.safestring import SafeText
 from pheme.templatetags.charts import (
     _severity_class_colors,
     register,
-    _build_legend,
+    build_legend,
+    calculate_legend_start_height,
 )
 
 __ELEMENT_TEMPLATE = """
@@ -50,7 +51,9 @@ __TEMPLATE = """
      width="{width}" height="{height}"
      viewBox="0 0 {width} {height}"
      xmlns="http://www.w3.org/2000/svg">
+     <g transform="translate({start_tree}, 0)">
      {rects}
+     </g>
      {legend}
 </svg>
 """
@@ -274,7 +277,9 @@ def treemap(
     if not title_color:
         title_color = _severity_class_colors
     sizes, label, color_keys = __transform_to_tree_data(data)
-    sizes = __squarify(sizes, Rect(0, 0, width, height))
+    max_legend_len = max([len(k) for k in title_color.keys()])
+    s_width = width - max_legend_len * font_size - font_size
+    sizes = __squarify(sizes, Rect(0, 0, s_width, height))
     elements = ""
     for i, d in enumerate(sizes):
         label_size_in_px = len(label[i]) * font_size
@@ -300,11 +305,13 @@ def treemap(
             font_size=font_size,
             font_family=font_family,
         )
+    legend_start = calculate_legend_start_height(height, title_color, font_size)
     return SafeText(
         __TEMPLATE.format(
             width=width,
-            height=height + 10 + font_size,
+            height=height,
             rects=elements,
-            legend=_build_legend(height + 10, width, title_color),
+            legend=build_legend(legend_start, title_color),
+            start_tree=width - s_width,
         )
     )
