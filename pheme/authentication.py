@@ -31,7 +31,7 @@ from pheme import settings
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-# pylint falsly identifies Union as unsubscriptable-object in python 3.9
+# pylint falsely identifies Union as unsubscriptable-object in python 3.9
 # pylint: disable=E1136
 
 
