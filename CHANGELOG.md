@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
-- just contain last element of reference type within references instead of all []()
+- just contain last element of reference type within references instead of all [180](https://github.com/greenbone/pheme/pull/180)
 
 [Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc2...HEAD
 
