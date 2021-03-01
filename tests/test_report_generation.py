@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from unittest.mock import patch
-from typing import List
+from typing import List, Optional
 import pytest
 from django.core.cache import cache
 from django.urls import reverse
@@ -31,39 +31,44 @@ from pheme.transformation.scanreport import renderer
 from tests.generate_test_data import gen_report
 
 
-def generate(prefix: str, amount: int) -> List[str]:
-    return ["{}_{}".format(prefix, i) for i in range(amount)]
+def generate(
+    prefix: str, amount: int, number: Optional[int] = None
+) -> List[str]:
+    return [
+        "{}_{}".format(prefix, number if number is not None else i)
+        for i in range(amount)
+    ]
 
 
 def test_report_contains_equipment():
     client = APIClient()
-    url = reverse('transform')
+    url = reverse("transform")
     report = {
-        'report': {
-            'report': gen_report(generate('host', 10), generate('oid', 5))
+        "report": {
+            "report": gen_report(generate("host", 10), generate("oid", 5))
         }
     }
-    response = client.post(url, data=report, format='xml')
+    response = client.post(url, data=report, format="xml")
     assert response.status_code == 200
     result = cache.get(response.data)
-    assert result['results'][0]['equipment']['os'] == "rusty rust rust"
-    assert result['results'][0]['equipment']['ports'] is not None
+    assert result["results"][0]["equipment"]["os"] == "rusty rust rust"
+    assert result["results"][0]["equipment"]["ports"] is not None
 
 
 def test_report_contains_charts():
     client = APIClient()
-    url = reverse('transform')
+    url = reverse("transform")
     report = {
-        'report': {
-            'report': gen_report(generate('host', 10), generate('oid', 5))
+        "report": {
+            "report": gen_report(generate("host", 10), generate("oid", 5))
         }
     }
-    response = client.post(url, data=report, format='xml')
+    response = client.post(url, data=report, format="xml")
     assert response.status_code == 200
     result = cache.get(response.data)
-    assert result['overview'] is not None
-    assert result['overview']['hosts'] is not None
-    assert result['overview']['nvts'] is not None
+    assert result["overview"] is not None
+    assert result["overview"]["hosts"] is not None
+    assert result["overview"]["nvts"] is not None
     # assert result['overview']['vulnerable_equipment'] is not None
 
 
@@ -84,11 +89,11 @@ def test_workaround_for_inline_svg_and_weasyprint(html_contains):
 
 def test_dynamic_template():
     subtype = "html"
-    css_key = f'vulnerability_report_{subtype}_css'
-    template_key = f'vulnerability_report_{subtype}_template'
+    css_key = f"vulnerability_report_{subtype}_css"
+    template_key = f"vulnerability_report_{subtype}_template"
     client = APIClient()
     url = reverse(
-        'put_parameter',
+        "put_parameter",
     )
     nvts_template = """
     <h1>{{ High }}</h1>
@@ -103,34 +108,43 @@ def test_dynamic_template():
         url,
         data={
             css_key: "html { background: #000; }",
-            'nvts_template': nvts_template,
+            "nvts_template": nvts_template,
             template_key: render_charts,
         },
         HTTP_X_API_KEY=SECRET_KEY,
     )
     assert response.status_code == 200
     response = test_http_accept("text/html")
-    nvts = response.data['overview']['nvts']
-    html_report = response.getvalue().decode('utf-8')
+    nvts = response.data["overview"]["nvts"]
+    html_report = response.getvalue().decode("utf-8")
     assert f"<h1>{nvts['High']}</h1>" in html_report
+
+
+def test_charts_generation_on_zero_severity_report():
+    report = gen_report(
+        generate("host", 10),
+        generate("oid", 10, 0),
+        name="http_accept_test",
+    )
+    test_chart_keyword(report, 3)
 
 
 def test_charts_generation_on_zero_result_report():
     report = gen_report(
-        generate('host', 0),
-        generate('oid', 0),
-        name='http_accept_test',
+        generate("host", 0),
+        generate("oid", 0),
+        name="http_accept_test",
     )
     test_chart_keyword(report, 1)
 
 
 def test_chart_keyword(report=None, expected=3):
     subtype = "html"
-    css_key = 'vulnerability_report_{}_css'.format(subtype)
-    template_key = 'vulnerability_report_{}_template'.format(subtype)
+    css_key = "vulnerability_report_{}_css".format(subtype)
+    template_key = "vulnerability_report_{}_template".format(subtype)
     client = APIClient()
     url = reverse(
-        'put_parameter',
+        "put_parameter",
     )
     render_charts = """
     {% load charts %}
@@ -150,7 +164,7 @@ def test_chart_keyword(report=None, expected=3):
     )
     assert response.status_code == 200
     response = test_http_accept("text/html", report)
-    html_report = response.getvalue().decode('utf-8')
+    html_report = response.getvalue().decode("utf-8")
     assert html_report.count("<svg ") == expected
 
 
@@ -162,12 +176,12 @@ def test_chart_keyword(report=None, expected=3):
     ],
 )
 def test_http_accept_visual(http_accept):
-    subtype = http_accept.split('/')[-1]
-    css_key = 'vulnerability_report_{}_css'.format(subtype)
-    template_key = 'vulnerability_report_{}_template'.format(subtype)
+    subtype = http_accept.split("/")[-1]
+    css_key = "vulnerability_report_{}_css".format(subtype)
+    template_key = "vulnerability_report_{}_template".format(subtype)
     client = APIClient()
     url = reverse(
-        'put_parameter',
+        "put_parameter",
     )
     render_charts = """
     {% load charts %}
@@ -203,17 +217,17 @@ def test_http_accept(
 ):
     if not report:
         report = gen_report(
-            generate('host', 1),
-            generate('oid', 1),
-            name='http_accept_test',
+            generate("host", 1),
+            generate("oid", 1),
+            name="http_accept_test",
         )
-    url = reverse('transform')
-    report = {'report': {'report': report}}
+    url = reverse("transform")
+    report = {"report": {"report": report}}
     client = APIClient()
-    response = client.post(url, data=report, format='xml')
+    response = client.post(url, data=report, format="xml")
     assert response.status_code == 200
     key = response.data
-    report_url = reverse('report', kwargs={'name': key})
+    report_url = reverse("report", kwargs={"name": key})
     html_report = client.get(report_url, HTTP_ACCEPT=http_accept)
     assert html_report.status_code == 200
     return html_report
@@ -221,13 +235,13 @@ def test_http_accept(
 
 def test_generate_format_editor_html_report():
     def upload(key, data):
-        cache_url = reverse('store_cache')
+        cache_url = reverse("store_cache")
         to_send = {"key": key, "value": data}
-        response = APIClient().post(cache_url, data=to_send, format='json')
+        response = APIClient().post(cache_url, data=to_send, format="json")
         assert response.status_code == 200
 
     def upload_image(key, name, content):
-        cache_url = reverse('store_cache')
+        cache_url = reverse("store_cache")
         to_send = {
             "key": key,
             "value": {
@@ -237,7 +251,7 @@ def test_generate_format_editor_html_report():
             "append": True,
         }
         response = APIClient().post(
-            cache_url + '?append_image=true', data=to_send, format='json'
+            cache_url + "?append_image=true", data=to_send, format="json"
         )
         assert response.status_code == 200
 
@@ -246,20 +260,20 @@ def test_generate_format_editor_html_report():
         as_datalink("p2".encode(), "jpg"),
     ]
     client = APIClient()
-    url = reverse('transform')
+    url = reverse("transform")
     report = {
-        'report': {
-            'report': gen_report(
-                generate('host', 10),
-                generate('oid', 5),
-                name='report_format_editor_test',
+        "report": {
+            "report": gen_report(
+                generate("host", 10),
+                generate("oid", 5),
+                name="report_format_editor_test",
             )
         }
     }
-    response = client.post(url, data=report, format='xml')
+    response = client.post(url, data=report, format="xml")
     assert response.status_code == 200
     key = response.data
-    report_url = reverse('report', kwargs={'name': key})
+    report_url = reverse("report", kwargs={"name": key})
     html_template = """
         <html>
             <head>
@@ -279,25 +293,25 @@ def test_generate_format_editor_html_report():
     upload("{}html_css".format(key), html_css)
     # upload(images)
     html_report = client.get(
-        report_url, HTTP_ACCEPT='text/html+report_format_editor'
+        report_url, HTTP_ACCEPT="text/html+report_format_editor"
     )
     assert html_report.status_code == 200
     report = str(html_report.getvalue())
-    assert 'report_format_editor_test' in report
-    assert 'background-color: #000' in report
+    assert "report_format_editor_test" in report
+    assert "background-color: #000" in report
     for content in images:
-        assert "<img src=\"{}\"/>".format(content) in report
+        assert '<img src="{}"/>'.format(content) in report
 
 
-@patch('pheme.parameter.pheme.authentication.get_username_role')
+@patch("pheme.parameter.pheme.authentication.get_username_role")
 def test_html_report_contains_user_paramater(user_information):
-    user_information.side_effect = [(None, None), ('test', 'admin')]
+    user_information.side_effect = [(None, None), ("test", "admin")]
     subtype = "html"
-    css_key = 'vulnerability_report_{}_css'.format(subtype)
-    template_key = 'vulnerability_report_{}_template'.format(subtype)
+    css_key = "vulnerability_report_{}_css".format(subtype)
+    template_key = "vulnerability_report_{}_template".format(subtype)
     client = APIClient()
     url = reverse(
-        'put_parameter',
+        "put_parameter",
     )
     html_template = "<html><body><p>{{ main_color }}</p></body></html>" ""
     response = client.put(
@@ -310,15 +324,15 @@ def test_html_report_contains_user_paramater(user_information):
         HTTP_X_API_KEY=SECRET_KEY,
     )
     assert response.status_code == 200
-    assert response.data['main_color']
+    assert response.data["main_color"]
     client = APIClient()
     url = reverse(
-        'put_value_parameters',
+        "put_value_parameters",
         kwargs={"key": "main_color"},
     )
-    response = client.put(url, data="#000", format='json')
+    response = client.put(url, data="#000", format="json")
     assert response.status_code == 200
-    assert response.data['user_specific']['test']['main_color'] == "#000"
-    report_response = test_http_accept('text/html')
-    html_report = report_response.getvalue().decode('utf-8')
+    assert response.data["user_specific"]["test"]["main_color"] == "#000"
+    report_response = test_http_accept("text/html")
+    html_report = report_response.getvalue().decode("utf-8")
     assert html_report == "<html><body><p>#fff</p></body></html>"
