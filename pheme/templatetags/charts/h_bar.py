@@ -118,6 +118,8 @@ def h_bar_chart(
     max_width = svg_width - max_hostname_len - 100  # key and total placeholder
     # highest sum of counts
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
+    if max_sum == 0:
+        max_sum = 1
     orientation_lines = ""
     orientation_labels = ""
 
