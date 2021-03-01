@@ -6,19 +6,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+
+[Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc3...HEAD
+
+
+## [21.04-rc3] - 2021-03-01
+### Added
 - font-family and font-size to charts [167](https://github.com/greenbone/pheme/pull/167)
 ### Changed
 - replaced hardcoded 175 in favor of max len hostname * font size * 1.25 in bar chart [167](https://github.com/greenbone/pheme/pull/167)
 - legend on the middle left instead of middle bottom [170](https://github.com/greenbone/pheme/pull/170)
-### Deprecated
-### Removed
 ### Fixed
 - just contain last element of reference type within references instead of all [180](https://github.com/greenbone/pheme/pull/180)
 - throw error when trying to calculate next line on missing severity [181](https://github.com/greenbone/pheme/pull/181)
 - replace newlines with space on interpreted tags [182](https://github.com/greenbone/pheme/pull/182)
 
-[Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc2...HEAD
-
+[21.04-rc3]: https://github.com/greenbone/pheme/compare/v21.04-rc2...v21.04-rc3
 
 ## [21.04-rc2] - 2021-01-11
 ### Changed
