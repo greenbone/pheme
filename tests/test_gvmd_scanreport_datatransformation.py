@@ -24,8 +24,17 @@ from pheme.transformation.scanreport.gvmd import (
 
 from tests.generate_test_data import gen_report
 
-oids = ['oid_{}'.format(i) for i in range(5)]
-hosts = ['first', 'second']
+oids = ["oid_{}".format(i) for i in range(5)]
+hosts = ["first", "second"]
+
+
+def test_grouping_nvt_oid_per_type():
+    scan_results = gen_report(hosts, oids, with_optional=True)
+    data = {"report": {"report": scan_results}}
+    report = transform(data)
+    results = report.results[0]['results']
+    # so far refs are hardcoded to ten
+    assert len(results[0]['nvt_refs_ref']['CVE']) == 10
 
 
 @pytest.mark.parametrize(
@@ -37,8 +46,8 @@ hosts = ['first', 'second']
         (0, gen_report(None, [], with_optional=False)),
     ],
 )
-def test_report_generation(expected):
+def test_report_generation_per_host(expected):
     amount_scans, scan_results = expected
-    data = {'report': {'report': scan_results}}
+    data = {"report": {"report": scan_results}}
     report = transform(data)
     assert len(report.results or []) == amount_scans

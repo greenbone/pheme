@@ -65,7 +65,7 @@ def __group_refs(refs: List[Dict]) -> Dict:
     for ref in refs.get('ref', []):
         if isinstance(ref, dict):
             typus = ref.get('type', 'unknown')
-            refs_ref[typus] = refs.get(typus, []) + [ref.get('id')]
+            refs_ref[typus] = refs_ref.get(typus, []) + [ref.get('id')]
     return refs_ref
 
 
