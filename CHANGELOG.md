@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 - just contain last element of reference type within references instead of all [180](https://github.com/greenbone/pheme/pull/180)
+- throw error when trying to calculate next line on missing severity [181](https://github.com/greenbone/pheme/pull/181)
+- replace newlines with space on interpreted tags [182](https://github.com/greenbone/pheme/pull/182)
 
 [Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc2...HEAD
 

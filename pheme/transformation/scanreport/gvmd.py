@@ -28,7 +28,7 @@ it is a specialized module for gvmd scanreports.
 import logging
 import time
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 from pheme.transformation.scanreport.model import (
@@ -53,14 +53,14 @@ def measure_time(func):
     return measure
 
 
-def __tansform_tags(item) -> List[Dict]:
+def __tansform_tags(item) -> Optional[Dict[str, str]]:
     if isinstance(item, str):
         split = [i.split('=') for i in item.split('|')]
-        return {i[0]: i[1] for i in split if len(i) == 2}
+        return {i[0]: i[1].replace('\n', ' ') for i in split if len(i) == 2}
     return None
 
 
-def __group_refs(refs: List[Dict]) -> Dict:
+def __group_refs(refs: Dict[str, str]) -> Dict:
     refs_ref = {}
     for ref in refs.get('ref', []):
         if isinstance(ref, dict):
