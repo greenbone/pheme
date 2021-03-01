@@ -55,7 +55,7 @@ def gen_host(hostname='localhost') -> Dict:
 
 def gen_refs(length: int = 0) -> Dict:
     def ref():
-        return {'id': uuid.uuid1().hex, 'type': _random_text(5)}
+        return {'id': uuid.uuid1().hex, 'type': 'CVE'}
 
     return {'ref': [ref() for _ in range(length)]}
 
@@ -72,7 +72,7 @@ def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
         'oid': oid,
         'solution': gen_solution() if with_optional else None,
         'refs': gen_refs(10) if with_optional else None,
-        'type': _random_text(15) if with_optional else None,
+        'type': 'CVE',
         'name': "faked example {}".format(oid) if with_optional else None,
         'family': _random_text(15) if with_optional else None,
         'cvss_base': "{}".format(float(oid[4:]) / 10)
