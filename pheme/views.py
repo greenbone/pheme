@@ -30,7 +30,7 @@ from pheme.renderer import MarkDownTableRenderer, XMLRenderer, CSVRenderer
 from pheme.transformation.scanreport import model
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @renderer_classes(
     [
         rest_framework.renderers.JSONRenderer,
@@ -40,7 +40,7 @@ def load_cache(request, key):
     return Response(load(key))
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @parser_classes([rest_framework.parsers.JSONParser])
 @renderer_classes(
     [
@@ -49,17 +49,17 @@ def load_cache(request, key):
 )
 def store_cache(request):
     key = request.data.get("key", "unknown")
-    data = request.data.get('value')
-    if request.data.get('append'):
+    data = request.data.get("value")
+    if request.data.get("append"):
         if isinstance(data, dict):
             cached = load(key) or {}
-            cached[data.get('name', 'unknown')] = data.get('content')
+            cached[data.get("name", "unknown")] = data.get("content")
             data = cached
     name = store(key, data, id_generator=str)
     return Response(name)
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @parser_classes([XMLParser, XMLFormParser])
 @renderer_classes(
     [
@@ -74,7 +74,7 @@ def transform(request):
     return Response(name)
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @parser_classes([XMLParser])
 @renderer_classes(
     [
@@ -85,7 +85,7 @@ def unmodified(request):
     return Response(request.data)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @renderer_classes(
     [
         rest_framework.renderers.JSONRenderer,
@@ -107,7 +107,7 @@ def template_elements(request: Request, name: str):
     )
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @renderer_classes(
     [
         rest_framework.renderers.JSONRenderer,
@@ -136,16 +136,16 @@ def report(request: Request, name: str):
             }
         )
     data = load(name)
-    if request.GET.get('without_overview'):
+    if request.GET.get("without_overview"):
         # remove charts
-        data.pop('overview', None)
-    if request.META.get('HTTP_ACCEPT') == "application/xml":
+        data.pop("overview", None)
+    if request.META.get("HTTP_ACCEPT") == "application/xml":
         # XML needs exactly one root
-        data = {'report': data}
+        data = {"report": data}
     return Response(data)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @renderer_classes(
     [
         rest_framework.renderers.JSONRenderer,

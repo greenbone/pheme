@@ -47,6 +47,6 @@ def store(
 ):
     name = id_generator(prefix)
     if isinstance(value, dict):
-        value['internal_name'] = name
+        value["internal_name"] = name
     handler(name, value)
     return name

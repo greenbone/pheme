@@ -36,11 +36,11 @@ class XMLFormParser(BaseParser):
 
     def parse(self, stream, media_type=None, parser_context=None):
         for report in stream.FILES.values():
-            if report.content_type == 'text/xml':
+            if report.content_type == "text/xml":
                 return xmltodict.parse(
                     report.read(),
-                    attr_prefix='',
-                    cdata_key='text',
+                    attr_prefix="",
+                    cdata_key="text",
                     dict_constructor=dict,
                 )
         return None
@@ -55,5 +55,5 @@ class XMLParser(BaseParser):
 
     def parse(self, stream, media_type=None, parser_context=None):
         return xmltodict.parse(
-            stream, attr_prefix='', cdata_key='text', dict_constructor=dict
+            stream, attr_prefix="", cdata_key="text", dict_constructor=dict
         )

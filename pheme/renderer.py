@@ -24,22 +24,22 @@ import xmltodict
 
 
 class CSVRenderer(BaseRenderer):
-    media_type = 'text/csv'
-    format = 'text'
-    charset = 'utf-8'
+    media_type = "text/csv"
+    format = "text"
+    charset = "utf-8"
 
     def __flatten_per_result(
         self, data: Dict
     ) -> Generator[Union[List[str], Dict], None, None]:
         # for the case that results is there but it is None
-        results = data.pop('results', None) or []
+        results = data.pop("results", None) or []
         send_keys = True
         for host in results:
-            for result in host.get('results'):
+            for result in host.get("results"):
                 flatten = {
                     **data,
-                    "os": host.get('os'),
-                    **result.pop('nvt_tags_interpreted', {}),
+                    "os": host.get("os"),
+                    **result.pop("nvt_tags_interpreted", {}),
                     **result,
                 }
                 if send_keys:
@@ -49,7 +49,7 @@ class CSVRenderer(BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if data is None:
-            return ''
+            return ""
         try:
             generator = self.__flatten_per_result(data)
             result = StringIO()
@@ -59,13 +59,13 @@ class CSVRenderer(BaseRenderer):
             result.seek(0)
             return result.read()
         except StopIteration:
-            return ''
+            return ""
 
 
 class MarkDownTableRenderer(BaseRenderer):
-    media_type = 'text/markdown+table'
-    format = 'text'
-    charset = 'utf-8'
+    media_type = "text/markdown+table"
+    format = "text"
+    charset = "utf-8"
 
     def __as_md(self, previous_key, data):
         def append(value):
@@ -92,7 +92,7 @@ class MarkDownTableRenderer(BaseRenderer):
                     ),
                 )
             )
-            previous_key = 'item'
+            previous_key = "item"
             items = [("", v) for v in data]
         else:
             items = data.items()
@@ -108,7 +108,7 @@ class MarkDownTableRenderer(BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if data is None:
-            return ''
+            return ""
         first_line = "|key|template_example|description|\n"
         table_indicator = "| :- | :--: | -: |\n"
         rest = "\n".join(self.__as_md("", data))
@@ -116,12 +116,12 @@ class MarkDownTableRenderer(BaseRenderer):
 
 
 class XMLRenderer(BaseRenderer):
-    media_type = 'application/xml'
-    format = 'xml'
-    charset = 'utf-8'
+    media_type = "application/xml"
+    format = "xml"
+    charset = "utf-8"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if data is None:
-            return ''
+            return ""
 
         return xmltodict.unparse(data)
