@@ -144,7 +144,7 @@ def h_bar_chart(
     if orientation_basis > 0:
         overhead = max_sum % orientation_basis
         # if it's already adjusted we don't need to add anything
-        if overhead == 0:
+        if overhead == 0 or max_sum < orientation_basis:
             overhead = orientation_basis
         max_sum = max_sum + orientation_basis - overhead
 
