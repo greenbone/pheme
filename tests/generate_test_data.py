@@ -29,25 +29,25 @@ import xmltodict
 
 
 def _random_text(length: int) -> str:
-    return ''.join([random.choice(string.ascii_letters) for i in range(length)])
+    return "".join([random.choice(string.ascii_letters) for i in range(length)])
 
 
 def gen_solution() -> Dict:
     return {
-        'type': "Maybe a mitigration, maybe not",
-        'text': _random_text(250),
+        "type": "Maybe a mitigration, maybe not",
+        "text": _random_text(250),
     }
 
 
-def gen_host(hostname='localhost') -> Dict:
+def gen_host(hostname="localhost") -> Dict:
     return {
-        'text': "{}.{}.{}.{}".format(
+        "text": "{}.{}.{}.{}".format(
             random.randint(1, 254),
             random.randint(1, 254),
             random.randint(1, 254),
             random.randint(1, 254),
         ),
-        'hostname': "{}.{}.org".format(
+        "hostname": "{}.{}.org".format(
             hostname, _random_text(random.randint(1, 10))
         ),
     }
@@ -55,99 +55,101 @@ def gen_host(hostname='localhost') -> Dict:
 
 def gen_refs(length: int = 0) -> Dict:
     def ref():
-        return {'id': uuid.uuid1().hex, 'type': 'CVE'}
+        return {"id": uuid.uuid1().hex, "type": "CVE"}
 
-    return {'ref': [ref() for _ in range(length)]}
+    return {"ref": [ref() for _ in range(length)]}
 
 
 def gen_qod() -> Dict:
     return {
-        'type': _random_text(10),
-        'value': '{}'.format(random.randint(1, 254)),
+        "type": _random_text(10),
+        "value": "{}".format(random.randint(1, 254)),
     }
 
 
 def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
     return {
-        'oid': oid,
-        'solution': gen_solution() if with_optional else None,
-        'refs': gen_refs(10) if with_optional else None,
-        'type': 'CVE',
-        'name': "faked example {}".format(oid) if with_optional else None,
-        'family': _random_text(15) if with_optional else None,
-        'cvss_base': "{}".format(float(oid[4:]) / 10)
+        "oid": oid,
+        "solution": gen_solution() if with_optional else None,
+        "refs": gen_refs(10) if with_optional else None,
+        "type": "CVE",
+        "name": "faked example {}".format(oid) if with_optional else None,
+        "family": _random_text(15) if with_optional else None,
+        "cvss_base": "{}".format(float(oid[4:]) / 10)
         if with_optional
         else None,
-        'tags': _random_text(150) if with_optional else None,
+        "tags": _random_text(150) if with_optional else None,
     }
 
 
-threats = ['Low', 'Medium', 'High']
+threats = ["Low", "Medium", "High"]
 
 
-def gen_result(host: dict, oid: str, with_optional: bool = True) -> Dict:
-    allowed_ports = [80, 8080, 443, 20, 25, 21, 23, 143, 22, 67, 68]
+def gen_result(
+    host: dict, oid: str, with_optional: bool = True, port: str = None
+) -> Dict:
+    if not port:
+        allowed_ports = [80, 8080, 443, 20, 25, 21, 23, 143, 22, 67, 68]
+        port = "{}/tcp".format(random.choice(allowed_ports))
     return {
-        'host': host,
-        'nvt': generate_nvt(oid),
-        'port': '{}/tcp'.format(random.choice(allowed_ports))
-        if with_optional
-        else None,
-        'threat': random.choice(threats),
-        'severity': "{}".format(float(oid[4:]) / 10) if with_optional else None,
-        'qod': gen_qod() if with_optional else None,
-        'description': _random_text(254) if with_optional else None,
+        "host": host,
+        "nvt": generate_nvt(oid),
+        "port": port if with_optional else None,
+        "threat": random.choice(threats),
+        "severity": "{}".format(float(oid[4:]) / 10) if with_optional else None,
+        "qod": gen_qod() if with_optional else None,
+        "description": _random_text(254) if with_optional else None,
     }
 
 
 def gen_gmp() -> Dict:
-    return {'version': '21.04'}
+    return {"version": "21.04"}
 
 
 def gen_count(count: int = random.randint(1, 100)) -> Dict:
-    return {'count': count}
+    return {"count": count}
 
 
 def gen_identifiable(name: str = None) -> dict:
     return {
-        'id': uuid.uuid1().hex,
-        'name': name or _random_text(10),
-        'comment': _random_text(150),
+        "id": uuid.uuid1().hex,
+        "name": name or _random_text(10),
+        "comment": _random_text(150),
     }
 
 
 def gen_task(name: str = None) -> Dict:
     return {
         **gen_identifiable(name),
-        'target': {
+        "target": {
             **gen_identifiable(),
-            'trash': _random_text(2),
+            "trash": _random_text(2),
         },
-        'progress': '100',
+        "progress": "100",
     }
 
 
 def gen_filtered() -> Dict:
-    return {'full': _random_text(25), 'filtered': _random_text(12)}
+    return {"full": _random_text(25), "filtered": _random_text(12)}
 
 
 def gen_result_count() -> Dict:
     return {
         **gen_filtered(),
-        'debug': gen_filtered(),
-        'hole': gen_filtered(),
-        'info': gen_filtered(),
-        'log': gen_filtered(),
-        'warning': gen_filtered(),
-        'false_positive': gen_filtered(),
-        'text': _random_text(25),
+        "debug": gen_filtered(),
+        "hole": gen_filtered(),
+        "info": gen_filtered(),
+        "log": gen_filtered(),
+        "warning": gen_filtered(),
+        "false_positive": gen_filtered(),
+        "text": _random_text(25),
     }
 
 
 def generate_result_count(full: int, filtered: int) -> Dict:
     return {
-        'full': str(full),
-        'filtered': str(filtered),
+        "full": str(full),
+        "filtered": str(filtered),
     }
 
 
@@ -156,16 +158,19 @@ def gen_report(
     oids: List[str],
     with_optional: bool = True,
     name: str = None,
+    port: str = None,
 ) -> Dict:
     g_hosts = [gen_host(v) for v in hosts or []]
     result = []
     host_details = [] if hosts is not None else None
     for h in g_hosts:
         for _ in range(random.randint(1, len(oids) + 2)):
-            res = gen_result(h, oids[random.randint(0, len(oids) - 1)])
+            res = gen_result(
+                h, oids[random.randint(0, len(oids) - 1)], port=port
+            )
             host_details.append(
                 {
-                    "ip": res['host']['text'],
+                    "ip": res["host"]["text"],
                     "detail": [
                         {"name": "best_os_cpe", "value": "rusty kernel"},
                         {"name": "best_os_txt", "value": "rusty rust rust"},
@@ -176,38 +181,38 @@ def gen_report(
             result.append(res)
 
     results = {
-        'max': '{}'.format(random.randint(1, 1000)) if with_optional else None,
-        'start': '{}'.format(random.randint(0, 1000))
+        "max": "{}".format(random.randint(1, 1000)) if with_optional else None,
+        "start": "{}".format(random.randint(0, 1000))
         if with_optional
         else None,
     }
     if hosts is not None:
-        results['result'] = list(result)
+        results["result"] = list(result)
     return {
-        'id': uuid.uuid1().hex if with_optional else None,
-        'gmp': gen_gmp() if with_optional else None,
-        'scan_run_status': '100' if with_optional else None,
-        'hosts': gen_count(1) if with_optional else None,
-        'closed_cves': gen_count() if with_optional else None,
-        'vulns': gen_count() if with_optional else None,
-        'os': gen_count() if with_optional else None,
-        'apps': gen_count() if with_optional else None,
-        'ssl_certs': gen_count() if with_optional else None,
-        'task': gen_task(name) if with_optional else None,
-        'timestamp': '2342' if with_optional else None,
-        'scan_start': '2020-07-01T21:00' if with_optional else None,
-        'timezone': 'timezone_abbrev' if with_optional else None,
-        'timezone_abbrev': 'UTC' if with_optional else None,
-        'scan_end': '2020-07-01T21:00' if with_optional else None,
-        'errors': gen_count() if with_optional else None,
-        'severity': gen_filtered() if with_optional else None,
-        'results': results,
-        'result_count': gen_result_count() if with_optional else None,
-        'host': host_details,
+        "id": uuid.uuid1().hex if with_optional else None,
+        "gmp": gen_gmp() if with_optional else None,
+        "scan_run_status": "100" if with_optional else None,
+        "hosts": gen_count(1) if with_optional else None,
+        "closed_cves": gen_count() if with_optional else None,
+        "vulns": gen_count() if with_optional else None,
+        "os": gen_count() if with_optional else None,
+        "apps": gen_count() if with_optional else None,
+        "ssl_certs": gen_count() if with_optional else None,
+        "task": gen_task(name) if with_optional else None,
+        "timestamp": "2342" if with_optional else None,
+        "scan_start": "2020-07-01T21:00" if with_optional else None,
+        "timezone": "timezone_abbrev" if with_optional else None,
+        "timezone_abbrev": "UTC" if with_optional else None,
+        "scan_end": "2020-07-01T21:00" if with_optional else None,
+        "errors": gen_count() if with_optional else None,
+        "severity": gen_filtered() if with_optional else None,
+        "results": results,
+        "result_count": gen_result_count() if with_optional else None,
+        "host": host_details,
     }
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     own_path = Path(__file__).absolute()
     directory = own_path.__str__()[0 : (len(own_path.name) * -1)]
     number_of_hosts = 10
@@ -216,9 +221,9 @@ if __name__ == '__main__':
     print("generating oid for nvts")
     oids = ["oid_{}".format(i) for i in range(100)]
     print("generating report data")
-    data = {'report': {'report': gen_report(hosts, oids, True)}}
+    data = {"report": {"report": gen_report(hosts, oids, True)}}
     path = Path(
-        '{}../test_data/artifical_{}_hosts_{}_oid_per_host.xml'.format(
+        "{}../test_data/artifical_{}_hosts_{}_oid_per_host.xml".format(
             directory, number_of_hosts, len(oids)
         )
     )

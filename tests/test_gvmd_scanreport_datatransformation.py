@@ -28,6 +28,20 @@ oids = ["oid_{}".format(i) for i in range(5)]
 hosts = ["first", "second"]
 
 
+def test_should_contain_non_general_ports():
+    scan_results = gen_report(hosts, oids, port="80/tcp")
+    data = {"report": {"report": scan_results}}
+    report = transform(data)
+    assert report.results[0]['equipment']['ports'] == {"80/tcp"}
+
+
+def test_remove_general_from_equipment_port_list():
+    scan_results = gen_report(hosts, oids, port="general/tcp")
+    data = {"report": {"report": scan_results}}
+    report = transform(data)
+    assert report.results[0]['equipment']['ports'] == []
+
+
 def test_grouping_nvt_oid_per_type():
     scan_results = gen_report(hosts, oids, with_optional=True)
     data = {"report": {"report": scan_results}}

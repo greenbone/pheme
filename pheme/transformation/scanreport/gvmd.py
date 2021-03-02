@@ -55,17 +55,17 @@ def measure_time(func):
 
 def __tansform_tags(item) -> Optional[Dict[str, str]]:
     if isinstance(item, str):
-        split = [i.split('=') for i in item.split('|')]
-        return {i[0]: i[1].replace('\n', ' ') for i in split if len(i) == 2}
+        split = [i.split("=") for i in item.split("|")]
+        return {i[0]: i[1].replace("\n", " ") for i in split if len(i) == 2}
     return None
 
 
 def __group_refs(refs: Dict[str, str]) -> Dict:
     refs_ref = {}
-    for ref in refs.get('ref', []):
+    for ref in refs.get("ref", []):
         if isinstance(ref, dict):
-            typus = ref.get('type', 'unknown')
-            refs_ref[typus] = refs_ref.get(typus, []) + [ref.get('id')]
+            typus = ref.get("type", "unknown")
+            refs_ref[typus] = refs_ref.get(typus, []) + [ref.get("id")]
     return refs_ref
 
 
@@ -73,11 +73,11 @@ def __get_hostname_from_result(result) -> str:
     if isinstance(result, str):
         return result
     if isinstance(result, dict):
-        host = result.get('host', {})
+        host = result.get("host", {})
         if isinstance(host, dict):
-            return host.get('text', 'unknown')
+            return host.get("text", "unknown")
         return host
-    return 'unknown'
+    return "unknown"
 
 
 def __return_highest_threat(threats: List[int]) -> str:
@@ -87,7 +87,7 @@ def __return_highest_threat(threats: List[int]) -> str:
     for i, value in enumerate(threats):
         if value > 0:
             return __threats[i]
-    return 'NA'
+    return "NA"
 
 
 def __host_threat_overview(threat_count: List[int]) -> Dict:
@@ -95,8 +95,8 @@ def __host_threat_overview(threat_count: List[int]) -> Dict:
     returns nvt statistics mostly used in the per host overview
     """
     result = {**threat_count}
-    result['total'] = sum(threat_count.values())
-    result['highest'] = __return_highest_threat(threat_count.values())
+    result["total"] = sum(threat_count.values())
+    result["highest"] = __return_highest_threat(threat_count.values())
     return result
 
 
@@ -107,7 +107,7 @@ def __return_highest_severity(severities: List[int]) -> str:
     for i in range(len(severities) - 1, -1, -1):
         if severities[i] > 0:
             return str(i + 1)
-    return 'NA'
+    return "NA"
 
 
 def __host_severity_overview(nvt_count: List[int]) -> Dict:
@@ -115,8 +115,8 @@ def __host_severity_overview(nvt_count: List[int]) -> Dict:
     returns nvt severity statistics mostly used in the per host overview
     """
     result = {str(i + 1): value for i, value in enumerate(nvt_count)}
-    result['total'] = sum(nvt_count)
-    result['highest'] = __return_highest_severity(nvt_count)
+    result["total"] = sum(nvt_count)
+    result["highest"] = __return_highest_severity(nvt_count)
     return result
 
 
@@ -125,29 +125,29 @@ def __create_host_information_lookup(report: Dict) -> Dict:
     created a lookup table for available host information
     """
     # lookup for host information name and dict name
-    information_key = {'best_os_txt': 'os'}
+    information_key = {"best_os_txt": "os"}
 
     def filter_per_host(host: Dict) -> Dict:
         information = {}
         found = 0
-        details = host.get('detail', [])
+        details = host.get("detail", [])
         for detail in details:
-            name = detail.get('name', '')
+            name = detail.get("name", "")
             if name in information_key.keys():
-                information[information_key.get(name)] = detail.get('value')
+                information[information_key.get(name)] = detail.get("value")
                 found += 1
             if found == len(information_key.keys()):
                 return information
         return information
 
     result = {}
-    hosts = report.get('host')
+    hosts = report.get("host")
     if isinstance(hosts, dict):
-        result[hosts.get('ip', 'unknown')] = filter_per_host(hosts)
+        result[hosts.get("ip", "unknown")] = filter_per_host(hosts)
     elif isinstance(hosts, list):
         # best_os_txt seems to be in the end
         for host in hosts[::-1]:
-            result[host.get('ip', 'unknown')] = filter_per_host(host)
+            result[host.get("ip", "unknown")] = filter_per_host(host)
     return result
 
 
@@ -158,7 +158,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     gvmd report.
     """
     host_information_lookup = __create_host_information_lookup(report)
-    results = report.get('results', {}).get('result', [])
+    results = report.get("results", {}).get("result", [])
     by_host = {}
     host_threat_count = {}
     host_severity_count = {}
@@ -172,30 +172,31 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     def per_result(result):
         hostname = __get_hostname_from_result(result)
         host_dict = by_host.get(hostname, {})
-        threat = result.get('threat', 'unknown')
-        port = result.get('port')
-        nvt = transform_key("nvt", result.get('nvt', {}))
-        nvt['nvt_tags_interpreted'] = __tansform_tags(nvt.get('nvt_tags', ''))
-        nvt['nvt_refs_ref'] = __group_refs(nvt.get('nvt_refs', {}))
-        qod = transform_key('qod', result.get('qod', {}))
-        severity = int(float(result.get('severity', '0.0')))
+        threat = result.get("threat", "unknown")
+        port = result.get("port")
+        nvt = transform_key("nvt", result.get("nvt", {}))
+        nvt["nvt_tags_interpreted"] = __tansform_tags(nvt.get("nvt_tags", ""))
+        nvt["nvt_refs_ref"] = __group_refs(nvt.get("nvt_refs", {}))
+        qod = transform_key("qod", result.get("qod", {}))
+        severity = int(float(result.get("severity", "0.0")))
         new_host_result = {
             "port": port,
             "threat": threat,
             "severity": severity,
-            "description": result.get('description'),
+            "description": result.get("description"),
             **nvt,
             **qod,
         }
-        host_results = host_dict.get('results', [])
+        host_results = host_dict.get("results", [])
         host_results.append(new_host_result)
-        equipment = host_dict.get('equipment', {})
-        equipment['ports'] = list(
-            dict.fromkeys(equipment.get('ports', []) + [port])
-        )
-        if not equipment.get('os'):
-            equipment['os'] = host_information_lookup.get(hostname, {}).get(
-                'os', 'unknown'
+        equipment = host_dict.get("equipment", {})
+        ports = list(dict.fromkeys(equipment.get("ports", [])))
+        if port and not port.startswith("general"):
+            ports = set(ports + [port])
+        equipment["ports"] = ports
+        if not equipment.get("os"):
+            equipment["os"] = host_information_lookup.get(hostname, {}).get(
+                "os", "unknown"
             )
 
         # needs hostname, high, medium, low
@@ -256,17 +257,17 @@ def transform(data: Dict[str, str]) -> Report:
     # sometimes gvmd reports have .report.report sometimes just .report
     report = report.get("report", report)
 
-    task = report.get('task') or {}
-    gmp = report.get('gmp') or {}
+    task = report.get("task") or {}
+    gmp = report.get("gmp") or {}
     logger.info("data transformation")
     results, host_counts, nvts_counts = __create_results_per_host(report)
 
     return Report(
-        report.get('id'),
-        task.get('name'),
-        task.get('comment'),
-        gmp.get('version'),
-        report.get('scan_start'),
+        report.get("id"),
+        task.get("name"),
+        task.get("comment"),
+        gmp.get("version"),
+        report.get("scan_start"),
         Overview(
             hosts=host_counts,
             nvts=nvts_counts,
