@@ -30,7 +30,7 @@ weasyprint = ">=51,<53"
 rope = ">=0.17,<0.19"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.7.0"
+pylint = "^2.7.2"
 pylint-django = "^2.4.2"
 pytest = "^6.2.2"
 pytest-cov = "^2.11.1"
