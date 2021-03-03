@@ -195,7 +195,7 @@ LOGGING = {
     },
     "root": {
         "handlers": [
-            "syslog" if Path("/dev/log").exists() else "console",
+            "syslog" if Path("/dev/log").exists() and not DEBUG else "console",
             "file",
         ],
         "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),

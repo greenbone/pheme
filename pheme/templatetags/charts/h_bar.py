@@ -73,7 +73,7 @@ def h_bar_chart(
     title_color=None,
     svg_width=800,
     bar_jump=44,
-    orientation_basis=20,
+    orientation_marker=6,
     limit=10,
     font_family="Droid Sans",
     font_size=10,
@@ -101,8 +101,8 @@ def h_bar_chart(
         svg_width - The overall width of the output chart, default 800
         bar_jump - The amount of y pixels to jump from bar element to the next.
             Default is 44.
-        orientation_basis - if higher than 0 than there will be a vertical line
-            each orientation_basis.
+        orientation_marker - if higher than 0 than there will be a vertical line
+            each nth step.
         limit - limits the data by N first elements
         font_family - the font family used within text elements
         font_size - the font size used within text elements
@@ -120,37 +120,34 @@ def h_bar_chart(
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
     if max_sum == 0:
         max_sum = 1
+
     orientation_lines = ""
     orientation_labels = ""
-
-    def __add_orientation(i: int, orientation_lines="", orientation_labels=""):
-        x_pos = i * orientation_basis / max_sum * max_width
-        label = str(i * orientation_basis)
-        orientation_lines += __ORIENTATION_LINE_TEMPLATE.format(
-            x=x_pos,
-            height=bar_jump + 10,
-            font_family=font_family,
-            font_size=font_size,
-        )
-        orientation_labels += __ORIENTATION_LINE_TEXT_TEMPLATE.format(
-            x=x_pos,
-            width=len(label),
-            label=label,
-            font_family=font_family,
-            font_size=font_size,
-        )
-        return orientation_lines, orientation_labels
-
-    if orientation_basis > 0:
+    orientation_basis = (
+        int(max_sum / orientation_marker) if orientation_marker > 0 else 0
+    )
+    if max_sum > orientation_basis and orientation_basis > 0:
         overhead = max_sum % orientation_basis
         # if it's already adjusted we don't need to add anything
-        if overhead == 0 or max_sum < orientation_basis:
+        if overhead == 0:
             overhead = orientation_basis
         max_sum = max_sum + orientation_basis - overhead
 
         for i in range(int(max_sum / orientation_basis + 1)):
-            orientation_lines, orientation_labels = __add_orientation(
-                i, orientation_lines, orientation_labels
+            x_pos = i * orientation_basis / max_sum * max_width
+            label = str(i * orientation_basis)
+            orientation_lines += __ORIENTATION_LINE_TEMPLATE.format(
+                x=x_pos,
+                height=bar_jump + 10,
+                font_family=font_family,
+                font_size=font_size,
+            )
+            orientation_labels += __ORIENTATION_LINE_TEXT_TEMPLATE.format(
+                x=x_pos,
+                width=len(label),
+                label=label,
+                font_family=font_family,
+                font_size=font_size,
             )
 
     bars = ""
