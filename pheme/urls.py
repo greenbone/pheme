@@ -39,29 +39,29 @@ import pheme.parameter
 
 urlpatterns = [
     path(
-        'parameter/<str:key>',
+        "parameter/<str:key>",
         pheme.parameter.put_value,
-        name='put_value_parameters',
+        name="put_value_parameters",
     ),
     path(
-        'parameter',
+        "parameter",
         pheme.parameter.put,
-        name='put_parameter',
+        name="put_parameter",
     ),
-    path('cache/<str:key>', pheme.views.load_cache, name='load_cache'),
-    path('cache', pheme.views.store_cache, name='store_cache'),
-    path('unmodified', pheme.views.unmodified, name='unmodified'),
-    path('transform', pheme.views.transform, name='transform'),
-    path('transform/', pheme.views.transform),
+    path("cache/<str:key>", pheme.views.load_cache, name="load_cache"),
+    path("cache", pheme.views.store_cache, name="store_cache"),
+    path("unmodified", pheme.views.unmodified, name="unmodified"),
+    path("transform", pheme.views.transform, name="transform"),
+    path("transform/", pheme.views.transform),
     path(
-        'scanreport/data/description',
+        "scanreport/data/description",
         pheme.views.scanreport_data_description,
-        name='scanreport_data_description',
+        name="scanreport_data_description",
     ),
-    path('report/<str:name>', pheme.views.report, name='report'),
+    path("report/<str:name>", pheme.views.report, name="report"),
     path(
-        'template/elements/<str:name>',
+        "template/elements/<str:name>",
         pheme.views.template_elements,
-        name='template_elements',
+        name="template_elements",
     ),
 ]

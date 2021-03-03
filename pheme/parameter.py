@@ -82,13 +82,13 @@ def __put(
     store: Callable[[Dict, str], Dict] = __store
 ) -> Response:
     params = __load_params(from_path=from_path)
-    username = request.META.get('GVM_USERNAME')
+    username = request.META.get("GVM_USERNAME")
     if username:
-        all_user = params.get('user_specific', {})
+        all_user = params.get("user_specific", {})
         specific_user_params = all_user.get(username, {})
         specific_user_params = func(request, specific_user_params)
         all_user[username] = specific_user_params
-        params['user_specific'] = all_user
+        params["user_specific"] = all_user
         value = params
     else:
         value = func(request, params)
@@ -111,9 +111,9 @@ def __process_form_data(request: HttpRequest, data: Dict) -> Dict:
                 value.name,
                 key,
             )
-            if file_type and file_type.startswith('image'):
+            if file_type and file_type.startswith("image"):
                 data[key] = as_datalink(value.read(), file_type)
-            elif file_type and file_type.startswith('text'):
+            elif file_type and file_type.startswith("text"):
                 data[key] = value.read().decode()
             else:
                 raise ValueError("Only image or text is permitted")
@@ -126,7 +126,7 @@ def __process_json_object(request: HttpRequest, data: Dict) -> Dict:
     return {**data, **request.data}
 
 
-@api_view(['PUT'])
+@api_view(["PUT"])
 @parser_classes([rest_framework.parsers.JSONParser])
 @renderer_classes(
     [
@@ -150,7 +150,7 @@ def put_value(
     return __put(request, __process_single_value)
 
 
-@api_view(['PUT'])
+@api_view(["PUT"])
 @parser_classes(
     [rest_framework.parsers.JSONParser, rest_framework.parsers.MultiPartParser]
 )
