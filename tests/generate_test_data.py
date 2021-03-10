@@ -182,9 +182,7 @@ def gen_report(
 
     results = {
         "max": "{}".format(random.randint(1, 1000)) if with_optional else None,
-        "start": "{}".format(random.randint(0, 1000))
-        if with_optional
-        else None,
+        "start": "2018-01-01T00:00:00+01:00",
     }
     if hosts is not None:
         results["result"] = list(result)
@@ -200,7 +198,7 @@ def gen_report(
         "ssl_certs": gen_count() if with_optional else None,
         "task": gen_task(name) if with_optional else None,
         "timestamp": "2342" if with_optional else None,
-        "scan_start": "2020-07-01T21:00" if with_optional else None,
+        "scan_start": "2018-01-01T00:00:00+01:00" if with_optional else None,
         "timezone": "timezone_abbrev" if with_optional else None,
         "timezone_abbrev": "UTC" if with_optional else None,
         "scan_end": "2020-07-01T21:00" if with_optional else None,
