@@ -90,7 +90,7 @@ def __return_highest_threat(threats: List[int]) -> str:
     return "NA"
 
 
-def __host_threat_overview(threat_count: List[int]) -> Dict:
+def __host_threat_overview(threat_count: Dict) -> Dict:
     """
     returns nvt statistics mostly used in the per host overview
     """
@@ -178,7 +178,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         nvt["nvt_tags_interpreted"] = __tansform_tags(nvt.get("nvt_tags", ""))
         nvt["nvt_refs_ref"] = __group_refs(nvt.get("nvt_refs", {}))
         qod = transform_key("qod", result.get("qod", {}))
-        severity = int(float(result.get("severity", "0.0")))
+        severity = float(result.get("severity", "0.0"))
         new_host_result = {
             "port": port,
             "threat": threat,
@@ -213,7 +213,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
 
         # severity 1 to 10
         host_severities = host_severity_count.get(hostname, [0] * 10)
-        host_severities[severity - 1] += 1
+        host_severities[int(severity) - 1] += 1
         host_severity_count[hostname] = host_severities
 
         by_host[hostname] = {
