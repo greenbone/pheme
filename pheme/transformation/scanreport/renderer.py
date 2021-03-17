@@ -148,6 +148,47 @@ def _replace_inline_svg_with_img_tags(
         from_index = to_index
 
 
+def enforce_limit(
+    data: Dict, parameter: Dict, format_type: str = "pdf"
+) -> Dict:
+    if not "results" in data:
+        return data
+
+    limits = parameter.get("limits", {}).get(format_type, {})
+    max_hosts = limits.get("hosts")
+    max_results_in_host = limits.get("results")
+    logger.debug(
+        "limit max_results %s and max_hosts %s", max_results_in_host, max_hosts
+    )
+    if not max_hosts and not max_results_in_host:
+        return data
+    host_cut = False
+    if max_hosts and len(data["results"]) > max_hosts:
+        data["results"] = data["results"][:max_hosts]
+        host_cut = True
+    result_cut = False
+    if max_results_in_host:
+        for result in data["results"]:
+            if len(result["results"]) > max_results_in_host:
+                result["results"] = result["results"][:max_results_in_host]
+                result_cut = True
+    if host_cut and not result_cut:
+        data["comment"] = limits.get(
+            "host_limit_msg", "Host limit: {host_limit}."
+        ).format(host_limit=max_hosts)
+    elif result_cut and not host_cut:
+        data["comment"] = limits.get(
+            "result_limit_msg", "Result limit: {result_limit}."
+        ).format(result_limit=max_results_in_host)
+    elif host_cut and result_cut:
+        data["comment"] = limits.get(
+            "host_result_limit_msg",
+            "Host limit {host_limit}; Result limit: {result_limit}.",
+        ).format(host_limit=max_hosts, result_limit=max_results_in_host)
+
+    return data
+
+
 class VulnerabilityPDFReport(Report):
     """
     Is used to generate vulnerability reports in PDF.
@@ -161,11 +202,11 @@ class VulnerabilityPDFReport(Report):
     format = "binary"
 
     def apply(self, name: str, data: Dict, parameter: Dict):
-        logger.debug("got template: %s", self.__template)
+        data = enforce_limit(data, parameter)
         css = _load_template(self.__css_template, parameter).render(
             Context(parameter)
         )
-        html_template = _load_template(self.__template)
+        html_template = _load_template(self.__template, parameter)
         html = html_template.render(Context(_enrich(name, data, parameter)))
         html = _replace_inline_svg_with_img_tags(html)
         logger.debug("created html")

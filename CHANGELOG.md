@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Possibility to transform '%Y-%m-%dT%H:%M:%S%z' into '%a, %b %d, %Y %I %p %Z' within a template [193](https://github.com/greenbone/pheme/pull/193)
+- Possibility to limit PDF reports [197](https://github.com/greenbone/pheme/pull/197)
 ### Changed
 - Orientation marker in bar charts are configured as a amount of lines instead of every amount draw a line [186](https://github.com/greenbone/pheme/pull/186)
 - NVT severity in float instead of int [194](https://github.com/greenbone/pheme/pull/194)
