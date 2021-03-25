@@ -34,7 +34,7 @@ __LEGEND_TEMPLATE = """
 """
 __LEGEND_ELEMENT = """
 <rect x="{x}" y="{y}" height="{font_size}" width="{font_size}" style="fill: {color};"></rect>
-<text style="font-size:{font_size};font-family:{font_family}" x="{text_x}" y="{text_y}" dominant-baseline="central">{label}</text>
+<text style="font-size:{font_size}px;font-family:{font_family}" x="{text_x}" y="{text_y}" dominant-baseline="central">{label}</text>
 """
 
 
