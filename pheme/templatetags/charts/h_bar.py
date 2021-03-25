@@ -75,7 +75,7 @@ def h_bar_chart(
     bar_jump=44,
     orientation_marker=6,
     limit=10,
-    font_family="Droid Sans",
+    font_family="Dejavu Sans",
     font_size=10,
 ) -> SafeText:
 
