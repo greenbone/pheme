@@ -34,7 +34,7 @@ __ORIENTATION_LINE_TEMPLATE = """
 
 __ORIENTATION_LINE_TEXT_TEMPLATE = """
 <text class="orientation label" y="22" x="{x}" fill="#4C4C4D" dominant-baseline="central"
-style="font-size:{font_size};font-family:{font_family};text-anchor: middle;" width="{width}">{label}
+style="font-size:{font_size}px;font-family:{font_family};text-anchor: middle;" width="{width}">{label}
 </text>
 """
 __BAR_ELEMENT_TEMPLATE = """
@@ -44,7 +44,7 @@ __BAR_ELEMENT_TEMPLATE = """
 __BAR_TEMPLATE = """
 <g class="entry" transform="translate(0, {y})">
 <text class="label category" y="22" x="87.5" fill="#4C4C4D" dominant-baseline="central"
-style="font-size:{font_size};font-family:{font_family};text-anchor: right;" width="{max_hostname_len}">{key}
+style="font-size:{font_size}px;font-family:{font_family};text-anchor: right;" width="{max_hostname_len}">{key}
 </text>
 <g transform="translate({max_hostname_len}, 0)">
 {orientation_lines}
@@ -52,7 +52,7 @@ style="font-size:{font_size};font-family:{font_family};text-anchor: right;" widt
 </g>
 <g transform="translate({begin_total}, 0)">
 <text class="sum" y="22" x="10" fill="#4C4C4D" dominant-baseline="central"
-style="font-size:{font_size};font-family:{font_family};text-anchor: left;" width="100">{total}</text>
+style="font-size:{font_size}px;font-family:{font_family};text-anchor: left;" width="100">{total}</text>
 </g>
 </g>
 """

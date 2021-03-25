@@ -41,7 +41,7 @@ from pheme.templatetags.charts import (
 __ELEMENT_TEMPLATE = """
 <g>
     <rect x="{x}" y="{y}" width="{width}" height="{height}" fill="{color}" stroke="{border_color}" strokeWidth="1" />
-    <text style="font-size:{font_size};font-family:{font_family}" x="{label_x}" y="{label_y}" width="{width}" height="{height}" dominant-baseline="central">{label}</text>
+    <text style="font-size:{font_size}px;font-family:{font_family}" x="{label_x}" y="{label_y}" width="{width}" height="{height}" dominant-baseline="central">{label}</text>
 </g>
 """
 
