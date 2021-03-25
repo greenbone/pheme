@@ -240,7 +240,7 @@ def treemap(
     border_color: str = "#ffffff",
     title_color: Dict[str, str] = None,
     font_size: int = 10,
-    font_family: str = "Droid Sans",
+    font_family: str = "Dejavu Sans",
 ) -> SafeText:
     """
     Expects a sorted dict containing a str, and a dict with values in it.

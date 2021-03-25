@@ -50,7 +50,7 @@ def pie_chart(
     width: int = 390,
     border_size: int = 0,
     slice_width: int = 90,
-    font_family: str = "Droid Sans",
+    font_family: str = "Dejavu Sans",
     font_size: int = 10,
 ) -> SafeText:
     """

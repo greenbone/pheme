@@ -47,7 +47,7 @@ def calculate_legend_start_height(
 def build_legend(
     start_height: int,
     label_color: Dict,
-    font_family: str = "Droid Sans",
+    font_family: str = "Dejavu Sans",
     font_size: int = 10,
 ) -> str:
     """
