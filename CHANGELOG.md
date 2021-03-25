@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Orientation marker in bar charts are configured as a amount of lines instead of every amount draw a line [186](https://github.com/greenbone/pheme/pull/186)
 - NVT severity in float instead of int [194](https://github.com/greenbone/pheme/pull/194)
 - Version within report is not using the gmp version but parameter version if existing [201](https://github.com/greenbone/pheme/pull/201)
+- Set font-size to px instead of unspecified [203](https://github.com/greenbone/pheme/pull/203)
 ### Deprecated
 ### Removed
 ### Fixed

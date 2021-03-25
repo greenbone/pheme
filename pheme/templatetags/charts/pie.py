@@ -38,7 +38,7 @@ __PIE_CHART_TEMPLATE = """
 __SLICE_TEMPLATE = """
 <g>
 <circle cx="{cx}" cy="{cy}" r="{radius}" stroke="{color}" stroke-width="{stroke_width}" stroke-dasharray="{d_array}" stroke-dashoffset="{s_offset}" transform="rotate({r_start}, {cx}, {cy})" fill="transparent"></circle>
-<text style="font-size:{font_size};font-family:{font_family}" x="{t_x}" y="{t_y}" text-anchor="middle">{label}</text>
+<text style="font-size:{font_size}px;font-family:{font_family}" x="{t_x}" y="{t_y}" text-anchor="middle">{label}</text>
 </g>
 """
 
