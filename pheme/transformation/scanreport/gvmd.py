@@ -258,7 +258,6 @@ def transform(data: Dict[str, str]) -> Report:
     report = report.get("report", report)
 
     task = report.get("task") or {}
-    gmp = report.get("gmp") or {}
     logger.info("data transformation")
     results, host_counts, nvts_counts = __create_results_per_host(report)
 
@@ -266,7 +265,6 @@ def transform(data: Dict[str, str]) -> Report:
         report.get("id"),
         task.get("name"),
         task.get("comment"),
-        gmp.get("version"),
         report.get("scan_start"),
         Overview(
             hosts=host_counts,
