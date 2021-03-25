@@ -84,6 +84,7 @@ class Report(renderers.BaseRenderer):
         username, _ = get_username_role(request)
         if username:
             params = {**params, **user_parameter.get(username, {})}
+        data["version"] = params.get("version")
 
         result = self.apply(name, data, params)
         if cache_key:
