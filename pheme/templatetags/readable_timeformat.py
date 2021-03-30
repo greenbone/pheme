@@ -45,5 +45,5 @@ def format_time(iso_8601: str) -> SafeString:
     try:
         time = datetime.strptime(iso_8601, "%Y-%m-%dT%H:%M:%S%z")
         return SafeText(datetime.strftime(time, "%a, %b %d, %Y %I %p %Z"))
-    except ValueError:
+    except (ValueError, TypeError) as _:
         return SafeText(iso_8601)

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 ### Fixed
 - when the max severity amount is smaller then the orientation marker it does not make sense to round up [184](https://github.com/greenbone/pheme/pull/184)
+- when there is None value for format_time [210](https://github.com/greenbone/pheme/pull/210)
 
 [Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc4...HEAD
 
