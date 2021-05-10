@@ -59,6 +59,16 @@ style="font-size:{font_size}px;font-family:{font_family};text-anchor: left;" wid
 __BAR_CHART_TEMPLATE = """
 <svg width="{width}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
 {bars}
+<g transform="translate(0, {bar_legend_y})">
+<text 
+    class="label category" 
+    y="22" x="87.5" 
+    fill="#4C4C4D" dominant-baseline="central"
+    style="font-size:{font_size}px;font-family:{font_family};text-anchor: right;" 
+    width="{max_hostname_len}">
+    {x_title}
+    </text>
+</g>
 <g transform="translate({max_hostname_len}, {bar_legend_y})">
 {bar_legend}
 </g>
@@ -68,8 +78,10 @@ __BAR_CHART_TEMPLATE = """
 
 
 @register.filter
+@register.simple_tag
 def h_bar_chart(
     chart_data: Dict[str, Dict[str, int]],
+    x_title="",
     title_color=None,
     svg_width=800,
     bar_jump=44,
@@ -106,15 +118,17 @@ def h_bar_chart(
         limit - limits the data by N first elements
         font_family - the font family used within text elements
         font_size - the font size used within text elements
+        x_title - the titile of the x axis
     """
-
     data = dict(itertools.islice(chart_data.items(), limit))
     if not title_color:
         title_color = _severity_class_colors
     if not data.values():
         return SafeText("")
     # multiply by 1.25 for kerning
-    max_hostname_len = max(len(k) for k in data.keys()) * font_size * 1.25
+    max_hostname_len = (
+        max(max(len(k) for k in data.keys()), len(x_title)) * font_size * 1.25
+    )
     max_width = svg_width - max_hostname_len - 100  # key and total placeholder
     # highest sum of counts
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
@@ -192,5 +206,6 @@ def h_bar_chart(
         font_family=font_family,
         font_size=font_size,
         max_hostname_len=max_hostname_len,
+        x_title=x_title,
     )
     return SafeText(svg_chart)
