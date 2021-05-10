@@ -81,7 +81,7 @@ __BAR_CHART_TEMPLATE = """
 @register.simple_tag
 def h_bar_chart(
     chart_data: Dict[str, Dict[str, int]],
-    x_title="",
+    x_title: str = "",
     title_color=None,
     svg_width=800,
     bar_jump=44,
@@ -118,7 +118,7 @@ def h_bar_chart(
         limit - limits the data by N first elements
         font_family - the font family used within text elements
         font_size - the font size used within text elements
-        x_title - the titile of the x axis
+        x_title - the title of the x axis
     """
     data = dict(itertools.islice(chart_data.items(), limit))
     if not title_color:

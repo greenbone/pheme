@@ -16,7 +16,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import re
 import dataclasses
 import rest_framework.renderers
 from rest_framework.decorators import api_view, parser_classes, renderer_classes
@@ -30,11 +29,6 @@ from pheme.storage import store, load
 from pheme.renderer import MarkDownTableRenderer, XMLRenderer, CSVRenderer
 from pheme.transformation.scanreport import model
 from pheme.version import __version__
-
-# __but_numbers is used to remove everything but numbers of version
-# so that it can be used within a template for fature toggling without
-# the need for introducing version verifying filter/tags
-__but_numbers = re.compile(r"[^\d]")
 
 
 @api_view(["GET"])
@@ -143,7 +137,7 @@ def report(request: Request, name: str):
             }
         )
     data = load(name)
-    data["pheme_version"] = int(__but_numbers.sub("", __version__))
+    data["pheme_version"] = int("".join(filter(str.isdigit, __version__)))
     if request.GET.get("without_overview"):
         # remove charts
         data.pop("overview", None)
