@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [21.04-cr1] - 2021-05-10
 ### Added
 - Possibility to transform '%Y-%m-%dT%H:%M:%S%z' into '%a, %b %d, %Y %I %p %Z' within a template [193](https://github.com/greenbone/pheme/pull/193)
 - Possibility to limit PDF report size, by limiting included hosts/results [197](https://github.com/greenbone/pheme/pull/197)
@@ -13,15 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NVT severity in float instead of int [194](https://github.com/greenbone/pheme/pull/194)
 - Version within report is not using the gmp version but parameter version if existing [201](https://github.com/greenbone/pheme/pull/201)
 - Set font-size to px instead of unspecified [203](https://github.com/greenbone/pheme/pull/203)
-### Deprecated
-### Removed
 ### Fixed
 - when the max severity amount is smaller then the orientation marker it does not make sense to round up [184](https://github.com/greenbone/pheme/pull/184)
 - when there is None value for format_time [210](https://github.com/greenbone/pheme/pull/210)
 - counted unknown threats severity as 'Low' [219](https://github.com/greenbone/pheme/pull/219)
 
-[Unreleased]: https://github.com/greenbone/pheme/compare/v21.04-rc4...HEAD
-
+[21.04-cr1]: https://github.com/greenbone/pheme/compare/v21.04-rc4...v21.04-cr1
 
 ## [21.04-rc4] - 2021-03-02
 [21.04-rc4]: https://github.com/greenbone/pheme/compare/v21.04-rc3...v21.04-rc4
