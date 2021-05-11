@@ -45,10 +45,10 @@ TEMPLATE_DIR = BASE_DIR / "template"
 
 GSAD_URL = os.environ.get("GSAD_URL", "https://localhost/gmp")
 
-SENTRY_DNS = os.environ.get("SENTRY_DNS_PHEME")
+SENTRY_DSN = os.environ.get("SENTRY_DSN_PHEME")
 
-# load sentry_sdk only when SENTRY_DNS_PHEME is set otherwise don't bother
-if SENTRY_DNS is not None:
+# load sentry_sdk only when SENTRY_DSN_PHEME is set otherwise don't bother
+if SENTRY_DSN is not None:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -57,7 +57,11 @@ if SENTRY_DNS is not None:
     # experience than to have to look up lambdas, pylint detectes this as an
     # abstract class; which it is.
     sentry_sdk.init(
-        SENTRY_DNS, traces_sample_rate=1.0, integrations=[DjangoIntegration()]
+        SENTRY_DSN,
+        traces_sample_rate=1.0,
+        environment=os.environ.get("SENTRY_ENVIRONMENT"),
+        server_name=os.environ.get("SENTRY_SERVER_NAME"),
+        integrations=[DjangoIntegration()],
     )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
