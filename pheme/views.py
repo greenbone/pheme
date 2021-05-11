@@ -28,6 +28,7 @@ from pheme.transformation import scanreport
 from pheme.storage import store, load
 from pheme.renderer import MarkDownTableRenderer, XMLRenderer, CSVRenderer
 from pheme.transformation.scanreport import model
+from pheme.version import __version__
 
 
 @api_view(["GET"])
@@ -136,6 +137,7 @@ def report(request: Request, name: str):
             }
         )
     data = load(name)
+    data["pheme_version"] = int("".join(filter(str.isdigit, __version__)))
     if request.GET.get("without_overview"):
         # remove charts
         data.pop("overview", None)

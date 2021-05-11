@@ -126,7 +126,7 @@ def test_charts_generation_on_zero_severity_report():
         generate("oid", 10, 0),
         name="http_accept_test",
     )
-    test_chart_keyword(report, 3)
+    test_chart_keyword(report)
 
 
 def test_charts_generation_on_zero_result_report():
@@ -138,7 +138,7 @@ def test_charts_generation_on_zero_result_report():
     test_chart_keyword(report, 1)
 
 
-def test_chart_keyword(report=None, expected=3):
+def test_chart_keyword(report=None, expected=4):
     subtype = "html"
     css_key = "vulnerability_report_{}_css".format(subtype)
     template_key = "vulnerability_report_{}_template".format(subtype)
@@ -151,6 +151,7 @@ def test_chart_keyword(report=None, expected=3):
     <html>
     {{ overview.nvts | pie_chart}}
     {{ overview.hosts | h_bar_chart  }}
+    {% h_bar_chart overview.hosts x_title="Vulnerabilitites" %}
     {{ overview.hosts | treemap  }}
     </html>
     """
