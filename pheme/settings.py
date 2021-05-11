@@ -50,12 +50,15 @@ SENTRY_DNS = os.environ.get("SENTRY_DNS_PHEME")
 # load sentry_sdk only when SENTRY_DNS_PHEME is set otherwise don't bother
 if SENTRY_DNS is not None:
     import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
 
     # pylint: disable=E0110
     # Due to the MYPY handling within sentry_sdk.init, to have a nicer user
     # experience than to have to look up lambdas, pylint detectes this as an
     # abstract class; which it is.
-    sentry_sdk.init(SENTRY_DNS, traces_sample_rate=1.0)
+    sentry_sdk.init(
+        SENTRY_DNS, traces_sample_rate=1.0, integrations=[DjangoIntegration()]
+    )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
