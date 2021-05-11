@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - title for the x axis summary [243](https://github.com/greenbone/pheme/pull/243)
+- sentry.io [245](https://github.com/greenbone/pheme/pull/245)
 ### Changed
 ### Deprecated
 ### Removed
