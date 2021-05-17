@@ -54,7 +54,7 @@ if SENTRY_DSN is not None:
 
     # pylint: disable=E0110
     # Due to the MYPY handling within sentry_sdk.init, to have a nicer user
-    # experience than to have to look up lambdas, pylint detectes this as an
+    # experience than to have to look up lambdas, pylint detects this as an
     # abstract class; which it is.
     sentry_sdk.init(
         SENTRY_DSN,
