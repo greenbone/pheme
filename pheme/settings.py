@@ -128,9 +128,7 @@ ROOT_URLCONF = "pheme.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            TEMPLATE_DIR,
-        ],
+        "DIRS": [TEMPLATE_DIR],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -138,9 +136,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-            ],
+            ]
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = "pheme.wsgi.application"
@@ -176,10 +174,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    STATIC_DIR,
-    TEMPLATE_DIR,
-]
+STATICFILES_DIRS = [STATIC_DIR, TEMPLATE_DIR]
 
 # Logging
 # https://docs.djangoproject.com/en/3.1/topics/logging/
@@ -188,10 +183,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-        },
+        "console": {"class": "logging.StreamHandler", "formatter": "standard"},
         "syslog": {
             "class": "logging.handlers.SysLogHandler",
             "formatter": "standard",
@@ -210,7 +202,7 @@ LOGGING = {
         "standard": {
             "format": "{module}#{funcName} {levelname} {asctime}: {message}",
             "style": "{",
-        },
+        }
     },
     "root": {
         "handlers": [
@@ -235,5 +227,5 @@ REST_FRAMEWORK = {
         "pheme.renderer.XMLRenderer",
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.MultiPartRenderer",
-    ],
+    ]
 }

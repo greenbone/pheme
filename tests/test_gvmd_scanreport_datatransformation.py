@@ -32,23 +32,23 @@ def test_should_contain_non_general_ports():
     scan_results = gen_report(hosts, oids, port="80/tcp")
     data = {"report": {"report": scan_results}}
     report = transform(data)
-    assert report.results[0]['equipment']['ports'] == {"80/tcp"}
+    assert report.results[0]["equipment"]["ports"] == {"80/tcp"}
 
 
 def test_remove_general_from_equipment_port_list():
     scan_results = gen_report(hosts, oids, port="general/tcp")
     data = {"report": {"report": scan_results}}
     report = transform(data)
-    assert report.results[0]['equipment']['ports'] == []
+    assert report.results[0]["equipment"]["ports"] == []
 
 
 def test_grouping_nvt_oid_per_type():
     scan_results = gen_report(hosts, oids, with_optional=True)
     data = {"report": {"report": scan_results}}
     report = transform(data)
-    results = report.results[0]['results']
+    results = report.results[0]["results"]
     # so far refs are hardcoded to ten
-    assert len(results[0]['nvt_refs_ref']['CVE']) == 10
+    assert len(results[0]["nvt_refs_ref"]["CVE"]) == 10
 
 
 @pytest.mark.parametrize(

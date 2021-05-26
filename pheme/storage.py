@@ -43,7 +43,7 @@ def store(
     value: Dict,
     *,
     handler=__default_store_handler,
-    id_generator=__default_id_generator
+    id_generator=__default_id_generator,
 ):
     name = id_generator(prefix)
     if isinstance(value, dict):

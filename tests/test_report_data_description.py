@@ -23,6 +23,6 @@ from django.urls import reverse
 
 def test_markdown_description_without_error():
     client = APIClient()
-    url = reverse('scanreport_data_description')
-    response = client.get(url, format='text/markdown+table')
+    url = reverse("scanreport_data_description")
+    response = client.get(url, format="text/markdown+table")
     assert response.status_code == 200

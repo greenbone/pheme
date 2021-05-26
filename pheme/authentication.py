@@ -54,7 +54,7 @@ def get_username_role(
     request: HttpRequest,
     *,
     gsad_url: str = settings.GSAD_URL,
-    get: Callable = requests.get
+    get: Callable = requests.get,
 ) -> Tuple[Union[str, None], Union[str, None]]:
     """
     returns a username and a role when it got found based on the request.
