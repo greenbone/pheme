@@ -33,11 +33,11 @@ class Case:
 @pytest.mark.parametrize(
     "xml",
     [
-        Case('<data a="b"/>', {'data': {'a': 'b'}}),
-        Case('<data><a>b</a></data>', {'data': {'a': 'b'}}),
+        Case('<data a="b"/>', {"data": {"a": "b"}}),
+        Case("<data><a>b</a></data>", {"data": {"a": "b"}}),
         Case(
-            '<data>a<b></b></data>',
-            {'data': {'b': None, 'text': 'a'}},
+            "<data>a<b></b></data>",
+            {"data": {"b": None, "text": "a"}},
         ),
     ],
 )

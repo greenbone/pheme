@@ -79,7 +79,7 @@ def __put(
     func: Callable[[HttpRequest, Dict], Dict],
     *,
     from_path: str = settings.PARAMETER_FILE_ADDRESS,
-    store: Callable[[Dict, str], Dict] = __store
+    store: Callable[[Dict, str], Dict] = __store,
 ) -> Response:
     params = __load_params(from_path=from_path)
     username = request.META.get("GVM_USERNAME")
@@ -106,10 +106,7 @@ def __process_form_data(request: HttpRequest, data: Dict) -> Dict:
         if isinstance(value, UploadedFile):
             file_type, _ = mimetypes.guess_type(value.name)
             logger.info(
-                "uploading filetype %s/%s for %s",
-                file_type,
-                value.name,
-                key,
+                "uploading filetype %s/%s for %s", file_type, value.name, key
             )
             if file_type and file_type.startswith("image"):
                 data[key] = as_datalink(value.read(), file_type)
@@ -128,21 +125,14 @@ def __process_json_object(request: HttpRequest, data: Dict) -> Dict:
 
 @api_view(["PUT"])
 @parser_classes([rest_framework.parsers.JSONParser])
-@renderer_classes(
-    [
-        rest_framework.renderers.JSONRenderer,
-    ]
-)
+@renderer_classes([rest_framework.renderers.JSONRenderer])
 @authentication_classes(
     [
         pheme.authentication.LoggedInAsAUser,
         pheme.authentication.SimpleApiKeyAuthentication,
     ]
 )
-def put_value(
-    request: HttpRequest,
-    key: str,
-) -> Response:
+def put_value(request: HttpRequest, key: str) -> Response:
     def __process_single_value(request: HttpRequest, data: Dict) -> Dict:
         data[key] = request.data
         return data
@@ -154,11 +144,7 @@ def put_value(
 @parser_classes(
     [rest_framework.parsers.JSONParser, rest_framework.parsers.MultiPartParser]
 )
-@renderer_classes(
-    [
-        rest_framework.renderers.JSONRenderer,
-    ]
-)
+@renderer_classes([rest_framework.renderers.JSONRenderer])
 @authentication_classes(
     [
         pheme.authentication.LoggedInAsAUser,
