@@ -13,7 +13,6 @@ Or in this case personification of a service to generate reports.
 - [Installation](#installation)
   - [Requirements](#requirements)
 - [Development](#development)
-- [API overview](#api-overview)
 - [Maintainer](#maintainer)
 - [Contributing](#contributing)
 - [License](#license)
@@ -56,16 +55,6 @@ Afterwards activate the git hooks for auto-formatting and linting via
 Validate the activated git hooks by running
 
     poetry run autohooks check
-
-## API overview
-
-To get an overview of the API you can start this project
-
-```
-poetry run python manage.py runserver
-```
-
-and then go to [swagger](http://localhost:8000/docs/)
 
 ## Usage
 

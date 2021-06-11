@@ -203,13 +203,14 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         host_threats = host_threat_count.get(
             hostname, {threat: 0 for threat in __threats}
         )
-        threat_index = __threat_index_lookup.get(threat, len(__threats) - 1)
+        threat_index = __threat_index_lookup.get(threat)
+        if threat_index is not None:
+            threat_count[threat_index] += 1
         if host_threats.get(threat) is not None:
             host_threats[threat] += 1
         host_threat_count[hostname] = host_threats
 
         # needs high, medium, low
-        threat_count[threat_index] += 1
 
         # severity 1 to 10
         host_severities = host_severity_count.get(hostname, [0] * 10)

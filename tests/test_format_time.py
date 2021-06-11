@@ -17,6 +17,7 @@ def test_format_time_within_template():
     {% load readable_timeformat %}
     <html>
     {{ start | format_time }}
+    {{ unknown_key | format_time }}
     </html>
     """
     response = client.put(
