@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- X-axis label to bar chart, total amount of vulnerabilities to pie chart [272](https://github.com/greenbone/pheme/pull/272)
 - Possibility to transform '%Y-%m-%dT%H:%M:%S%z' into '%a, %b %d, %Y %I %p %Z' within a template [193](https://github.com/greenbone/pheme/pull/193)
 - Possibility to limit PDF report size, by limiting included hosts/results [197](https://github.com/greenbone/pheme/pull/197)
 ### Changed
@@ -126,6 +127,6 @@ curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: text/csv'
 ### Added
 - django webserver
 - openapi (/openapi-schema/)
-- swagger (/docs/) 
+- swagger (/docs/)
 
 [gvmd]: https://github.com/greenbone/gvmd
