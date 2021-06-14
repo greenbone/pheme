@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- X-axis label to bar chart, total amount of vulnerabilities to pie chart [272](https://github.com/greenbone/pheme/pull/272)
 - title for the x axis summary [243](https://github.com/greenbone/pheme/pull/243)
 - sentry.io [245](https://github.com/greenbone/pheme/pull/245) [246](https://github.com/greenbone/pheme/pull/246)
 ### Changed
@@ -137,6 +138,6 @@ curl 'http://localhost:8000/report/$ID_OF_PREVIOUS_POST' -H 'Accept: text/csv'
 ### Added
 - django webserver
 - openapi (/openapi-schema/)
-- swagger (/docs/) 
+- swagger (/docs/)
 
 [gvmd]: https://github.com/greenbone/gvmd

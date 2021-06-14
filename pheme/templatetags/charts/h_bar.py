@@ -37,6 +37,13 @@ __ORIENTATION_LINE_TEXT_TEMPLATE = """
 style="font-size:{font_size}px;font-family:{font_family};text-anchor: middle;" width="{width}">{label}
 </text>
 """
+
+__X_AXIS_LABEL = """
+<text class="x axis label" y="{y}" x="{x}" fill="#000000"
+style="font-size:{font_size}px;font-family:{font_family};text-anchor: middle;">{axis_label}
+</text>
+"""
+
 __BAR_ELEMENT_TEMPLATE = """
 <rect x="{x}" y="17" height="10" width="{width}" style="fill: {color};"></rect>
 """
@@ -73,6 +80,7 @@ __BAR_CHART_TEMPLATE = """
 {bar_legend}
 </g>
 {legend}
+{x_axis_label}
 </svg>
 """
 
@@ -192,7 +200,7 @@ def h_bar_chart(
             max_hostname_len=max_hostname_len,
             begin_total=svg_width - 100,
         )
-    svg_element_lengths = len(data.keys()) * bar_jump + 50
+    svg_element_lengths = len(data.keys()) * bar_jump + 60 + font_size
     legend_start = calculate_legend_start_height(
         svg_element_lengths, title_color, font_size
     )
@@ -206,6 +214,13 @@ def h_bar_chart(
         font_family=font_family,
         font_size=font_size,
         max_hostname_len=max_hostname_len,
+        x_axis_label=__X_AXIS_LABEL.format(
+            axis_label="Number of Vulnerabilities",
+            font_size=font_size,
+            font_family=font_family,
+            x=svg_width / 2,
+            y=svg_element_lengths,
+        ),
         x_title=x_title,
     )
     return SafeText(svg_chart)
