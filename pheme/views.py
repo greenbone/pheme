@@ -28,25 +28,18 @@ from pheme.transformation import scanreport
 from pheme.storage import store, load
 from pheme.renderer import MarkDownTableRenderer, XMLRenderer, CSVRenderer
 from pheme.transformation.scanreport import model
+from pheme.version import __version__
 
 
 @api_view(["GET"])
-@renderer_classes(
-    [
-        rest_framework.renderers.JSONRenderer,
-    ]
-)
+@renderer_classes([rest_framework.renderers.JSONRenderer])
 def load_cache(request, key):
     return Response(load(key))
 
 
 @api_view(["POST"])
 @parser_classes([rest_framework.parsers.JSONParser])
-@renderer_classes(
-    [
-        rest_framework.renderers.JSONRenderer,
-    ]
-)
+@renderer_classes([rest_framework.renderers.JSONRenderer])
 def store_cache(request):
     key = request.data.get("key", "unknown")
     data = request.data.get("value")
@@ -61,11 +54,7 @@ def store_cache(request):
 
 @api_view(["POST"])
 @parser_classes([XMLParser, XMLFormParser])
-@renderer_classes(
-    [
-        rest_framework.renderers.JSONRenderer,
-    ]
-)
+@renderer_classes([rest_framework.renderers.JSONRenderer])
 def transform(request):
     name = store(
         "scanreport",
@@ -76,21 +65,13 @@ def transform(request):
 
 @api_view(["POST"])
 @parser_classes([XMLParser])
-@renderer_classes(
-    [
-        rest_framework.renderers.JSONRenderer,
-    ]
-)
+@renderer_classes([rest_framework.renderers.JSONRenderer])
 def unmodified(request):
     return Response(request.data)
 
 
 @api_view(["GET"])
-@renderer_classes(
-    [
-        rest_framework.renderers.JSONRenderer,
-    ]
-)
+@renderer_classes([rest_framework.renderers.JSONRenderer])
 def template_elements(request: Request, name: str):
     def load_value_of(key) -> str:
         may_val = load(key) or {}
@@ -136,6 +117,7 @@ def report(request: Request, name: str):
             }
         )
     data = load(name)
+    data["pheme_version"] = int("".join(filter(str.isdigit, __version__)))
     if request.GET.get("without_overview"):
         # remove charts
         data.pop("overview", None)
@@ -147,10 +129,7 @@ def report(request: Request, name: str):
 
 @api_view(["GET"])
 @renderer_classes(
-    [
-        rest_framework.renderers.JSONRenderer,
-        MarkDownTableRenderer,
-    ]
+    [rest_framework.renderers.JSONRenderer, MarkDownTableRenderer]
 )
 def scanreport_data_description(request):
     return Response(dataclasses.asdict(model.describe()))

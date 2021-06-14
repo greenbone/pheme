@@ -268,9 +268,7 @@ def transform(data: Dict[str, str]) -> Report:
         task.get("comment"),
         report.get("scan_start"),
         Overview(
-            hosts=host_counts,
-            nvts=nvts_counts,
-            vulnerable_equipment=None,
+            hosts=host_counts, nvts=nvts_counts, vulnerable_equipment=None
         ),
         results,
     )

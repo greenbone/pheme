@@ -20,7 +20,7 @@ classifiers=[
 
 [tool.poetry.dependencies]
 python = "^3.7"
-django = "=2.2.18"
+django = "=2.2.20"
 xmltodict = "^0.12.0"
 pyyaml = "^5.3.1"
 uritemplate = "^3.0.1"
@@ -28,18 +28,19 @@ djangorestframework = "=3.11.2"
 coreapi = "^2.3.3"
 weasyprint = ">=51,<53"
 rope = ">=0.17,<0.20"
+sentry-sdk = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.8.2"
+pylint = "^2.8.3"
 pylint-django = "^2.4.4"
-pytest = "^6.2.3"
-pytest-cov = "^2.11.1"
+pytest = "^6.2.4"
+pytest-cov = "^2.12.1"
 pytest-django = ">=3.9,<5.0"
 pytest-env = "^0.6.2"
-autohooks = "^21.3.0"
+autohooks = "^21.6.0"
 autohooks-plugin-pylint = "^1.2.0"
 autohooks-plugin-black = {version = "^1.2.0", python = "^3.6"}
-black = {version = "21.4b2", python = "^3.6"}
+black = {version = "21.5b2", python = "^3.6"}
 rope = ">=0.17,<0.20"
 pontos = "^0.3.0"
 

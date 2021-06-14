@@ -45,6 +45,25 @@ TEMPLATE_DIR = BASE_DIR / "template"
 
 GSAD_URL = os.environ.get("GSAD_URL", "https://localhost/gmp")
 
+SENTRY_DSN = os.environ.get("SENTRY_DSN_PHEME")
+
+# load sentry_sdk only when SENTRY_DSN_PHEME is set otherwise don't bother
+if SENTRY_DSN is not None:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    # pylint: disable=E0110
+    # Due to the MYPY handling within sentry_sdk.init, to have a nicer user
+    # experience than to have to look up lambdas, pylint detects this as an
+    # abstract class; which it is.
+    sentry_sdk.init(
+        SENTRY_DSN,
+        traces_sample_rate=1.0,
+        environment=os.environ.get("SENTRY_ENVIRONMENT"),
+        server_name=os.environ.get("SENTRY_SERVER_NAME"),
+        integrations=[DjangoIntegration()],
+    )
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 
 PHEME_CONFIGURATION_PATH = Path(
@@ -109,9 +128,7 @@ ROOT_URLCONF = "pheme.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            TEMPLATE_DIR,
-        ],
+        "DIRS": [TEMPLATE_DIR],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -119,9 +136,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-            ],
+            ]
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = "pheme.wsgi.application"
@@ -157,10 +174,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    STATIC_DIR,
-    TEMPLATE_DIR,
-]
+STATICFILES_DIRS = [STATIC_DIR, TEMPLATE_DIR]
 
 # Logging
 # https://docs.djangoproject.com/en/3.1/topics/logging/
@@ -169,10 +183,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-        },
+        "console": {"class": "logging.StreamHandler", "formatter": "standard"},
         "syslog": {
             "class": "logging.handlers.SysLogHandler",
             "formatter": "standard",
@@ -191,7 +202,7 @@ LOGGING = {
         "standard": {
             "format": "{module}#{funcName} {levelname} {asctime}: {message}",
             "style": "{",
-        },
+        }
     },
     "root": {
         "handlers": [
@@ -216,5 +227,5 @@ REST_FRAMEWORK = {
         "pheme.renderer.XMLRenderer",
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.MultiPartRenderer",
-    ],
+    ]
 }
