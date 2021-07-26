@@ -37,7 +37,7 @@ pytest = "^6.2.4"
 pytest-cov = "^2.12.1"
 pytest-django = ">=3.9,<5.0"
 pytest-env = "^0.6.2"
-autohooks = "^21.6.0"
+autohooks = "^21.7.0"
 autohooks-plugin-pylint = "^21.6.0"
 autohooks-plugin-black = {version = "^21.7.0", python = "^3.6"}
 black = {version = "21.6b0", python = "^3.6"}
