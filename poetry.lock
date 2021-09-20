@@ -264,7 +264,7 @@ django = ">=1.11"
 
 [[package]]
 name = "fonttools"
-version = "4.26.2"
+version = "4.27.0"
 description = "Tools to manipulate font files"
 category = "main"
 optional = false
@@ -673,14 +673,14 @@ use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
 name = "rope"
-version = "0.19.0"
+version = "0.20.1"
 description = "a python refactoring library..."
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.extras]
-dev = ["pytest"]
+dev = ["pytest", "pytest-timeout"]
 
 [[package]]
 name = "sentry-sdk"
@@ -872,7 +872,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "a2afecb6488f4b3e9a1500c31d7b309a1d4035027364d48868a922d59a8c3bfe"
+content-hash = "f8657b59982a888d401d05ffe700b07858e815ccf12783663a84590d761af14c"
 
 [metadata.files]
 appdirs = [
@@ -1130,8 +1130,8 @@ djangorestframework = [
     {file = "djangorestframework-3.11.2.tar.gz", hash = "sha256:a5967b68a04e0d97d10f4df228e30f5a2d82ba63b9d03e1759f84993b7bf1b53"},
 ]
 fonttools = [
-    {file = "fonttools-4.26.2-py3-none-any.whl", hash = "sha256:47ce4aedc815a9d101d3b522c580264ca7e4a921cca6183ed460ad2c65d46f98"},
-    {file = "fonttools-4.26.2.zip", hash = "sha256:c1c0e03dd823e9e905232e875ea02dbb2dcd2ba195418c6d11bfaea49b9c774d"},
+    {file = "fonttools-4.27.0-py3-none-any.whl", hash = "sha256:f12224bde50eaee537120fab09c3ad6f955059f530dfd24f70aa5228be327d72"},
+    {file = "fonttools-4.27.0.zip", hash = "sha256:22ca101453fbc41fc5e34749402e41bdc41064b66daea80440cc12f501a45ad7"},
 ]
 html5lib = [
     {file = "html5lib-1.1-py2.py3-none-any.whl", hash = "sha256:0d78f8fde1c230e99fe37986a60526d7049ed4bf8a9fadbad5f00e22e58e041d"},
@@ -1454,7 +1454,7 @@ requests = [
     {file = "requests-2.26.0.tar.gz", hash = "sha256:b8aa58f8cf793ffd8782d3d8cb19e66ef36f7aba4353eec859e74678b01b07a7"},
 ]
 rope = [
-    {file = "rope-0.19.0.tar.gz", hash = "sha256:64e6d747532e1f5c8009ec5aae3e5523a5bcedf516f39a750d57d8ed749d90da"},
+    {file = "rope-0.20.1.tar.gz", hash = "sha256:505a2f6b4ac7b18e0429be179f4d8712243a194da5c866b0731f9d91ce7590bb"},
 ]
 sentry-sdk = [
     {file = "sentry-sdk-1.3.1.tar.gz", hash = "sha256:ebe99144fa9618d4b0e7617e7929b75acd905d258c3c779edcd34c0adfffe26c"},
