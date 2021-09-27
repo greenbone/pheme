@@ -77,12 +77,12 @@ def template_elements(request: Request, name: str):
         may_val = load(key) or {}
         return may_val
 
-    images = load_value_of("{}images".format(name))
+    images = load_value_of(f"{name}images")
     return Response(
         {
-            "template": load_value_of("{}html_template".format(name)),
-            "pdf_css": load_value_of("{}pdf_css".format(name)),
-            "html_css": load_value_of("{}html_css".format(name)),
+            "template": load_value_of(f"{name}html_template"),
+            "pdf_css": load_value_of(f"{name}pdf_css"),
+            "html_css": load_value_of(f"{name}html_css"),
             "images": images,
         }
     )
@@ -106,13 +106,13 @@ def report(request: Request, name: str):
         return may_val
 
     if "report_format_editor" in request.accepted_media_type:
-        images = load_value_of("{}images".format(name))
+        images = load_value_of(f"{name}images")
         return Response(
             {
-                "template": load_value_of("{}html_template".format(name)),
+                "template": load_value_of(f"{name}html_template"),
                 "vulnerability_report": load(name),
-                "pdf_css": load_value_of("{}pdf_css".format(name)),
-                "html_css": load_value_of("{}html_css".format(name)),
+                "pdf_css": load_value_of(f"{name}pdf_css"),
+                "html_css": load_value_of(f"{name}html_css"),
                 "images": images,
             }
         )

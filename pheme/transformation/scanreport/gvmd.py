@@ -133,10 +133,10 @@ def __create_host_information_lookup(report: Dict) -> Dict:
         details = host.get("detail", [])
         for detail in details:
             name = detail.get("name", "")
-            if name in information_key.keys():
+            if name in information_key:
                 information[information_key.get(name)] = detail.get("value")
                 found += 1
-            if found == len(information_key.keys()):
+            if found == len(information_key):
                 return information
         return information
 
@@ -165,9 +165,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     threat_count = [0] * len(__threats)
 
     def transform_key(prefix: str, vic: Dict) -> Dict:
-        return {
-            "{}_{}".format(prefix, key): value for key, value in vic.items()
-        }
+        return {f"{prefix}_{key}": value for key, value in vic.items()}
 
     def per_result(result):
         hostname = __get_hostname_from_result(result)

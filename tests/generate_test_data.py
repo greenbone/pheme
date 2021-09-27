@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=W0621,C0103
 from pathlib import Path
-import random
+from random import choice, randint
 import string
 import uuid
 
@@ -29,7 +29,7 @@ import xmltodict
 
 
 def _random_text(length: int) -> str:
-    return "".join([random.choice(string.ascii_letters) for i in range(length)])
+    return "".join([choice(string.ascii_letters) for i in range(length)])
 
 
 def gen_solution() -> Dict:
@@ -41,15 +41,9 @@ def gen_solution() -> Dict:
 
 def gen_host(hostname="localhost") -> Dict:
     return {
-        "text": "{}.{}.{}.{}".format(
-            random.randint(1, 254),
-            random.randint(1, 254),
-            random.randint(1, 254),
-            random.randint(1, 254),
-        ),
-        "hostname": "{}.{}.org".format(
-            hostname, _random_text(random.randint(1, 10))
-        ),
+        "text": f"{randint(1, 254)}.{randint(1, 254)}."
+        f"{randint(1, 254)}.{randint(1, 254)}",
+        "hostname": f"{hostname}.{_random_text(randint(1, 10))}.org",
     }
 
 
@@ -63,7 +57,7 @@ def gen_refs(length: int = 0) -> Dict:
 def gen_qod() -> Dict:
     return {
         "type": _random_text(10),
-        "value": "{}".format(random.randint(1, 254)),
+        "value": f"{randint(1, 254)}",
     }
 
 
@@ -73,11 +67,9 @@ def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
         "solution": gen_solution() if with_optional else None,
         "refs": gen_refs(10) if with_optional else None,
         "type": "CVE",
-        "name": "faked example {}".format(oid) if with_optional else None,
+        "name": f"faked example {oid}" if with_optional else None,
         "family": _random_text(15) if with_optional else None,
-        "cvss_base": "{}".format(float(oid[4:]) / 10)
-        if with_optional
-        else None,
+        "cvss_base": f"{float(oid[4:]) / 10}" if with_optional else None,
         "tags": _random_text(150) if with_optional else None,
     }
 
@@ -90,13 +82,13 @@ def gen_result(
 ) -> Dict:
     if not port:
         allowed_ports = [80, 8080, 443, 20, 25, 21, 23, 143, 22, 67, 68]
-        port = "{}/tcp".format(random.choice(allowed_ports))
+        port = f"{choice(allowed_ports)}/tcp"
     return {
         "host": host,
         "nvt": generate_nvt(oid),
         "port": port if with_optional else None,
-        "threat": random.choice(threats),
-        "severity": "{}".format(float(oid[4:]) / 10) if with_optional else None,
+        "threat": choice(threats),
+        "severity": f"{float(oid[4:]) / 10}" if with_optional else None,
         "qod": gen_qod() if with_optional else None,
         "description": _random_text(254) if with_optional else None,
     }
@@ -106,7 +98,7 @@ def gen_gmp() -> Dict:
     return {"version": "21.04"}
 
 
-def gen_count(count: int = random.randint(1, 100)) -> Dict:
+def gen_count(count: int = randint(1, 100)) -> Dict:
     return {"count": count}
 
 
@@ -164,10 +156,8 @@ def gen_report(
     result = []
     host_details = [] if hosts is not None else None
     for h in g_hosts:
-        for _ in range(random.randint(1, len(oids) + 2)):
-            res = gen_result(
-                h, oids[random.randint(0, len(oids) - 1)], port=port
-            )
+        for _ in range(randint(1, len(oids) + 2)):
+            res = gen_result(h, oids[randint(0, len(oids) - 1)], port=port)
             host_details.append(
                 {
                     "ip": res["host"]["text"],
@@ -181,7 +171,7 @@ def gen_report(
             result.append(res)
 
     results = {
-        "max": "{}".format(random.randint(1, 1000)) if with_optional else None,
+        "max": f"{randint(1, 1000)}" if with_optional else None,
         "start": "2018-01-01T00:00:00+01:00",
     }
     if hosts is not None:
@@ -214,16 +204,15 @@ if __name__ == "__main__":
     own_path = Path(__file__).absolute()
     directory = own_path.__str__()[0 : (len(own_path.name) * -1)]
     number_of_hosts = 10
-    print("generating {} hostnames".format(number_of_hosts))
-    hosts = ["host_{}".format(i) for i in range(number_of_hosts)]
+    print(f"generating {number_of_hosts} hostnames")
+    hosts = [f"host_{i}" for i in range(number_of_hosts)]
     print("generating oid for nvts")
-    oids = ["oid_{}".format(i) for i in range(100)]
+    oids = [f"oid_{i}" for i in range(100)]
     print("generating report data")
     data = {"report": {"report": gen_report(hosts, oids, True)}}
     path = Path(
-        "{}../test_data/artifical_{}_hosts_{}_oid_per_host.xml".format(
-            directory, number_of_hosts, len(oids)
-        )
+        f"{directory}../test_data/artifical_"
+        f"{number_of_hosts}_hosts_{len(oids)}_oid_per_host.xml"
     )
     print("writing report data")
-    path.write_text(xmltodict.unparse(data, pretty=True))
+    path.write_text(xmltodict.unparse(data, pretty=True), encoding="utf-8")

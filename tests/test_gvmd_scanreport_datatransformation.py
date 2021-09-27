@@ -24,7 +24,7 @@ from pheme.transformation.scanreport.gvmd import (
 
 from tests.generate_test_data import gen_report
 
-oids = ["oid_{}".format(i) for i in range(5)]
+oids = [f"oid_{i}" for i in range(5)]
 hosts = ["first", "second"]
 
 
