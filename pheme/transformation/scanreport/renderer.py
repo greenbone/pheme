@@ -61,7 +61,7 @@ def _default_not_found_response(
     # pylint: disable=W0212
     path = request._request.path
     report_id = path[path.rfind("/") + 1 :]
-    return '"not data found for %s"' % report_id
+    return f'"not data found for {report_id}"'
 
 
 class Report(renderers.BaseRenderer):
@@ -71,7 +71,7 @@ class Report(renderers.BaseRenderer):
             return _default_not_found_response(renderer_context, request)
 
         name = data.get("internal_name")
-        cache_key = "{}/{}".format(self.media_type, name) if name else None
+        cache_key = f"{self.media_type}/{name}" if name else None
         logger.debug("generating report %s", cache_key)
 
         if cache_key and not DEBUG:
@@ -141,9 +141,7 @@ def _replace_inline_svg_with_img_tags(
         to_encode = html[from_index:to_index]
         encoded = b64encode(to_encode.encode()).decode()
         img = (
-            '<img src="data:image/svg+xml;charset=utf-8;base64, {}" />'.format(
-                encoded
-            )
+            f'<img src="data:image/svg+xml;charset=utf-8;base64, {encoded}" />'
         )
         html = html[:from_index] + img + html[to_index:]
         from_index = to_index
@@ -175,17 +173,17 @@ def enforce_limit(
                 result_cut = True
     if host_cut and not result_cut:
         data["comment"] = limits.get(
-            "host_limit_msg", "Host limit: {host_limit}."
-        ).format(host_limit=max_hosts)
+            "host_limit_msg", f"Host limit: {max_hosts}."
+        )
     elif result_cut and not host_cut:
         data["comment"] = limits.get(
-            "result_limit_msg", "Result limit: {result_limit}."
-        ).format(result_limit=max_results_in_host)
+            "result_limit_msg", f"Result limit: {max_results_in_host}."
+        )
     elif host_cut and result_cut:
         data["comment"] = limits.get(
             "host_result_limit_msg",
-            "Host limit {host_limit}; Result limit: {result_limit}.",
-        ).format(host_limit=max_hosts, result_limit=max_results_in_host)
+            f"Host limit {max_hosts}; Result limit: {max_results_in_host}.",
+        )
 
     return data
 

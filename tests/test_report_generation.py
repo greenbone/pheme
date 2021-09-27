@@ -35,8 +35,7 @@ def generate(
     prefix: str, amount: int, number: Optional[int] = None
 ) -> List[str]:
     return [
-        "{}_{}".format(prefix, number if number is not None else i)
-        for i in range(amount)
+        f"{prefix}_{number if number is not None else i}" for i in range(amount)
     ]
 
 
@@ -140,8 +139,8 @@ def test_charts_generation_on_zero_result_report():
 
 def test_chart_keyword(report=None, expected=4):
     subtype = "html"
-    css_key = "vulnerability_report_{}_css".format(subtype)
-    template_key = "vulnerability_report_{}_template".format(subtype)
+    css_key = f"vulnerability_report_{subtype}_css"
+    template_key = f"vulnerability_report_{subtype}_template"
     client = APIClient()
     url = reverse(
         "put_parameter",
@@ -178,8 +177,8 @@ def test_chart_keyword(report=None, expected=4):
 )
 def test_http_accept_visual(http_accept):
     subtype = http_accept.split("/")[-1]
-    css_key = "vulnerability_report_{}_css".format(subtype)
-    template_key = "vulnerability_report_{}_template".format(subtype)
+    css_key = f"vulnerability_report_{subtype}_css"
+    template_key = f"vulnerability_report_{subtype}_template"
     client = APIClient()
     url = reverse(
         "put_parameter",
@@ -289,9 +288,9 @@ def test_generate_format_editor_html_report():
         """
     html_css = "body { background-color: #000; }"
     for i, content in enumerate(images):
-        upload_image("{}images".format(key), str(i), content)
-    upload("{}html_template".format(key), html_template)
-    upload("{}html_css".format(key), html_css)
+        upload_image(f"{key}images", str(i), content)
+    upload(f"{key}html_template", html_template)
+    upload(f"{key}html_css", html_css)
     # upload(images)
     html_report = client.get(
         report_url, HTTP_ACCEPT="text/html+report_format_editor"
@@ -301,15 +300,15 @@ def test_generate_format_editor_html_report():
     assert "report_format_editor_test" in report
     assert "background-color: #000" in report
     for content in images:
-        assert '<img src="{}"/>'.format(content) in report
+        assert f'<img src="{content}"/>' in report
 
 
 @patch("pheme.parameter.pheme.authentication.get_username_role")
 def test_html_report_contains_user_paramater(user_information):
     user_information.side_effect = [(None, None), ("test", "admin")]
     subtype = "html"
-    css_key = "vulnerability_report_{}_css".format(subtype)
-    template_key = "vulnerability_report_{}_template".format(subtype)
+    css_key = f"vulnerability_report_{subtype}_css"
+    template_key = f"vulnerability_report_{subtype}_template"
     client = APIClient()
     url = reverse(
         "put_parameter",
