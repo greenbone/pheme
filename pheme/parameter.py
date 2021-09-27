@@ -46,7 +46,7 @@ def __load_params(from_path: str) -> Dict:
     """
     param_file_obj = Path(from_path)
     return (
-        json.loads(param_file_obj.read_text())
+        json.loads(param_file_obj.read_text(encoding="utf-8"))
         if param_file_obj.exists()
         else {}
     )
@@ -70,7 +70,7 @@ def load_params(
 
 
 def __store(params: Dict, *, from_path: str = None) -> Dict:
-    Path(from_path).write_text(json.dumps(params))
+    Path(from_path).write_text(json.dumps(params), encoding="utf-8")
     return params
 
 
