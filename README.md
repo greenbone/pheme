@@ -4,8 +4,8 @@
 
 [![GitHub releases](https://img.shields.io/github/release-pre/greenbone/pheme.svg)](https://github.com/greenbone/pheme/releases)
  [![PyPI release](https://img.shields.io/pypi/v/pheme.svg)](https://pypi.org/project/pheme/)
- [![code test coverage](https://codecov.io/gh/greenbone/pheme/branch/master/graph/badge.svg)](https://codecov.io/gh/greenbone/pheme)
- [![CircleCI](https://circleci.com/gh/greenbone/pheme/tree/master.svg?style=svg)](https://circleci.com/gh/greenbone/pheme/tree/master)
+ [![code test coverage](https://codecov.io/gh/greenbone/pheme/branch/main/graph/badge.svg)](https://codecov.io/gh/greenbone/pheme)
+ [![CircleCI](https://circleci.com/gh/greenbone/pheme/tree/main.svg?style=svg)](https://circleci.com/gh/greenbone/pheme/tree/main)
  [![Build and test](https://github.com/greenbone/pheme/actions/workflows/ci-python.yml/badge.svg)](https://github.com/greenbone/pheme/actions/workflows/ci-python.yml)
 
 **pheme** is a service to create scan reports. It is maintained by [Greenbone Networks].
