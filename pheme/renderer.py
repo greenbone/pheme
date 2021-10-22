@@ -81,16 +81,12 @@ class MarkDownTableRenderer(BaseRenderer):
                 return key
             if not key:
                 return previous_key
-            return "{}.{}".format(previous_key, key)
+            return f"{previous_key}.{key}"
 
         if isinstance(data, list):
             result.append(
-                "|{}|{}| a list of items|".format(
-                    previous_key,
-                    "{{% for item in {} %}} ... {{% endfor %}}".format(
-                        previous_key
-                    ),
-                )
+                f"|{previous_key}|{{% for item in {previous_key} %}} ..."
+                " {% endfor %}| a list of items|"
             )
             previous_key = "item"
             items = [("", v) for v in data]
@@ -99,9 +95,7 @@ class MarkDownTableRenderer(BaseRenderer):
         for key, value in items:
             new_key = to_new_key(key)
             if append(value):
-                result.append(
-                    "|{}|{}|{}|".format(new_key, "{{ %s }}" % new_key, value)
-                )
+                result.append(f"|{new_key}|{{ {new_key} }}|{value}|")
             else:
                 result = result + self.__as_md(new_key, value)
         return result

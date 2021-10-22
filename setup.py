@@ -77,7 +77,7 @@ setup(
         'pyyaml==5.*,>=5.3.1',
         'rope<0.19,>=0.17',
         'uritemplate==3.*,>=3.0.1',
-        'weasyprint<53,>=51',
+        'weasyprint>=51,<54',
         'xmltodict==0.*,>=0.12.0',
     ],
     extras_require={

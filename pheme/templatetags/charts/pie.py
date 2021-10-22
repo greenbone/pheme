@@ -121,7 +121,7 @@ def pie_chart(
             r_start=degrees,
             t_x=t_x,
             t_y=t_y,
-            label=f"{round(percent * 100)}%",
+            label=f"{amount} ({round(percent * 100)}%)",
             font_family=font_family,
             font_size=font_size,
         ).strip()

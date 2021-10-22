@@ -25,7 +25,7 @@ def main():
     """Run administrative tasks."""
     sys.setrecursionlimit(15000)
     # needed for weasyprint on huge pages
-    print("recursion limit is: {}".format(sys.getrecursionlimit()))
+    print(f"recursion limit is: {sys.getrecursionlimit()}")
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pheme.settings')
     try:
         # pylint: disable=import-outside-toplevel

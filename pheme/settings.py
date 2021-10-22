@@ -87,11 +87,11 @@ DEFAULT_PARAMETER_ADDRESS = (
 
 def __load_or_create_api_key() -> str:
     if SECRET_KEY_LOCATION.exists():
-        may_token = SECRET_KEY_LOCATION.read_text()
+        may_token = SECRET_KEY_LOCATION.read_text(encoding="utf-8")
         if len(may_token.strip()) > 0:
             return may_token
     token = secrets.token_urlsafe(50)
-    SECRET_KEY_LOCATION.write_text(token)
+    SECRET_KEY_LOCATION.write_text(token, encoding="utf-8")
     return token
 
 

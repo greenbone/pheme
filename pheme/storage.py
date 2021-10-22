@@ -31,7 +31,7 @@ def __default_load_handler(name: str) -> Dict:
 
 
 def __default_id_generator(prefix: str) -> str:
-    return "{}-{}".format(prefix, uuid4())
+    return f"{prefix}-{uuid4()}"
 
 
 def load(name: str, *, handler=__default_load_handler) -> Dict:
