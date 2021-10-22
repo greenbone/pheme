@@ -20,7 +20,7 @@ from pheme.authentication import get_username_role
 
 GSAD_FAKE_RESPONSE = """
 <envelope>
-    <version>21.04.0~git-96347f1-master</version>
+    <version>21.4.0~git-96347f1-main</version>
     <vendor_version>docker-companion</vendor_version>
     <token>e93d3012-14f9-4bd0-aeff-3a70e3bd132c</token>
     <time>Mon Nov 2 12:03:43 2020 UTC</time>
