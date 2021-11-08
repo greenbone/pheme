@@ -3,7 +3,7 @@ FROM debian:stable-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR /notus
+WORKDIR /pheme
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --no-install-suggests -y \
