@@ -508,7 +508,7 @@ test = ["pytest", "pytest-cov", "pytest-flake8", "pytest-isort", "coverage", "pi
 
 [[package]]
 name = "pylint"
-version = "2.12.1"
+version = "2.12.2"
 description = "python code static checker"
 category = "dev"
 optional = false
@@ -878,7 +878,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "13ccfca368205ad5548ccdfbdc4fc845166e71103e419dc9295068a2d46dfa93"
+content-hash = "1245194c807f322ce415a8c985c3d9ad4944d3a8b0f06111770079dd225fe601"
 
 [metadata.files]
 appdirs = [
@@ -1346,8 +1346,8 @@ pydyf = [
     {file = "pydyf-0.1.2.tar.gz", hash = "sha256:1e2f5de48174f505de025a7d1e7cf01bbdd9422ca8ab9451782bf00ee178602c"},
 ]
 pylint = [
-    {file = "pylint-2.12.1-py3-none-any.whl", hash = "sha256:b4b5a7b6d04e914a11c198c816042af1fb2d3cda29bb0c98a9c637010da2a5c5"},
-    {file = "pylint-2.12.1.tar.gz", hash = "sha256:4f4a52b132c05b49094b28e109febcec6bfb7bc6961c7485a5ad0a0f961df289"},
+    {file = "pylint-2.12.2-py3-none-any.whl", hash = "sha256:daabda3f7ed9d1c60f52d563b1b854632fd90035bcf01443e234d3dc794e3b74"},
+    {file = "pylint-2.12.2.tar.gz", hash = "sha256:9d945a73640e1fec07ee34b42f5669b770c759acd536ec7b16d7e4b87a9c9ff9"},
 ]
 pylint-django = [
     {file = "pylint-django-2.4.4.tar.gz", hash = "sha256:f63f717169b0c2e4e19c28f1c32c28290647330184fcb7427805ae9b6994f3fc"},
