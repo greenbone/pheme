@@ -8,7 +8,7 @@ WORKDIR /pheme
 RUN apt-get update && \
     apt-get install --no-install-recommends --no-install-suggests -y \
     python3 \
-    python3-pip \
+    python3-pip && \
     apt-get remove --purge --auto-remove -y && \
     rm -rf /var/lib/apt/lists/*
 
