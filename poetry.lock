@@ -256,18 +256,19 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "djangorestframework"
-version = "3.11.2"
+version = "3.13.1"
 description = "Web APIs for Django, made easy."
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.6"
 
 [package.dependencies]
-django = ">=1.11"
+django = ">=2.2"
+pytz = "*"
 
 [[package]]
 name = "fonttools"
-version = "4.28.3"
+version = "4.28.5"
 description = "Tools to manipulate font files"
 category = "main"
 optional = false
@@ -878,7 +879,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "1245194c807f322ce415a8c985c3d9ad4944d3a8b0f06111770079dd225fe601"
+content-hash = "4167ac11e7aa9ca39e3ad9ded8ef23be0fb44aa33b11888b661954a236349798"
 
 [metadata.files]
 appdirs = [
@@ -1132,12 +1133,12 @@ django = [
     {file = "Django-2.2.24.tar.gz", hash = "sha256:3339ff0e03dee13045aef6ae7b523edff75b6d726adf7a7a48f53d5a501f7db7"},
 ]
 djangorestframework = [
-    {file = "djangorestframework-3.11.2-py3-none-any.whl", hash = "sha256:5cc724dc4b076463497837269107e1995b1fbc917468d1b92d188fd1af9ea789"},
-    {file = "djangorestframework-3.11.2.tar.gz", hash = "sha256:a5967b68a04e0d97d10f4df228e30f5a2d82ba63b9d03e1759f84993b7bf1b53"},
+    {file = "djangorestframework-3.13.1-py3-none-any.whl", hash = "sha256:24c4bf58ed7e85d1fe4ba250ab2da926d263cd57d64b03e8dcef0ac683f8b1aa"},
+    {file = "djangorestframework-3.13.1.tar.gz", hash = "sha256:0c33407ce23acc68eca2a6e46424b008c9c02eceb8cf18581921d0092bc1f2ee"},
 ]
 fonttools = [
-    {file = "fonttools-4.28.3-py3-none-any.whl", hash = "sha256:ca6ecc67e5a5620d31754f92147f22f48fd5461fd3fafe6afe031aa9ee079b0f"},
-    {file = "fonttools-4.28.3.zip", hash = "sha256:edb48922873d3fda489ab400bd40888ac239ae8070b53f494b839bcdff0d01f6"},
+    {file = "fonttools-4.28.5-py3-none-any.whl", hash = "sha256:edf251d5d2cc0580d5f72de4621c338d8c66c5f61abb50cf486640f73c8194d5"},
+    {file = "fonttools-4.28.5.zip", hash = "sha256:545c05d0f7903a863c2020e07b8f0a57517f2c40d940bded77076397872d14ca"},
 ]
 html5lib = [
     {file = "html5lib-1.1-py2.py3-none-any.whl", hash = "sha256:0d78f8fde1c230e99fe37986a60526d7049ed4bf8a9fadbad5f00e22e58e041d"},
