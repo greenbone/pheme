@@ -212,7 +212,8 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
 
         # severity 1 to 10
         host_severities = host_severity_count.get(hostname, [0] * 10)
-        host_severities[int(severity) - 1] += 1
+        if severity > 0:
+            host_severities[int(severity) - 1] += 1
         host_severity_count[hostname] = host_severities
 
         by_host[hostname] = {
