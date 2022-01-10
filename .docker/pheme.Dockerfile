@@ -7,6 +7,8 @@ WORKDIR /pheme
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --no-install-suggests -y \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
     python3 \
     python3-pip && \
     apt-get remove --purge --auto-remove -y && \
