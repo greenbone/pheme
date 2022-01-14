@@ -49,6 +49,7 @@ SENTRY_DSN = os.environ.get("SENTRY_DSN_PHEME")
 
 # load sentry_sdk only when SENTRY_DSN_PHEME is set otherwise don't bother
 if SENTRY_DSN is not None:
+    # pylint: disable=import-error
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
 
