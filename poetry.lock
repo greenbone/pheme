@@ -259,7 +259,7 @@ pytz = "*"
 
 [[package]]
 name = "fonttools"
-version = "4.29.1"
+version = "4.30.0"
 description = "Tools to manipulate font files"
 category = "main"
 optional = false
@@ -567,11 +567,11 @@ test = ["pytest", "pytest-cov", "pytest-flake8", "pytest-isort", "coverage"]
 
 [[package]]
 name = "pytest"
-version = "7.0.1"
+version = "7.1.0"
 description = "pytest: simple powerful testing with Python"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 atomicwrites = {version = ">=1.0", markers = "sys_platform == \"win32\""}
@@ -870,7 +870,7 @@ tracking = ["sentry-sdk"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "a9c6f6835ac675a2f77ae5dbd7134f0090874a460cc7e00267e2bc41f340c8f2"
+content-hash = "07b4ae1474697f4d166b59ba0061c4a1e0298b720bbaf27ab52c22fee8187d87"
 
 [metadata.files]
 astroid = [
@@ -1154,8 +1154,8 @@ djangorestframework = [
     {file = "djangorestframework-3.13.1.tar.gz", hash = "sha256:0c33407ce23acc68eca2a6e46424b008c9c02eceb8cf18581921d0092bc1f2ee"},
 ]
 fonttools = [
-    {file = "fonttools-4.29.1-py3-none-any.whl", hash = "sha256:1933415e0fbdf068815cb1baaa1f159e17830215f7e8624e5731122761627557"},
-    {file = "fonttools-4.29.1.zip", hash = "sha256:2b18a172120e32128a80efee04cff487d5d140fe7d817deb648b2eee023a40e4"},
+    {file = "fonttools-4.30.0-py3-none-any.whl", hash = "sha256:6985cc5380c06db07fdc73ade15e6adbd4ce6ff850d7561ca00f97090b4b263d"},
+    {file = "fonttools-4.30.0.zip", hash = "sha256:084dd1762f083a1bf49e41da1bfeafb475c9dce46265690a6bdd33290b9a63f4"},
 ]
 html5lib = [
     {file = "html5lib-1.1-py2.py3-none-any.whl", hash = "sha256:0d78f8fde1c230e99fe37986a60526d7049ed4bf8a9fadbad5f00e22e58e041d"},
@@ -1364,8 +1364,8 @@ pyphen = [
     {file = "pyphen-0.12.0.tar.gz", hash = "sha256:b7d3dfc24b6f2178cdb2b1757ace0bd5d222de3e62c28d22ac578c5f22a13e9b"},
 ]
 pytest = [
-    {file = "pytest-7.0.1-py3-none-any.whl", hash = "sha256:9ce3ff477af913ecf6321fe337b93a2c0dcf2a0a1439c43f5452112c1e4280db"},
-    {file = "pytest-7.0.1.tar.gz", hash = "sha256:e30905a0c131d3d94b89624a1cc5afec3e0ba2fbdb151867d8e0ebd49850f171"},
+    {file = "pytest-7.1.0-py3-none-any.whl", hash = "sha256:b555252a95bbb2a37a97b5ac2eb050c436f7989993565f5e0c9128fcaacadd0e"},
+    {file = "pytest-7.1.0.tar.gz", hash = "sha256:f1089d218cfcc63a212c42896f1b7fbf096874d045e1988186861a1a87d27b47"},
 ]
 pytest-cov = [
     {file = "pytest-cov-3.0.0.tar.gz", hash = "sha256:e7f0f5b1617d2210a2cabc266dfe2f4c75a8d32fb89eafb7ad9d06f6d076d470"},
