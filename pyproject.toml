@@ -31,7 +31,7 @@ rope = ">=0.17,<0.24"
 sentry-sdk = { version="^1.1.0", optional=true}
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.13.4"
+pylint = "^2.13.5"
 pylint-django = "^2.5.3"
 pytest = "^7.1.1"
 pytest-cov = "^3.0.0"
