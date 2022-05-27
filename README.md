@@ -1,4 +1,4 @@
-![Greenbone Logo](https://www.greenbone.net/wp-content/uploads/gb_logo_resilience_horizontal.png)
+![Greenbone Logo](https://www.greenbone.net/wp-content/uploads/gb_new-logo_horizontal_rgb_small.png)
 
 # Pheme - Greenbone Static Report Generator <!-- omit in toc -->
 
@@ -124,7 +124,7 @@ first.
 
 ## License
 
-Copyright (C) 2020 [Greenbone Networks GmbH][Greenbone Networks]
+Copyright (C) 2020-2022 [Greenbone Networks GmbH][Greenbone Networks]
 
 Licensed under the [GNU Affero General Public License v3.0 or later](LICENSE).
 
