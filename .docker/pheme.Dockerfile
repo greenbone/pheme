@@ -17,6 +17,10 @@ RUN apt-get update && \
 RUN addgroup --gid 1001 --system pheme && \
     adduser --no-create-home --shell /bin/false --disabled-password --uid 1001 --system --group pheme
 
+<<<<<<< HEAD
 COPY dist/* /pheme
+=======
+COPY --from=builder /source/dist/* /pheme/
+>>>>>>> 4dc620c (Update pheme.Dockerfile)
 
 RUN python3 -m pip install /pheme/*
