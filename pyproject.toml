@@ -40,7 +40,7 @@ pytest-env = "^0.6.2"
 autohooks = "^22.7.1"
 autohooks-plugin-pylint = "^22.8.1"
 autohooks-plugin-black = {version = "^22.8.1", python = "^3.6"}
-black = {version = "22.6.0", python = "^3.6"}
+black = {version = "22.8.0", python = "^3.6"}
 rope = ">=0.17,<1.2"
 pontos = ">=21.6.3"
 
