@@ -687,7 +687,7 @@ dev = ["build", "pytest", "pytest-timeout"]
 
 [[package]]
 name = "sentry-sdk"
-version = "1.9.5"
+version = "1.9.8"
 description = "Python client for Sentry (https://sentry.io)"
 category = "main"
 optional = true
@@ -695,10 +695,7 @@ python-versions = "*"
 
 [package.dependencies]
 certifi = "*"
-urllib3 = [
-    {version = ">=1.26.9", markers = "python_version >= \"3.5\""},
-    {version = ">=1.26.11", markers = "python_version >= \"3.6\""},
-]
+urllib3 = {version = ">=1.26.11", markers = "python_version >= \"3.6\""}
 
 [package.extras]
 aiohttp = ["aiohttp (>=3.5)"]
@@ -1494,8 +1491,12 @@ rope = [
     {file = "rope-1.1.1.tar.gz", hash = "sha256:13048ff0245a0fa187f282697a55add46e4ccf083e7670f868bdf54ee9e47f2e"},
 ]
 sentry-sdk = [
-    {file = "sentry-sdk-1.9.5.tar.gz", hash = "sha256:2d7ec7bc88ebbdf2c4b6b2650b3257893d386325a96c9b723adcd31033469b63"},
-    {file = "sentry_sdk-1.9.5-py2.py3-none-any.whl", hash = "sha256:b4b41f90951ed83e7b4c176eef021b19ecba39da5b73aca106c97a9b7e279a90"},
+    {file = "sentry-sdk-1.9.8.tar.gz", hash = "sha256:ef4b4d57631662ff81e15c22bf007f7ce07c47321648c8e601fbd22950ed1a79"},
+    {file = "sentry_sdk-1.9.8-py2.py3-none-any.whl", hash = "sha256:7378c08d81da78a4860da7b4900ac51fef38be841d01bc5b7cb249ac51e070c6"},
+]
+setuptools = [
+    {file = "setuptools-65.3.0-py3-none-any.whl", hash = "sha256:2e24e0bec025f035a2e72cdd1961119f557d78ad331bb00ff82efb2ab8da8e82"},
+    {file = "setuptools-65.3.0.tar.gz", hash = "sha256:7732871f4f7fa58fb6bdcaeadb0161b2bd046c85905dbaa066bdcbcc81953b57"},
 ]
 setuptools = [
     {file = "setuptools-65.3.0-py3-none-any.whl", hash = "sha256:2e24e0bec025f035a2e72cdd1961119f557d78ad331bb00ff82efb2ab8da8e82"},
