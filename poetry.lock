@@ -208,7 +208,7 @@ toml = ["tomli"]
 
 [[package]]
 name = "cssselect2"
-version = "0.6.0"
+version = "0.7.0"
 description = "CSS selectors for Python ElementTree"
 category = "main"
 optional = false
@@ -220,7 +220,7 @@ webencodings = "*"
 
 [package.extras]
 doc = ["sphinx", "sphinx_rtd_theme"]
-test = ["coverage[toml]", "pytest", "pytest-cov", "pytest-flake8", "pytest-isort"]
+test = ["flake8", "isort", "pytest"]
 
 [[package]]
 name = "dill"
@@ -1183,8 +1183,8 @@ coverage = [
     {file = "coverage-6.4.4.tar.gz", hash = "sha256:e16c45b726acb780e1e6f88b286d3c10b3914ab03438f32117c4aa52d7f30d58"},
 ]
 cssselect2 = [
-    {file = "cssselect2-0.6.0-py3-none-any.whl", hash = "sha256:3a83b2a68370c69c9cd3fcb88bbfaebe9d22edeef2c22d1ff3e1ed9c7fa45ed8"},
-    {file = "cssselect2-0.6.0.tar.gz", hash = "sha256:5b5d6dea81a5eb0c9ca39f116c8578dd413778060c94c1f51196371618909325"},
+    {file = "cssselect2-0.7.0-py3-none-any.whl", hash = "sha256:fd23a65bfd444595913f02fc71f6b286c29261e354c41d722ca7a261a49b5969"},
+    {file = "cssselect2-0.7.0.tar.gz", hash = "sha256:1ccd984dab89fc68955043aca4e1b03e0cf29cad9880f6e28e3ba7a74b14aa5a"},
 ]
 dill = [
     {file = "dill-0.3.5.1-py2.py3-none-any.whl", hash = "sha256:33501d03270bbe410c72639b350e941882a8b0fd55357580fbc873fba0c59302"},
