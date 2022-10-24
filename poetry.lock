@@ -631,14 +631,17 @@ testing = ["Django", "django-configurations (>=2.0)"]
 
 [[package]]
 name = "pytest-env"
-version = "0.6.2"
+version = "0.8.1"
 description = "py.test plugin that allows you to add environment variables."
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 
 [package.dependencies]
-pytest = ">=2.6.0"
+pytest = ">=7.1.3"
+
+[package.extras]
+test = ["coverage (>=6.5)", "pytest-mock (>=3.10)"]
 
 [[package]]
 name = "pytz"
@@ -892,7 +895,7 @@ tracking = ["sentry-sdk"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "71edbc0227833784d3d2876ab3edddd234ca3dff99b63691bef75a1a6cebd8bb"
+content-hash = "10bf1b9d2348a85edc1240edcb5e31ccc6353e1417aca22b91e7a4251ef4477f"
 
 [metadata.files]
 astroid = [
@@ -1442,7 +1445,8 @@ pytest-django = [
     {file = "pytest_django-4.5.2-py3-none-any.whl", hash = "sha256:c60834861933773109334fe5a53e83d1ef4828f2203a1d6a0fa9972f4f75ab3e"},
 ]
 pytest-env = [
-    {file = "pytest-env-0.6.2.tar.gz", hash = "sha256:7e94956aef7f2764f3c147d216ce066bf6c42948bb9e293169b1b1c880a580c2"},
+    {file = "pytest_env-0.8.1-py3-none-any.whl", hash = "sha256:8c0605ae09a5b7e41c20ebcc44f2c906eea9654095b4b0c342b3814bcc3a8492"},
+    {file = "pytest_env-0.8.1.tar.gz", hash = "sha256:d7b2f5273ec6d1e221757998bc2f50d2474ed7d0b9331b92556011fadc4e9abf"},
 ]
 pytz = [
     {file = "pytz-2022.4-py2.py3-none-any.whl", hash = "sha256:2c0784747071402c6e99f0bafdb7da0fa22645f06554c7ae06bf6358897e9c91"},
