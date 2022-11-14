@@ -822,7 +822,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "weasyprint"
-version = "57.0"
+version = "57.1"
 description = "The Awesome Document Factory"
 category = "main"
 optional = false
@@ -833,7 +833,7 @@ cffi = ">=0.6"
 cssselect2 = ">=0.1"
 fonttools = {version = ">=4.0.0", extras = ["woff"]}
 html5lib = ">=1.1"
-Pillow = ">=4.0.0"
+Pillow = ">=9.1.0"
 pydyf = ">=0.5.0"
 Pyphen = ">=0.9.1"
 tinycss2 = ">=1.0.0"
@@ -1554,8 +1554,8 @@ urllib3 = [
     {file = "urllib3-1.26.12.tar.gz", hash = "sha256:3fa96cf423e6987997fc326ae8df396db2a8b7c667747d47ddd8ecba91f4a74e"},
 ]
 weasyprint = [
-    {file = "weasyprint-57.0-py3-none-any.whl", hash = "sha256:c714681139a765964c3a8514ac1fc0f65ae063aada4aad752085575f2129e765"},
-    {file = "weasyprint-57.0.tar.gz", hash = "sha256:7b6f5cc13819e9a7d8748c1dbf0e8d2444f7a4818a98339f82dccaa822bf911b"},
+    {file = "weasyprint-57.1-py3-none-any.whl", hash = "sha256:204dff5753e003c6e75f6c674e39825fc95a20f984cee38ddb7ed3ab242a66fd"},
+    {file = "weasyprint-57.1.tar.gz", hash = "sha256:397a9d11298f94485ec3b7b68aeef1c6106fb638350126d9d4a64109b73508a0"},
 ]
 webencodings = [
     {file = "webencodings-0.5.1-py2.py3-none-any.whl", hash = "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78"},
