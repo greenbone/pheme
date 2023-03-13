@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2020-2021 Greenbone Networks GmbH
+# Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
@@ -43,7 +43,7 @@ setup(
     version='21.4.dev2',
     description='report-generation-service',
     python_requires='==3.*,>=3.7.0',
-    author='Greenbone Networks GmbH',
+    author='Greenbone AG',
     author_email='info@greenbone.net',
     license='AGPL-3.0-or-later',
     classifiers=[

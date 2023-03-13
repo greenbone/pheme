@@ -152,7 +152,7 @@ afterwards it can be get as usual:
 Maintainer
 ----------
 
-This project is maintained by `Greenbone Networks GmbH <https://www.greenbone.net/>`_
+This project is maintained by `Greenbone AG <https://www.greenbone.net/>`_
 
 Contributing
 ------------
@@ -166,6 +166,6 @@ first.
 License
 -------
 
-Copyright (C) 2020 `Greenbone Networks GmbH <https://www.greenbone.net/>`_
+Copyright (C) 2020 `Greenbone AG <https://www.greenbone.net/>`_
 
 Licensed under the `GNU Affero General Public License v3.0 or later <LICENSE>`_.
