@@ -73,7 +73,7 @@ setup(
     install_requires=[
         'coreapi==2.*,>=2.3.3',
         'django==2.2.2',
-        'djangorestframework==3.9.0',
+        'djangorestframework==3.13.1',
         'pyyaml==5.*,>=5.3.1',
         'rope>=0.17,<0.22',
         'uritemplate>=3,<5',
