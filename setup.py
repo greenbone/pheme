@@ -72,7 +72,7 @@ setup(
     package_data={"pheme": ["*.sh"]},
     install_requires=[
         'coreapi==2.*,>=2.3.3',
-        'django==2.2.2',
+        'django==2.2.28',
         'djangorestframework==3.9.0',
         'pyyaml==5.*,>=5.3.1',
         'rope>=0.17,<0.22',
