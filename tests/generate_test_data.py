@@ -1,7 +1,7 @@
 # pylint: disable=W0614,W0511,W0401,C0103
 # -*- coding: utf-8 -*-
 # tests/generate_test_data.py
-# Copyright (C) 2020-2021 Greenbone Networks GmbH
+# Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2020-2021 Greenbone Networks GmbH
+# Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
@@ -43,7 +43,7 @@ setup(
     version='21.4.dev2',
     description='report-generation-service',
     python_requires='==3.*,>=3.7.0',
-    author='Greenbone Networks GmbH',
+    author='Greenbone AG',
     author_email='info@greenbone.net',
     license='AGPL-3.0-or-later',
     classifiers=[
@@ -72,12 +72,12 @@ setup(
     package_data={"pheme": ["*.sh"]},
     install_requires=[
         'coreapi==2.*,>=2.3.3',
-        'django==2.2.2',
+        'django==2.2.28',
         'djangorestframework==3.9.0',
         'pyyaml==5.*,>=5.3.1',
         'rope>=0.17,<0.22',
         'uritemplate>=3,<5',
-        'weasyprint>=51,<55',
+        'weasyprint>=51,<58',
         'xmltodict==0.*,>=0.12.0',
     ],
     extras_require={
