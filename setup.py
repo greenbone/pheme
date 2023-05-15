@@ -85,7 +85,7 @@ setup(
             "autohooks==2.*,>=2.2.0",
             "autohooks-plugin-black==1.*,>=1.2.0; python_version == \"3.*\" and python_version >= \"3.6.0\"",
             "autohooks-plugin-pylint==1.*,>=1.2.0",
-            "black==20.8b1; python_version == \"3.*\" and python_version >= \"3.6.0\"",
+            "black==22.12.0; python_version == \"3.*\" and python_version >= \"3.6.0\"",
             "pontos==0.*,>=0.3.0",
             "pylint==2.*,>=2.6.0",
             "pylint-django==2.*,>=2.3.0",
