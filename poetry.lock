@@ -544,19 +544,18 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "djangorestframework"
-version = "3.13.1"
+version = "3.11.2"
 description = "Web APIs for Django, made easy."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.5"
 files = [
-    {file = "djangorestframework-3.13.1-py3-none-any.whl", hash = "sha256:24c4bf58ed7e85d1fe4ba250ab2da926d263cd57d64b03e8dcef0ac683f8b1aa"},
-    {file = "djangorestframework-3.13.1.tar.gz", hash = "sha256:0c33407ce23acc68eca2a6e46424b008c9c02eceb8cf18581921d0092bc1f2ee"},
+    {file = "djangorestframework-3.11.2-py3-none-any.whl", hash = "sha256:5cc724dc4b076463497837269107e1995b1fbc917468d1b92d188fd1af9ea789"},
+    {file = "djangorestframework-3.11.2.tar.gz", hash = "sha256:a5967b68a04e0d97d10f4df228e30f5a2d82ba63b9d03e1759f84993b7bf1b53"},
 ]
 
 [package.dependencies]
-django = ">=2.2"
-pytz = "*"
+django = ">=1.11"
 
 [[package]]
 name = "exceptiongroup"
@@ -1757,4 +1756,4 @@ tracking = ["sentry-sdk"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "ed3f6b576b707b45455233337e3236528540048127cb073b3815c47ec6bc5a84"
+content-hash = "5f7bb0c900950a52d0d8b236cc9855a259ddf07476cbce6cef7a29c3ef494708"
