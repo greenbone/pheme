@@ -1036,14 +1036,14 @@ files = [
 
 [[package]]
 name = "pydyf"
-version = "0.5.0"
+version = "0.6.0"
 description = "A low-level PDF generator."
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pydyf-0.5.0-py3-none-any.whl", hash = "sha256:116bc4b057822dc72d6afc826cad33444f7dcde8059aa85534380fb63e3e306f"},
-    {file = "pydyf-0.5.0.tar.gz", hash = "sha256:51e751ae1504037c1fc1f4815119137b011802cd5f6c3539db066c455b14a7e1"},
+    {file = "pydyf-0.6.0-py3-none-any.whl", hash = "sha256:291802bfb7f784134de27404eb592414b3c56a1290231fe6fb548a2559bc936a"},
+    {file = "pydyf-0.6.0.tar.gz", hash = "sha256:b44a38855d7e47b740b3cd31ab63a2f5b9b2793931d50b0ccaed3bb7b86912fc"},
 ]
 
 [package.extras]
@@ -1526,14 +1526,14 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "weasyprint"
-version = "57.2"
+version = "59.0"
 description = "The Awesome Document Factory"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "weasyprint-57.2-py3-none-any.whl", hash = "sha256:685692e7a2b4aec21010a61c1e8f1d6cd611dd46509fa7068fcca3c8e59a94f5"},
-    {file = "weasyprint-57.2.tar.gz", hash = "sha256:b8e9ef2dcbcfbc82e99215acfd68f947b2b5f1999b5b156db75fabe380ba7e9a"},
+    {file = "weasyprint-59.0-py3-none-any.whl", hash = "sha256:a308d67c5e99f536b15527baaad4e91be0cf307317e0f66e8d934a0bc99bfb38"},
+    {file = "weasyprint-59.0.tar.gz", hash = "sha256:223a76636b3744eaa4ab8a2885f50cf46cf8ebb1acb99b5276d02feccf507492"},
 ]
 
 [package.dependencies]
@@ -1542,7 +1542,7 @@ cssselect2 = ">=0.1"
 fonttools = {version = ">=4.0.0", extras = ["woff"]}
 html5lib = ">=1.1"
 Pillow = ">=9.1.0"
-pydyf = ">=0.5.0"
+pydyf = ">=0.6.0"
 Pyphen = ">=0.9.1"
 tinycss2 = ">=1.0.0"
 
@@ -1756,4 +1756,4 @@ tracking = ["sentry-sdk"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "5f7bb0c900950a52d0d8b236cc9855a259ddf07476cbce6cef7a29c3ef494708"
+content-hash = "5a37b0f4bd24b2002f8c4e179e7cdc43bc0467ca9ca08f617c68c73b04fbe9d2"
