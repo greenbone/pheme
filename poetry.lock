@@ -1127,19 +1127,19 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyphen"
-version = "0.13.2"
+version = "0.14.0"
 description = "Pure Python module to hyphenate text"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyphen-0.13.2-py3-none-any.whl", hash = "sha256:e88cfb46aed61f4c7fe49592ff322e6266485fd2447c818a9123485cd92b7ef4"},
-    {file = "pyphen-0.13.2.tar.gz", hash = "sha256:847f57a043a58408f24670ae0184ff6edfb5fd5731743208228c028ddc514438"},
+    {file = "pyphen-0.14.0-py3-none-any.whl", hash = "sha256:414c9355958ca3c6a3ff233f65678c245b8ecb56418fb291e2b93499d61cd510"},
+    {file = "pyphen-0.14.0.tar.gz", hash = "sha256:596c8b3be1c1a70411ba5f6517d9ccfe3083c758ae2b94a45f2707346d8e66fa"},
 ]
 
 [package.extras]
 doc = ["sphinx", "sphinx_rtd_theme"]
-test = ["coverage[toml]", "flake8 (<5)", "pytest", "pytest-cov", "pytest-flake8", "pytest-isort", "pytest-xdist"]
+test = ["flake8", "isort", "pytest"]
 
 [[package]]
 name = "pytest"
