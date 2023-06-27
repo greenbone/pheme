@@ -101,7 +101,7 @@ def __process_form_data(request: HttpRequest, data: Dict) -> Dict:
             "Request data is expected to be a dict, "
             f"but it is {type(request.data)}"
         )
-    for (key, value) in request.data.items():
+    for key, value in request.data.items():
         if isinstance(value, UploadedFile):
             file_type, _ = mimetypes.guess_type(value.name)
             logger.info(
@@ -151,7 +151,6 @@ def put_value(request: HttpRequest, key: str) -> Response:
     ]
 )
 def put(request: HttpRequest) -> Response:
-
     if request.content_type == "application/json":
         return __put(request, __process_json_object)
     return __put(request, __process_form_data)
