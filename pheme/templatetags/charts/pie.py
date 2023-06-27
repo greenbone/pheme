@@ -99,7 +99,7 @@ def pie_chart(
     dash_array = circumference - border_size
 
     donut = ""
-    for (category, amount) in input_values.items():
+    for category, amount in input_values.items():
         percent = amount / total
         color = title_color.get(category)
         dash_offset = circumference - percent * circumference

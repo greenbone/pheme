@@ -98,7 +98,6 @@ def h_bar_chart(
     font_family="Dejavu Sans",
     font_size=10,
 ) -> SafeText:
-
     """
     Returns a stacked horizontal bar chart in svg.
 
