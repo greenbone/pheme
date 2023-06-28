@@ -132,9 +132,10 @@ def h_bar_chart(
         title_color = _severity_class_colors
     if not data.values():
         return SafeText("")
-    # multiply by 1.25 for kerning
+    # multiply by 1.25 for kerning and add 87.5 for legend
     max_hostname_len = (
         max(max(len(k) for k in data.keys()), len(x_title)) * font_size * 1.25
+        + 87.5
     )
     max_width = svg_width - max_hostname_len - 100  # key and total placeholder
     # highest sum of counts
