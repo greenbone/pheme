@@ -146,7 +146,7 @@ def h_bar_chart(
             + 10
         )
     except OSError:
-        # add 87.5 for legend
+        # multiply by 1.25 for kerning and add 87.5 for legend
         max_hostname_len = (
             max(max(len(k) for k in data.keys()), len(x_title))
             * font_size
