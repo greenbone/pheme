@@ -19,6 +19,7 @@
 
 import itertools
 from typing import Dict
+from PIL import ImageFont
 from django.utils.safestring import SafeText
 from pheme.templatetags.charts import (
     register,
@@ -96,6 +97,7 @@ def h_bar_chart(
     orientation_marker=6,
     limit=10,
     font_family="Dejavu Sans",
+    font_file_name="DejaVuSans.ttf",
     font_size=10,
 ) -> SafeText:
     """
@@ -132,11 +134,25 @@ def h_bar_chart(
         title_color = _severity_class_colors
     if not data.values():
         return SafeText("")
-    # multiply by 1.25 for kerning and add 87.5 for legend
-    max_hostname_len = (
-        max(max(len(k) for k in data.keys()), len(x_title)) * font_size * 1.25
-        + 87.5
-    )
+    try:
+        font = ImageFont.truetype(font_file_name, font_size)
+        # add 87.5 + 10 for legend
+        max_hostname_len = (
+            max(
+                max(font.getlength(k) for k in data.keys()),
+                font.getlength(x_title),
+            )
+            + 87.5
+            + 10
+        )
+    except OSError:
+        # add 87.5 for legend
+        max_hostname_len = (
+            max(max(len(k) for k in data.keys()), len(x_title))
+            * font_size
+            * 1.25
+            + 87.5
+        )
     max_width = svg_width - max_hostname_len - 100  # key and total placeholder
     # highest sum of counts
     max_sum = max([sum(list(counts.values())) for counts in data.values()])
