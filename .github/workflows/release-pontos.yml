@@ -52,4 +52,4 @@ jobs:
           release-type: ${{ steps.release-type.outputs.release-type }}
           release-version: ${{ inputs.release-version }}
           ref: ${{ steps.release-type.outputs.release-ref }}
-          versioning-scheme: "semver"
+          versioning-scheme: "pep440"
