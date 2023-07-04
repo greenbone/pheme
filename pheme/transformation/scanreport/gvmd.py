@@ -130,15 +130,26 @@ def __create_host_information_lookup(report: Dict) -> Dict:
     def filter_per_host(host: Dict) -> Dict:
         information = {}
         found = 0
-        details = host.get("detail", [])
-        for detail in details:
+
+        def check_host_detail(detail: Dict) -> int:
             name = detail.get("name", "")
             if name in information_key:
                 information[information_key.get(name)] = detail.get("value")
-                found += 1
-            if found == len(information_key):
-                return information
-        return information
+                return 1
+            return 0
+
+        details = host.get("detail", [])
+        if isinstance(details, dict):
+            check_host_detail(details)
+            return information
+        elif isinstance(details, list):
+            for detail in details:
+                found += check_host_detail(detail)
+                if found == len(information_key):
+                    return information
+            return information
+        else:
+            return information
 
     result = {}
     hosts = report.get("host")
