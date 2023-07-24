@@ -74,7 +74,7 @@ setup(
         'coreapi==2.*,>=2.3.3',
         'django==2.2.28',
         'djangorestframework==3.11.2',
-        'pyyaml==5.*,>=5.3.1',
+        'pyyaml>=5,<7',
         'rope>=0.17,<0.22',
         'uritemplate>=3,<5',
         'weasyprint>=51,<58',
