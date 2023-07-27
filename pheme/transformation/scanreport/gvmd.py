@@ -188,6 +188,9 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         nvt["nvt_refs_ref"] = __group_refs(nvt.get("nvt_refs", {}))
         qod = transform_key("qod", result.get("qod", {}))
         severity = float(result.get("severity", "0.0"))
+        notes = result.get("notes", {}).get("note", [])
+        overrides = result.get("overrides", {}).get("override", [])
+
         new_host_result = {
             "port": port,
             "threat": threat,
@@ -195,6 +198,8 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             "description": result.get("description"),
             **nvt,
             **qod,
+            "notes": [],
+            "overrides": [],
         }
         host_results = host_dict.get("results", [])
         host_results.append(new_host_result)
@@ -226,6 +231,47 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         if severity > 0:
             host_severities[int(severity) - 1] += 1
         host_severity_count[hostname] = host_severities
+
+        def per_note(note):
+            result_notes = new_host_result.get("notes", [])
+            new_note = {
+                "text": note["text"]["text"],
+                "text_excerpt": note["text"]["excerpt"],
+            }
+            result_notes.append(new_note)
+
+        def per_override(override):
+            result_overrides = new_host_result.get("overrides", [])
+            severity = override["severity"]
+            severity_description = severity
+            if not severity:
+                severity_description = "Any severity"
+            elif float(severity) == 0.0:
+                severity_description = "Log"
+            elif float(severity) > 0.0:
+                severity_description = "Any positive severity"
+
+            new_override = {
+                "text": override["text"]["text"],
+                "text_excerpt": override["text"]["excerpt"],
+                "severity": severity,
+                "severity_description": severity_description,
+                "new_severity": override["new_severity"],
+            }
+            result_overrides.append(new_override)
+
+        # lists with just one element can be parsed as dict by xmltodict
+        if isinstance(notes, dict):
+            per_note(notes)
+        else:
+            for note in notes:
+                per_note(note)
+
+        if isinstance(overrides, dict):
+            per_override(overrides)
+        else:
+            for override in overrides:
+                per_override(override)
 
         by_host[hostname] = {
             "host": hostname,
