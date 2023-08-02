@@ -23,9 +23,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install poetry and dependencies
-        uses: greenbone/actions/poetry@v2
+        uses: greenbone/actions/poetry@v3
       - name: Check with black, pylint and pontos.version
-        uses: greenbone/actions/lint-python@v2
+        uses: greenbone/actions/lint-python@v3
         with:
           packages: pheme tests
 
@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install poetry and dependencies
-        uses: greenbone/actions/poetry@v2
+        uses: greenbone/actions/poetry@v3
       - name: Run unit tests
         run: poetry run python -m pytest
 
@@ -60,8 +60,8 @@ jobs:
         with:
           python-version: 3.8
       - name: Install poetry and dependencies
-        uses: greenbone/actions/poetry@v2
+        uses: greenbone/actions/poetry@v3
       - name: Calculate and upload coverage to codecov.io
-        uses: greenbone/actions/coverage-python@v2
+        uses: greenbone/actions/coverage-python@v3
         with:
           test-command: -m pytest
