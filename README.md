@@ -124,7 +124,7 @@ first.
 
 ## License
 
-Copyright (C) 2020-2022 [Greenbone AG][Greenbone Networks]
+Copyright (C) 2020-2023 [Greenbone AG][Greenbone Networks]
 
 Licensed under the [GNU Affero General Public License v3.0 or later](LICENSE).
 
