@@ -18,6 +18,7 @@ Or in this case personification of a service to generate reports.
 - [Installation](#installation)
   - [Requirements](#requirements)
 - [Development](#development)
+- [Usage](#usage)
 - [Maintainer](#maintainer)
 - [Contributing](#contributing)
 - [License](#license)
