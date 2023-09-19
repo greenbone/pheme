@@ -27,7 +27,7 @@ Or in this case personification of a service to generate reports.
 
 ### Requirements
 
-Python 3.7 and later is supported.
+Python 3.8 and later is supported.
 
 Besides python `pheme` also needs to have
 
