@@ -73,11 +73,11 @@ E.g.:
     -H 'Content-Type: application/xml'\
     -H 'Accept: application/json'\
     -d @test_data/longer_report.xml
-  
+
   "scanreport-nvt-9a233b0d-713c-4f22-9e15-f6e5090873e3"⏎
 ```
 
-The returned identifier can be used to generate the actual report. 
+The returned identifier can be used to generate the actual report.
 
 So far a report can be either in:
 - application/json
