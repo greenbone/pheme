@@ -18,13 +18,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=W0621,C0103
-from pathlib import Path
-from random import choice, randint
 import string
 import uuid
-
-
+from pathlib import Path
+from random import choice, randint
 from typing import Dict, List
+
 import xmltodict
 
 
@@ -202,7 +201,7 @@ def gen_report(
 
 if __name__ == "__main__":
     own_path = Path(__file__).absolute()
-    directory = own_path.__str__()[0 : (len(own_path.name) * -1)]
+    directory = own_path.parent
     number_of_hosts = 10
     print(f"generating {number_of_hosts} hostnames")
     hosts = [f"host_{i}" for i in range(number_of_hosts)]
