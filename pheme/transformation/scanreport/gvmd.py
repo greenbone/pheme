@@ -69,7 +69,7 @@ def __group_refs(refs: Dict[str, str]) -> Dict:
     return refs_ref
 
 
-def __get_hostname_from_result(result) -> str:
+def __get_host_ip_from_result(result) -> str:
     if isinstance(result, str):
         return result
     if isinstance(result, dict):
@@ -179,8 +179,8 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         return {f"{prefix}_{key}": value for key, value in vic.items()}
 
     def per_result(result):
-        hostname = __get_hostname_from_result(result)
-        host_dict = by_host.get(hostname, {})
+        host_ip = __get_host_ip_from_result(result)
+        host_dict = by_host.get(host_ip, {})
         threat = result.get("threat", "unknown")
         port = result.get("port")
         nvt = transform_key("nvt", result.get("nvt", {}))
@@ -209,28 +209,28 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             ports = set(ports + [port])
         equipment["ports"] = ports
         if not equipment.get("os"):
-            equipment["os"] = host_information_lookup.get(hostname, {}).get(
+            equipment["os"] = host_information_lookup.get(host_ip, {}).get(
                 "os", "unknown"
             )
 
-        # needs hostname, high, medium, low
+        # needs host_ip, high, medium, low
         host_threats = host_threat_count.get(
-            hostname, {threat: 0 for threat in __threats}
+            host_ip, {threat: 0 for threat in __threats}
         )
         threat_index = __threat_index_lookup.get(threat)
         if threat_index is not None:
             threat_count[threat_index] += 1
         if host_threats.get(threat) is not None:
             host_threats[threat] += 1
-        host_threat_count[hostname] = host_threats
+        host_threat_count[host_ip] = host_threats
 
         # needs high, medium, low
 
         # severity 1 to 10
-        host_severities = host_severity_count.get(hostname, [0] * 10)
+        host_severities = host_severity_count.get(host_ip, [0] * 10)
         if severity > 0:
             host_severities[int(severity) - 1] += 1
-        host_severity_count[hostname] = host_severities
+        host_severity_count[host_ip] = host_severities
 
         def per_note(note):
             result_notes = new_host_result.get("notes", [])
@@ -273,8 +273,8 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             for override in overrides:
                 per_override(override)
 
-        by_host[hostname] = {
-            "host": hostname,
+        by_host[host_ip] = {
+            "host": host_ip,
             "threats": __host_threat_overview(host_threats),
             "severities": __host_severity_overview(host_severities),
             "equipment": equipment,
