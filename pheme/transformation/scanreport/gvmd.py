@@ -80,6 +80,14 @@ def __get_host_ip_from_result(result) -> str:
     return "unknown"
 
 
+def __get_hostname_from_result(result) -> str:
+    if isinstance(result, dict):
+        host = result.get("host", {})
+        if isinstance(host, dict):
+            return host.get("hostname", "")
+    return ""
+
+
 def __return_highest_threat(threats: List[int]) -> str:
     """
     returns the highest threat
@@ -170,6 +178,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     """
     host_information_lookup = __create_host_information_lookup(report)
     results = report.get("results", {}).get("result", [])
+    hosts = report.get("host", [])
     by_host = {}
     host_threat_count = {}
     host_severity_count = {}
@@ -180,6 +189,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
 
     def per_result(result):
         host_ip = __get_host_ip_from_result(result)
+        hostname = __get_hostname_from_result(result)
         host_dict = by_host.get(host_ip, {})
         threat = result.get("threat", "unknown")
         port = result.get("port")
@@ -192,6 +202,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         overrides = result.get("overrides", {}).get("override", [])
 
         new_host_result = {
+            "hostname": hostname,
             "port": port,
             "threat": threat,
             "severity": severity,
@@ -203,6 +214,9 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         }
         host_results = host_dict.get("results", [])
         host_results.append(new_host_result)
+        hostnames = host_dict.get("hostnames", [])
+        if hostname is not None and hostname not in hostnames:
+            hostnames.append(hostname)
         equipment = host_dict.get("equipment", {})
         ports = list(dict.fromkeys(equipment.get("ports", [])))
         if port and not port.startswith("general"):
@@ -275,11 +289,35 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
 
         by_host[host_ip] = {
             "host": host_ip,
+            "hostname": "",
+            "hostnames": hostnames,
             "threats": __host_threat_overview(host_threats),
             "severities": __host_severity_overview(host_severities),
             "equipment": equipment,
             "results": host_results,
         }
+
+    def per_host(host):
+        host_ip = host.get("ip")
+        if host_ip not in by_host:
+            return
+
+        def per_detail(detail):
+            name = detail.get("name", "")
+            value = detail.get("value", "")
+
+            if name == "EXIT_CODE":
+                return
+
+            if name == "hostname" and by_host[host_ip]["hostname"] == "":
+                by_host[host_ip]["hostname"] = value
+
+        details = host.get("detail", [])
+        if isinstance(details, dict):
+            per_detail(details)
+        else:
+            for detail in details:
+                per_detail(detail)
 
     # lists with just one element can be parsed as dict by xmltodict
     if isinstance(results, dict):
@@ -287,6 +325,13 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     else:
         for result in results:
             per_result(result)
+
+    if isinstance(hosts, dict):
+        per_host(hosts)
+    elif isinstance(hosts, list):
+        for host in hosts:
+            per_host(host)
+
     threat_count_dict = {
         __threats[i]: count for i, count in enumerate(threat_count)
     }
