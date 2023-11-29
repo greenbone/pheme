@@ -103,6 +103,7 @@ def describe():
         results=[
             dict(
                 host="str; ip address of host",
+                hostname="str; main hostname of the host",
                 threats={
                     "high": "int; amount of high nvts in host",
                     "medium": "int; amount of medium nvts in host",
@@ -145,6 +146,7 @@ def describe():
                     "nvt.refs.ref": [{"name_of_ref": ["str; ref_vallue"]}],
                     "nvt.solution.type": "str; nvt.solution.type; optional",
                     "nvt.solution.text": "str; nvt.solution.text; optional",
+                    "hostname": "str; result specific hostname; optional",
                     "port": "str; port; optional",
                     "severity": "str; severity; optional",
                     "qod.value": "str; qod.value; optional",
