@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pheme"
-version = "21.9.0"
+version = "21.9.1.dev1"
 authors = ["Greenbone AG <info@greenbone.net>"]
 license = "AGPL-3.0-or-later"
 readme = "README.md"
