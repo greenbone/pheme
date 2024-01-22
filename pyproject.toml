@@ -29,7 +29,7 @@ uritemplate = ">=3.0.1,<5.0.0"
 djangorestframework = "=3.14.0"
 coreapi = "^2.3.3"
 weasyprint = ">=51,<61"
-rope = ">=0.17,<1.12"
+rope = ">=0.17,<1.13"
 sentry-sdk = { version = "^1.1.0", optional = true }
 
 [tool.poetry.dev-dependencies]
@@ -42,7 +42,7 @@ pytest-env = ">=0.8.1"
 autohooks = ">=23.1.0"
 autohooks-plugin-pylint = ">=22.8.1"
 autohooks-plugin-black = ">=22.11.0"
-rope = ">=0.17,<1.12"
+rope = ">=0.17,<1.13"
 pontos = ">=21.6.3"
 
 [tool.poetry.extras]
