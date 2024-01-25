@@ -249,7 +249,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
         def per_note(note):
             result_notes = new_host_result.get("notes", [])
             excerpt = "0"
-            if "excerpt" in note["text"] :
+            if "excerpt" in note["text"]:
                 excerpt = note["text"]["excerpt"]
             new_note = {
                 "text": note["text"]["text"],
@@ -269,7 +269,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
                 severity_description = "Any positive severity"
 
             excerpt = "0"
-            if "excerpt" in override["text"] :
+            if "excerpt" in override["text"]:
                 excerpt = override["text"]["excerpt"]
             new_override = {
                 "text": override["text"]["text"],
