@@ -194,9 +194,11 @@ LOGGING = {
         "file": {
             "class": "logging.FileHandler",
             "formatter": "standard",
-            "filename": "/var/log/pheme/pheme.log"
-            if Path("/var/log/pheme").exists()
-            else "/tmp/pheme.log",
+            "filename": (
+                "/var/log/pheme/pheme.log"
+                if Path("/var/log/pheme").exists()
+                else "/tmp/pheme.log"
+            ),
         },
     },
     "formatters": {
