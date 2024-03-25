@@ -26,10 +26,10 @@ django = "=4.2.11"
 xmltodict = ">=0.12,<0.14"
 pyyaml = ">=5.3.1,<7.0.0"
 uritemplate = ">=3.0.1,<5.0.0"
-djangorestframework = "=3.15.0"
+djangorestframework = "=3.15.1"
 coreapi = "^2.3.3"
 weasyprint = ">=51,<62"
-rope = ">=0.17,<1.13"
+rope = ">=0.17,<1.14"
 sentry-sdk = { version = "^1.1.0", optional = true }
 
 [tool.poetry.dev-dependencies]
@@ -42,7 +42,7 @@ pytest-env = ">=0.8.1"
 autohooks = ">=23.1.0"
 autohooks-plugin-pylint = ">=22.8.1"
 autohooks-plugin-black = ">=22.11.0"
-rope = ">=0.17,<1.13"
+rope = ">=0.17,<1.14"
 pontos = ">=21.6.3"
 
 [tool.poetry.extras]
