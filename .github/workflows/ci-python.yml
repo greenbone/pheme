@@ -67,3 +67,4 @@ jobs:
         uses: greenbone/actions/coverage-python@v3
         with:
           test-command: -m pytest
+          token: ${{ secrets.CODECOV_TOKEN }}
