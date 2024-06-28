@@ -7,7 +7,7 @@
  [![code test coverage](https://codecov.io/gh/greenbone/pheme/branch/main/graph/badge.svg)](https://codecov.io/gh/greenbone/pheme)
  [![Build and test](https://github.com/greenbone/pheme/actions/workflows/ci-python.yml/badge.svg)](https://github.com/greenbone/pheme/actions/workflows/ci-python.yml)
 
-**pheme** is a service to create scan reports. It is maintained by [Greenbone Networks].
+**pheme** is a service to create scan reports. It is maintained by [Greenbone AG][Greenbone AG].
 
 [Pheme](https://en.wikipedia.org/wiki/Pheme) is the personification of fame and renown.
 
@@ -112,7 +112,7 @@ afterwards it can be get as usual:
 
 ## Maintainer
 
-This project is maintained by [Greenbone AG][Greenbone Networks]
+This project is maintained by [Greenbone AG][Greenbone AG]
 
 ## Contributing
 
@@ -124,10 +124,10 @@ first.
 
 ## License
 
-Copyright (C) 2020-2023 [Greenbone AG][Greenbone Networks]
+Copyright (C) 2020-2023 [Greenbone AG][Greenbone AG]
 
 Licensed under the [GNU Affero General Public License v3.0 or later](LICENSE).
 
-[Greenbone Networks]: https://www.greenbone.net/
+[Greenbone AG]: https://www.greenbone.net/
 [poetry]: https://python-poetry.org/
 [autohooks]: https://github.com/greenbone/autohooks
