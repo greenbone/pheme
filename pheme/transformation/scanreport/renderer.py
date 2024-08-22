@@ -17,19 +17,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
+from base64 import b64encode
 from typing import Dict
 
-from base64 import b64encode
-
 from django.core.cache import cache
-from django.template import Template, Context
+from django.template import Context, Template
 from rest_framework import renderers
 from rest_framework.request import Request
 from weasyprint import CSS, HTML
-from pheme.settings import DEBUG
-from pheme.parameter import load_params
+
 from pheme.authentication import get_username_role
 from pheme.errors import TemplateNotFoundError
+from pheme.parameter import load_params
+from pheme.settings import DEBUG
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +150,7 @@ def _replace_inline_svg_with_img_tags(
 def enforce_limit(
     data: Dict, parameter: Dict, format_type: str = "pdf"
 ) -> Dict:
-    if not "results" in data:
+    if "results" not in data:
         return data
 
     limits = parameter.get("limits", {}).get(format_type, {})

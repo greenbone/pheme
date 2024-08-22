@@ -22,9 +22,9 @@ Adds the possibility to print iso_8601 strings as %a, %b %d, %Y %I %p %Z', e.g.:
     2001-07-22T09:15:37Z -> Sun, Jul 22, 2001 09 AM UTC
 """
 from datetime import datetime
-from django.utils.safestring import SafeText, SafeString
-from django import template
 
+from django import template
+from django.utils.safestring import SafeString, SafeText
 
 register = template.Library()
 

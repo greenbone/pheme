@@ -19,15 +19,16 @@
 
 import itertools
 from typing import Dict
-from PIL import ImageFont
+
 from django.utils.safestring import SafeText
+from PIL import ImageFont
+
 from pheme.templatetags.charts import (
-    register,
     _severity_class_colors,
     build_legend,
     calculate_legend_start_height,
+    register,
 )
-
 
 __ORIENTATION_LINE_TEMPLATE = """
 <rect x="{x}" y="0" height="{height}" width="1" style="fill: #000000;"></rect>
@@ -138,7 +139,7 @@ def h_bar_chart(
         font = ImageFont.truetype(font_file_name, font_size)
         # add 87.5 + 10 for legend
         max_hostname_len = (
-            max(
+            max( # noqa: PLW3301
                 max(font.getlength(k) for k in data.keys()),
                 font.getlength(x_title),
             )
@@ -148,7 +149,7 @@ def h_bar_chart(
     except OSError:
         # multiply by 1.25 for kerning and add 87.5 for legend
         max_hostname_len = (
-            max(max(len(k) for k in data.keys()), len(x_title))
+            max(max(len(k) for k in data.keys()), len(x_title)) # noqa: PLW3301
             * font_size
             * 1.25
             + 87.5

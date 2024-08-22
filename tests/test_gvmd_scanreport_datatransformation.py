@@ -18,10 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
+
 from pheme.transformation.scanreport.gvmd import (
     transform,
 )
-
 from tests.generate_test_data import gen_report
 
 oids = [f"oid_{i}" for i in range(5)]

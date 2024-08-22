@@ -15,25 +15,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import mimetypes
-import logging
-from typing import Dict, Callable
-from pathlib import Path
 import json
+import logging
+import mimetypes
+from pathlib import Path
+from typing import Callable, Dict
+
 import rest_framework
 from django.core.files.uploadedfile import UploadedFile
 from rest_framework.decorators import (
     api_view,
+    authentication_classes,
     parser_classes,
     renderer_classes,
-    authentication_classes,
 )
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
-from pheme.datalink import as_datalink
-from pheme import settings
-import pheme.authentication
 
+import pheme.authentication
+from pheme import settings
+from pheme.datalink import as_datalink
 
 logger = logging.getLogger(__name__)
 

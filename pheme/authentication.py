@@ -18,16 +18,14 @@
 import logging
 from typing import Callable, Tuple, Union
 
-from rest_framework.authentication import BaseAuthentication
+import requests
+import xmltodict
+from requests.models import Response
 from rest_framework import exceptions
+from rest_framework.authentication import BaseAuthentication
 from rest_framework.request import HttpRequest
 
-import requests
-from requests.models import Response
-import xmltodict
-
 from pheme import settings
-
 
 logger: logging.Logger = logging.getLogger(__name__)
 

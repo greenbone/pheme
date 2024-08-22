@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Dict
+
 from django import template
 
 _severity_class_colors = {

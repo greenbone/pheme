@@ -16,9 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from unittest.mock import patch
+
 import pytest
-from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
+
 from pheme.settings import SECRET_KEY
 
 

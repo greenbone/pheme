@@ -27,9 +27,7 @@ it is a specialized module for gvmd scanreports.
 """
 import logging
 import time
-
 from typing import Dict, List, Optional
-
 
 from pheme.transformation.scanreport.model import (
     # Equipment,

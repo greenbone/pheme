@@ -33,9 +33,10 @@ Including another URLconf
 """
 
 from django.urls import path
+
+import pheme.parameter
 import pheme.version
 import pheme.views
-import pheme.parameter
 
 urlpatterns = [
     path(

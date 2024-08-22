@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APIClient
-from tests.test_report_generation import test_http_accept
 
 from pheme.settings import SECRET_KEY
+from tests.test_report_generation import test_http_accept
 
 
 def test_format_time_within_template():

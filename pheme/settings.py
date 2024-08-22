@@ -28,9 +28,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-from pathlib import Path
-import secrets
 import os
+import secrets
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 __configured_base = os.environ.get("PHEME_BASE_PATH")

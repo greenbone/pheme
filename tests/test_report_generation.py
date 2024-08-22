@@ -17,8 +17,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from unittest.mock import patch
 from typing import List, Optional
+from unittest.mock import patch
+
 import pytest
 from django.core.cache import cache
 from django.urls import reverse
@@ -27,7 +28,6 @@ from rest_framework.test import APIClient
 from pheme.datalink import as_datalink
 from pheme.settings import SECRET_KEY
 from pheme.transformation.scanreport import renderer
-
 from tests.generate_test_data import gen_report
 
 

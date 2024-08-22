@@ -18,12 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import math
 from typing import Dict
+
 from django.utils.safestring import SafeText
+
 from pheme.templatetags.charts import (
-    calculate_legend_start_height,
-    register,
     _severity_class_colors,
     build_legend,
+    calculate_legend_start_height,
+    register,
 )
 
 __PIE_CHART_TEMPLATE = """
