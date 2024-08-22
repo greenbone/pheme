@@ -139,7 +139,7 @@ def h_bar_chart(
         font = ImageFont.truetype(font_file_name, font_size)
         # add 87.5 + 10 for legend
         max_hostname_len = (
-            max( # noqa: PLW3301
+            max(  # noqa: PLW3301
                 max(font.getlength(k) for k in data.keys()),
                 font.getlength(x_title),
             )
@@ -149,7 +149,7 @@ def h_bar_chart(
     except OSError:
         # multiply by 1.25 for kerning and add 87.5 for legend
         max_hostname_len = (
-            max(max(len(k) for k in data.keys()), len(x_title)) # noqa: PLW3301
+            max(max(len(k) for k in data.keys()), len(x_title))  # noqa: PLW3301
             * font_size
             * 1.25
             + 87.5
