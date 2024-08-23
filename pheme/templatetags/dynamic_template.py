@@ -23,10 +23,10 @@ and render them into another template without having the need to declare them
 as a dependency upfront.
 """
 
-from django.utils.safestring import mark_safe, SafeString
 from django import template
-from pheme.parameter import load_params
+from django.utils.safestring import SafeString, mark_safe
 
+from pheme.parameter import load_params
 
 register = template.Library()
 

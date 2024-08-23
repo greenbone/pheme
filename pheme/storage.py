@@ -16,8 +16,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from uuid import uuid4
 from typing import Dict
+from uuid import uuid4
 
 from django.core.cache import cache
 

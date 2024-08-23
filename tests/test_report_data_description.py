@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from rest_framework.test import APIClient
 from django.urls import reverse
+from rest_framework.test import APIClient
 
 
 def test_markdown_description_without_error():

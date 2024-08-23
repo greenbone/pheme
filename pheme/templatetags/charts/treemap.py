@@ -33,9 +33,9 @@ from django.utils.safestring import SafeText
 
 from pheme.templatetags.charts import (
     _severity_class_colors,
-    register,
     build_legend,
     calculate_legend_start_height,
+    register,
 )
 
 __ELEMENT_TEMPLATE = """

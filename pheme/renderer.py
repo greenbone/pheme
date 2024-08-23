@@ -16,11 +16,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from typing import List, Dict, Generator, Union
-from io import StringIO
 from csv import DictWriter
-from rest_framework.renderers import BaseRenderer
+from io import StringIO
+from typing import Dict, Generator, List, Union
+
 import xmltodict
+from rest_framework.renderers import BaseRenderer
 
 
 class CSVRenderer(BaseRenderer):

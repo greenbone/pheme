@@ -39,7 +39,7 @@ pytest-cov = ">=4.0.0"
 pytest-django = ">=3.9"
 pytest-env = ">=0.8.1"
 autohooks = ">=23.1.0"
-autohooks-plugin-pylint = ">=22.8.1"
+autohooks-plugin-ruff = ">=24.1.0"
 autohooks-plugin-black = ">=22.11.0"
 rope = ">=0.17,<1.14"
 pontos = ">=21.6.3"
@@ -64,8 +64,15 @@ exclude = '''
 '''
 
 [tool.autohooks]
-pre-commit = ['autohooks.plugins.black', 'autohooks.plugins.pylint']
+pre-commit = ['autohooks.plugins.black', 'autohooks.plugins.ruff']
 mode = "poetry"
+
+[tool.ruff]
+line-length = 80
+target-version = "py39"
+
+[tool.ruff.lint]
+extend-select = ["I", "PLE", "PLW"]
 
 [tool.pontos.version]
 version-module-file = "pheme/version/__version__.py"
