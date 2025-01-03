@@ -21,7 +21,8 @@ from typing import Dict
 from django import template
 
 _severity_class_colors = {
-    "High": "#d4003e",
+    "Critical": "#bf0000",
+    "High": "#f51414",
     "Medium": "#fcb900",
     "Low": "#7db4d0",
 }
