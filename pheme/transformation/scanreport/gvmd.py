@@ -37,7 +37,7 @@ from pheme.transformation.scanreport.model import (
 
 logger = logging.getLogger(__name__)
 
-__threats = ["High", "Medium", "Low"]
+__threats = ["Critical", "High", "Medium", "Low"]
 __threat_index_lookup = {v: i for i, v in enumerate(__threats)}
 
 
