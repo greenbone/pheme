@@ -105,6 +105,7 @@ def describe():
                 host="str; ip address of host",
                 hostname="str; main hostname of the host",
                 threats={
+                    "critical": "int; amount of critical nvts in host",
                     "high": "int; amount of high nvts in host",
                     "medium": "int; amount of medium nvts in host",
                     "low": "int; amount of low nvts in host",
