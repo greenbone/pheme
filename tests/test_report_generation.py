@@ -39,6 +39,23 @@ def generate(
     ]
 
 
+def http_accept_helper(http_accept, report=None):
+    if not report:
+        report = gen_report(
+            generate("host", 1),
+            generate("oid", 1),
+            name="http_accept_test",
+        )
+    url = reverse("transform")
+    report = {"report": {"report": report}}
+    client = APIClient()
+    response = client.post(url, data=report, format="xml")
+    assert response.status_code == 200
+    key = response.data
+    report_url = reverse("report", kwargs={"name": key})
+    return client.get(report_url, HTTP_ACCEPT=http_accept)
+
+
 def test_report_contains_equipment():
     client = APIClient()
     url = reverse("transform")
@@ -113,7 +130,8 @@ def test_dynamic_template():
         HTTP_X_API_KEY=SECRET_KEY,
     )
     assert response.status_code == 200
-    response = test_http_accept("text/html")
+    response = http_accept_helper("text/html")
+    assert response.status_code == 200
     nvts = response.data["overview"]["nvts"]
     html_report = response.getvalue().decode("utf-8")
     assert f"<h1>{nvts['High']}</h1>" in html_report
@@ -163,7 +181,8 @@ def test_chart_keyword(report=None, expected=4):
         HTTP_X_API_KEY=SECRET_KEY,
     )
     assert response.status_code == 200
-    response = test_http_accept("text/html", report)
+    response = http_accept_helper("text/html", report)
+    assert response.status_code == 200
     html_report = response.getvalue().decode("utf-8")
     assert html_report.count("<svg ") == expected
 
@@ -215,22 +234,8 @@ def test_http_accept(
     http_accept,
     report=None,
 ):
-    if not report:
-        report = gen_report(
-            generate("host", 1),
-            generate("oid", 1),
-            name="http_accept_test",
-        )
-    url = reverse("transform")
-    report = {"report": {"report": report}}
-    client = APIClient()
-    response = client.post(url, data=report, format="xml")
-    assert response.status_code == 200
-    key = response.data
-    report_url = reverse("report", kwargs={"name": key})
-    html_report = client.get(report_url, HTTP_ACCEPT=http_accept)
+    html_report = http_accept_helper(http_accept=http_accept, report=report)
     assert html_report.status_code == 200
-    return html_report
 
 
 def test_generate_format_editor_html_report():
@@ -333,6 +338,7 @@ def test_html_report_contains_user_paramater(user_information):
     response = client.put(url, data="#000", format="json")
     assert response.status_code == 200
     assert response.data["user_specific"]["test"]["main_color"] == "#000"
-    report_response = test_http_accept("text/html")
+    report_response = http_accept_helper("text/html")
+    assert report_response.status_code == 200
     html_report = report_response.getvalue().decode("utf-8")
     assert html_report == "<html><body><p>#fff</p></body></html>"
