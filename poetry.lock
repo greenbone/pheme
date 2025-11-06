@@ -795,14 +795,14 @@ profile = ["gprof2dot (>=2022.7.29)"]
 
 [[package]]
 name = "django"
-version = "4.2.25"
+version = "4.2.26"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "django-4.2.25-py3-none-any.whl", hash = "sha256:9584cf26b174b35620e53c2558b09d7eb180a655a3470474f513ff9acb494f8c"},
-    {file = "django-4.2.25.tar.gz", hash = "sha256:2391ab3d78191caaae2c963c19fd70b99e9751008da22a0adcc667c5a4f8d311"},
+    {file = "django-4.2.26-py3-none-any.whl", hash = "sha256:c96e64fc3c359d051a6306871bd26243db1bd02317472a62ffdbe6c3cae14280"},
+    {file = "django-4.2.26.tar.gz", hash = "sha256:9398e487bcb55e3f142cb56d19fbd9a83e15bb03a97edc31f408361ee76d9d7a"},
 ]
 
 [package.dependencies]
@@ -2542,4 +2542,4 @@ tracking = ["sentry-sdk"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "c1cc22708c5a04dfa7274bcf45a4d7b388d3df4d2b706e36621d74cf70ba9ef5"
+content-hash = "87f844acf72a0e5ec941868ca2c265933947da5e5cbd43319a298fe4d1d11db2"
