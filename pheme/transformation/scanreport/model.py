@@ -65,6 +65,7 @@ class Overview:
     hosts: CountGraph
     nvts: CountGraph
     vulnerable_equipment: CountGraph
+    is_container_image_scan: bool = False
 
 
 @dataclass
@@ -99,6 +100,7 @@ def describe():
                 chart="str; link to chart image (base64 encoded datalink)",
                 counts=[],
             ),
+            is_container_image_scan="bool; indicates if the report is for a container image scan",
         ),
         results=[
             dict(

@@ -188,6 +188,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     def per_result(result):
         host_ip = __get_host_ip_from_result(result)
         hostname = __get_hostname_from_result(result)
+        oci_image = transform_key("oci_image", result.get("oci_image", {}))
         host_dict = by_host.get(host_ip, {})
         threat = result.get("threat", "unknown")
         port = result.get("port")
@@ -309,6 +310,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             "host": host_ip,
             "hostname": "",
             "hostnames": hostnames,
+            **oci_image,
             "threats": __host_threat_overview(host_threats),
             "severities": __host_severity_overview(host_severities),
             "equipment": equipment,
@@ -380,6 +382,9 @@ def transform(data: Dict[str, str]) -> Report:
     task = report.get("task") or {}
     logger.info("data transformation")
     results, host_counts, nvts_counts = __create_results_per_host(report)
+    is_container_image_scan = (
+        True if results and "oci_image_name" in results[0] else False
+    )
 
     return Report(
         report.get("id"),
@@ -387,7 +392,10 @@ def transform(data: Dict[str, str]) -> Report:
         task.get("comment"),
         report.get("scan_start"),
         Overview(
-            hosts=host_counts, nvts=nvts_counts, vulnerable_equipment=None
+            hosts=host_counts,
+            nvts=nvts_counts,
+            vulnerable_equipment=None,
+            is_container_image_scan=is_container_image_scan,
         ),
         results,
     )
