@@ -131,7 +131,7 @@ def __create_host_information_lookup(report: Dict) -> Dict:
     created a lookup table for available host information
     """
     # lookup for host information name and dict name
-    information_key = {"best_os_txt": "os"}
+    information_key = {"best_os_txt": "os", "hostname": "hostname"}
 
     def filter_per_host(host: Dict) -> Dict:
         information = {}
@@ -157,19 +157,52 @@ def __create_host_information_lookup(report: Dict) -> Dict:
         else:
             return information
 
+    def get_result_key(host, hostname):
+        ip = host.get("ip", "unknown")
+        if ip.startswith("sha256:") and len(hostname) > 0:
+            return ip + "##" + hostname
+        else:
+            return ip
+
     result = {}
     hosts = report.get("host")
     if isinstance(hosts, dict):
-        result[hosts.get("ip", "unknown")] = filter_per_host(hosts)
+        information = filter_per_host(hosts)
+        result[get_result_key(hosts, information.get("hostname", ""))] = (
+            information
+        )
     elif isinstance(hosts, list):
         # best_os_txt seems to be in the end
         for host in hosts[::-1]:
-            result[host.get("ip", "unknown")] = filter_per_host(host)
+            information = filter_per_host(host)
+            result[get_result_key(host, information.get("hostname", ""))] = (
+                information
+            )
     return result
 
 
+def __is_container_image_report(report: Dict) -> bool:
+    """
+    checks if the report is a container image report by checking image digest in first host.
+    """
+
+    def check_host_ip(host) -> bool:
+        host_ip = host.get("ip", "")
+        return host_ip.startswith("sha256:")
+
+    hosts = report.get("host", [])
+    if isinstance(hosts, dict):
+        return check_host_ip(hosts)
+    elif isinstance(hosts, list):
+        for host in hosts:
+            return check_host_ip(host)
+    return False
+
+
 @measure_time
-def __create_results_per_host(report: Dict) -> List[Dict]:
+def __create_results_per_host(
+    report: Dict, is_container_image_report: bool
+) -> List[Dict]:
     """
     creates the results dict used by a vulnerability-report based on a given
     gvmd report.
@@ -185,11 +218,29 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     def transform_key(prefix: str, vic: Dict) -> Dict:
         return {f"{prefix}_{key}": value for key, value in vic.items()}
 
+    def shorten(s, n=28):
+        s = s or ""
+        return s if len(s) < n else s[: n - 3] + "..."
+
+    def split_image_name(hostname: str) -> str:
+        if "/" in hostname:
+            return hostname.split("/")[-1]
+        return hostname
+
     def per_result(result):
         host_ip = __get_host_ip_from_result(result)
         hostname = __get_hostname_from_result(result)
         oci_image = transform_key("oci_image", result.get("oci_image", {}))
-        host_dict = by_host.get(host_ip, {})
+        if oci_image.get("oci_image_short_name") is not None:
+            oci_image["oci_image_short_name"] = shorten(
+                oci_image.get("oci_image_short_name", ""), 60
+            )
+        key = (
+            host_ip + "##" + hostname
+            if is_container_image_report and len(hostname) > 0
+            else host_ip
+        )
+        host_dict = by_host.get(key, {})
         threat = result.get("threat", "unknown")
         port = result.get("port")
         nvt = transform_key("nvt", result.get("nvt", {}))
@@ -222,28 +273,28 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             ports = set(ports + [port])
         equipment["ports"] = ports
         if not equipment.get("os"):
-            equipment["os"] = host_information_lookup.get(host_ip, {}).get(
+            equipment["os"] = host_information_lookup.get(key, {}).get(
                 "os", "unknown"
             )
 
         # needs host_ip, high, medium, low
         host_threats = host_threat_count.get(
-            host_ip, {threat: 0 for threat in __threats}
+            key, {threat: 0 for threat in __threats}
         )
         threat_index = __threat_index_lookup.get(threat)
         if threat_index is not None:
             threat_count[threat_index] += 1
         if host_threats.get(threat) is not None:
             host_threats[threat] += 1
-        host_threat_count[host_ip] = host_threats
+        host_threat_count[key] = host_threats
 
         # needs high, medium, low
 
         # severity 1 to 10
-        host_severities = host_severity_count.get(host_ip, [0] * 10)
+        host_severities = host_severity_count.get(key, [0] * 10)
         if severity > 0:
             host_severities[int(severity) - 1] += 1
-        host_severity_count[host_ip] = host_severities
+        host_severity_count[key] = host_severities
 
         def per_note(note):
             result_notes = new_host_result.get("notes", [])
@@ -306,7 +357,7 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
             for override in overrides:
                 per_override(override)
 
-        by_host[host_ip] = {
+        by_host[key] = {
             "host": host_ip,
             "hostname": "",
             "hostnames": hostnames,
@@ -330,7 +381,11 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
                 return
 
             if name == "hostname" and by_host[host_ip]["hostname"] == "":
-                by_host[host_ip]["hostname"] = value
+                if is_container_image_report and len(value) > 0:
+                    key = host_ip + "##" + value
+                else:
+                    key = host_ip
+                by_host[key]["hostname"] = value
 
         details = host.get("detail", [])
         if isinstance(details, dict):
@@ -355,10 +410,24 @@ def __create_results_per_host(report: Dict) -> List[Dict]:
     threat_count_dict = {
         __threats[i]: count for i, count in enumerate(threat_count)
     }
+
+    is_combined_key = all("##" in key for key in host_threat_count.keys())
+
+    if is_container_image_report and is_combined_key:
+        results = map(
+            lambda item: (
+                shorten(split_image_name(item[0].split("##")[-1])),
+                item[1],
+            ),
+            host_threat_count.items(),
+        )
+    else:
+        results = host_threat_count.items()
+
     # sort by amount descending
     host_threat_count = dict(
         sorted(
-            host_threat_count.items(),
+            results,
             key=lambda x: sum(x[1].values()),
             reverse=True,
         )
@@ -381,9 +450,9 @@ def transform(data: Dict[str, str]) -> Report:
 
     task = report.get("task") or {}
     logger.info("data transformation")
-    results, host_counts, nvts_counts = __create_results_per_host(report)
-    is_container_image_scan = (
-        True if results and "oci_image_name" in results[0] else False
+    is_container_image_scan = __is_container_image_report(report)
+    results, host_counts, nvts_counts = __create_results_per_host(
+        report, is_container_image_scan
     )
 
     return Report(
