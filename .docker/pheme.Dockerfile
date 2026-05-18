@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim as builder
+FROM debian:stable-slim as builder
 
 COPY . /source
 
@@ -17,7 +17,7 @@ RUN python -m pip install --upgrade pip && \
 
 RUN rm -rf dist && poetry build -f wheel
 
-FROM debian:bullseye-slim
+FROM debian:stable-slim
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
