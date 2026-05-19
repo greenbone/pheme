@@ -23,6 +23,7 @@ Although there is the project djangorestframework-xml xmltodict seems to be more
 reliable for our usecase.
 
 """
+
 import xmltodict
 from rest_framework.parsers import BaseParser
 

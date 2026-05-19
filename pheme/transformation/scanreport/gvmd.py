@@ -25,6 +25,7 @@ contrains the function
 
 it is a specialized module for gvmd scanreports.
 """
+
 import logging
 import time
 from typing import Dict, List, Optional
