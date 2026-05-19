@@ -27,7 +27,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           labels: |
             org.opencontainers.image.vendor=Greenbone
-            org.opencontainers.image.base.name=debian/bullseye-slim
+            org.opencontainers.image.base.name=debian/stable-slim
           flavor: latest=false # no latest container tag for git tags
           tags: |
             # use version, major.minor and major  for tags
