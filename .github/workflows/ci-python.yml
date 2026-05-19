@@ -2,20 +2,21 @@ name: Build and test Python package
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   linting:
     name: Linting
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     strategy:
-        matrix:
-          python-version:
-            - "3.9"
-            - "3.10"
-            - "3.11"
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python ${{ matrix.python-version }}
@@ -27,17 +28,19 @@ jobs:
       - name: Check with black, pylint and pontos.version
         uses: greenbone/actions/lint-python@v3
         with:
+          formatter: ruff format --diff
           packages: pheme tests
 
   test:
     name: Run all tests
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     strategy:
-        matrix:
-          python-version:
-            - "3.9"
-            - "3.10"
-            - "3.11"
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python ${{ matrix.python-version }}
@@ -52,7 +55,7 @@ jobs:
   codecov:
     name: Upload coverage to codecov.io
     needs: test
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python
