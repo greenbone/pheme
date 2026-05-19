@@ -318,7 +318,7 @@ def test_html_report_contains_user_paramater(user_information):
     url = reverse(
         "put_parameter",
     )
-    html_template = "<html><body><p>{{ main_color }}</p></body></html>" ""
+    html_template = "<html><body><p>{{ main_color }}</p></body></html>"
     response = client.put(
         url,
         data={
