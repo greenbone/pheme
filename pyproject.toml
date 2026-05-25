@@ -22,11 +22,11 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-django = "=4.2.30"
+django = "=5.2.14"
 xmltodict = ">=0.12,<1.1"
 pyyaml = ">=5.3.1,<7.0.0"
 uritemplate = ">=3.0.1,<5.0.0"
-djangorestframework = "=3.16.1"
+djangorestframework = "=3.17.1"
 coreapi = "^2.3.3"
 weasyprint = ">=62"
 rope = ">=0.17,<1.15"
