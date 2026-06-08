@@ -22,7 +22,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-django = "=5.2.14"
+django = "=5.2.15"
 xmltodict = ">=0.12,<1.1"
 pyyaml = ">=5.3.1,<7.0.0"
 uritemplate = ">=3.0.1,<5.0.0"
