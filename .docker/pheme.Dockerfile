@@ -51,15 +51,4 @@ RUN apt-get update \
 
 EXPOSE 8000
 USER 1001:1001
-CMD [
-  "uwsgi",
-  "--need-plugin", "python3",
-  "--module", "pheme.wsgi:application",
-  "--env", "DJANGO_SETTINGS_MODULE=pheme.settings",
-  "--master",
-  "--http-socket", "0.0.0.0:8000",
-  "--processes", "3",
-  "--max-requests", "100",
-  "--enable-threads",
-  "--vacuum"
-]
+CMD ["uwsgi", "--http", ":8080", "--module", "pheme.wsgi:application", "--env", "DJANGO_SETTINGS_MODULE=pheme.settings", "--master", "--processes", "3", "--max-requests", "100", "--enable-threads", "--vacuum"]
