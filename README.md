@@ -1,4 +1,4 @@
-![Greenbone Logo](https://www.greenbone.net/wp-content/uploads/gb_new-logo_horizontal_rgb_small.png)
+![Greenbone Logo]([https://www.greenbone.net/wp-content/uploads/gb_new-logo_horizontal_rgb_small.png](https://www.greenbone.net/wp-content/uploads/greenbone-logo-2025.png))
 
 # Pheme - Greenbone Static Report Generator <!-- omit in toc -->
 
