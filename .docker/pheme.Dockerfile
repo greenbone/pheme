@@ -34,8 +34,7 @@ RUN apt-get update && \
     libpangocairo-1.0-0 \
     python3 \
     python3-pip && \
-    apt-get remove --purge --auto-remove -y && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get remove --purge --auto-remove -y
 
 RUN addgroup --gid 1001 --system pheme && \
     adduser --no-create-home --shell /bin/false --disabled-password --uid 1001 --system --group pheme
@@ -43,3 +42,13 @@ RUN addgroup --gid 1001 --system pheme && \
 COPY --from=builder /source/dist/* /pheme/
 
 RUN python3 -m pip install --break-system-packages /pheme/*
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        uwsgi \
+        uwsgi-plugin-python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 8000
+USER 1001:1001
+CMD ["uwsgi", "--http-socket", ":8000", "--need-plugin", "python3", "--module", "pheme.wsgi:application", "--env", "DJANGO_SETTINGS_MODULE=pheme.settings", "--master", "--processes", "3", "--max-requests", "100", "--enable-threads", "--vacuum"]
