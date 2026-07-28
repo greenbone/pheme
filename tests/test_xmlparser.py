@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # tests/test_xmlparser.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -17,7 +16,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from dataclasses import dataclass
-from typing import Dict
 
 import pytest
 
@@ -27,7 +25,7 @@ from pheme.parser.xml import XMLParser
 @dataclass
 class Case:
     data: str
-    expected: Dict
+    expected: dict
 
 
 @pytest.mark.parametrize(

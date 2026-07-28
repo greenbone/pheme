@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -102,8 +101,8 @@ def test_get_username_and_role(request, response):
         response.text = GSAD_FAKE_RESPONSE
         return response
 
-    request.query_params = dict(token="TOKEN")
-    request.COOKIES = dict(GSAD_SID="GSAD_SID")
+    request.query_params = {"token": "TOKEN"}
+    request.COOKIES = {"GSAD_SID": "GSAD_SID"}
     username, role = get_username_role(request, get=fake_get)
     assert username == "admin"
     assert role == "Admin"
@@ -111,7 +110,7 @@ def test_get_username_and_role(request, response):
 
 @patch("rest_framework.request.HttpRequest")
 def test_return_none_on_missing_url(request):
-    username, role = get_username_role(request, gsad_url=None)
+    username, role = get_username_role(request, gsad_url=None)  # type: ignore
     assert username is None
     assert role is None
 
@@ -119,7 +118,7 @@ def test_return_none_on_missing_url(request):
 @patch("rest_framework.request.HttpRequest")
 def test_not_call_on_missing_token_gsadsid(request):
     def fake_get(url, params, **kwargs):
-        raise Exception("should not be called")
+        raise Exception("should not be called")  # noqa: TRY002
 
     request.query_params = {}
     request.COOKIES = {}

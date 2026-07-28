@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/parser/xml.py
 # Copyright (C) 2020-2021 Greenbone AG
 #

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: GPL-3.0-or-later

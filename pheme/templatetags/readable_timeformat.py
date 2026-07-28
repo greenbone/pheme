@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/templatetags/dynamic_template.py
 # Copyright (C) 2020-2021 Greenbone AG
 #

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # tests/test_gvmd_scanreport_datatransformation.py
 # Copyright (C) 2020-2021 Greenbone AG
 #

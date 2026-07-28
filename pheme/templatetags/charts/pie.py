@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/templatetags/charts.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -16,8 +15,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import math
-from typing import Dict
 
 from django.utils.safestring import SafeText
 
@@ -47,8 +46,8 @@ __SLICE_TEMPLATE = """
 
 @register.filter
 def pie_chart(
-    input_values: Dict,
-    title_color: Dict = None,
+    input_values: dict,
+    title_color: dict | None = None,
     width: int = 390,
     border_size: int = 0,
     slice_width: int = 90,
@@ -90,7 +89,7 @@ def pie_chart(
     # we start at 12' o clock
     angle_offset = -90
 
-    max_legend_len = max([len(k) for k in title_color.keys()])
+    max_legend_len = max([len(k) for k in title_color])
     chart_size = width - max_legend_len * font_size - font_size
 
     cx = chart_size / 2  # shift x

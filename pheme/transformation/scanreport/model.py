@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/transformation/scanreport/model.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -18,7 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=W0614,W0511,W0401,C0103
 from dataclasses import dataclass
-from typing import Dict, List, Union
 
 
 @dataclass
@@ -30,7 +28,7 @@ class NVTThreatCount:
 @dataclass
 class Equipment:
     os: str  # search for host.text and refs than os-detection
-    ports: List[str]  # ports port host and ports port text
+    ports: list[str]  # ports port host and ports port text
 
 
 @dataclass
@@ -51,7 +49,7 @@ class HostCount:
 class CountGraph:
     name: str
     chart: str
-    counts: List[Union[NVTCount, HostCount]]
+    counts: list[NVTCount | HostCount]
 
 
 @dataclass
@@ -75,7 +73,7 @@ class Report:
     comment: str
     start: str
     overview: Overview
-    results: List[Dict]
+    results: list[dict]
 
 
 def describe():
@@ -100,13 +98,13 @@ def describe():
                 chart="str; link to chart image (base64 encoded datalink)",
                 counts=[],
             ),
-            is_container_image_scan="bool; indicates if the report is for a container image scan",
+            is_container_image_scan="bool; indicates if the report is for a container image scan",  # type: ignore
         ),
         results=[
-            dict(
-                host="str; ip address of host",
-                hostname="str; main hostname of the host",
-                threats={
+            {
+                "host": "str; ip address of host",
+                "hostname": "str; main hostname of the host",
+                "threats": {
                     "critical": "int; amount of critical nvts in host",
                     "high": "int; amount of high nvts in host",
                     "medium": "int; amount of medium nvts in host",
@@ -114,7 +112,7 @@ def describe():
                     "total": "int; amount of nvts in host",
                     "highest": "str; highest threat within host",
                 },
-                severities={
+                "severities": {
                     "1": "int; amount of 1 severities in host",
                     "2": "int; amount of 2 severities in host",
                     "3": "int; amount of 3 severities in host",
@@ -128,10 +126,10 @@ def describe():
                     "total": "int; amount of nvts in host",
                     "highest": "str; highest severity within host",
                 },
-                equipment=Equipment(
+                "equipment": Equipment(
                     os="str; operating system", ports=["str; open ports"]
                 ),
-                results={
+                "results": {
                     "nvt.oid": "str; nvt.oid; optional",
                     "nvt.type": "str; nvt.type; optional",
                     "nvt.name": "str; nvt.name; optional",
@@ -156,6 +154,6 @@ def describe():
                     "qod.type": "str; qod.type; optional",
                     "description": "str; description; optional",
                 },
-            )
+            }
         ],
     )

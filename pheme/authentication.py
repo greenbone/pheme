@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -16,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-from typing import Callable, Tuple, Union
+from collections.abc import Callable
 
 import requests
 import xmltodict
@@ -35,12 +34,12 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 def __gsad_user_role(
     token: str, gsad_sid: str, *, gsad_url: str, get: Callable
-) -> Tuple[Union[str, None], Union[str, None]]:
+) -> tuple[str | None, str | None]:
     if not gsad_url:
         logger.warning("no gsad url")
         return None, None
     params = {"token": token, "cmd": "get_users"}
-    cookies = dict(GSAD_SID=gsad_sid)
+    cookies = {"GSAD_SID": gsad_sid}
     response: Response = get(gsad_url, params=params, cookies=cookies)
     resp = xmltodict.parse(
         response.text, attr_prefix="", cdata_key="text", dict_constructor=dict
@@ -53,7 +52,7 @@ def get_username_role(
     *,
     gsad_url: str = settings.GSAD_URL,
     get: Callable = requests.get,
-) -> Tuple[Union[str, None], Union[str, None]]:
+) -> tuple[str | None, str | None]:
     """
     returns a username and a role when it got found based on the request.
 

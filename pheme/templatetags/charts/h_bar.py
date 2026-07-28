@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/templatetags/bar_chart.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -18,7 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import itertools
-from typing import Dict
 
 from django.utils.safestring import SafeText
 from PIL import ImageFont
@@ -90,7 +88,7 @@ __BAR_CHART_TEMPLATE = """
 @register.filter
 @register.simple_tag
 def h_bar_chart(
-    chart_data: Dict[str, Dict[str, int]],
+    chart_data: dict[str, dict[str, int]],
     x_title: str = "",
     title_color=None,
     svg_width=800,
@@ -140,7 +138,7 @@ def h_bar_chart(
         # add 87.5 + 10 for legend
         max_hostname_len = (
             max(  # noqa: PLW3301
-                max(font.getlength(k) for k in data.keys()),
+                max(font.getlength(k) for k in data),
                 font.getlength(x_title),
             )
             + 87.5
@@ -149,7 +147,7 @@ def h_bar_chart(
     except OSError:
         # multiply by 1.25 for kerning and add 87.5 for legend
         max_hostname_len = (
-            max(max(len(k) for k in data.keys()), len(x_title))  # noqa: PLW3301
+            max(max(len(k) for k in data), len(x_title))  # noqa: PLW3301
             * font_size
             * 1.25
             + 87.5
@@ -165,7 +163,7 @@ def h_bar_chart(
     orientation_basis = (
         int(max_sum / orientation_marker) if orientation_marker > 0 else 0
     )
-    if max_sum > orientation_basis and orientation_basis > 0:
+    if max_sum > orientation_basis > 0:
         overhead = max_sum % orientation_basis
         # if it's already adjusted we don't need to add anything
         if overhead == 0:
