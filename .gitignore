@@ -135,3 +135,5 @@ generate.sh
 # to prevent accidental uploads of default parameter
 static/parameter.json
 example.sh
+
+.vscode/
