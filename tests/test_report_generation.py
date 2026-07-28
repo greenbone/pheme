@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # tests/test_report_generation.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -17,7 +16,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import List, Optional
 from unittest.mock import patch
 
 import pytest
@@ -31,9 +29,7 @@ from pheme.transformation.scanreport import renderer
 from tests.generate_test_data import gen_report
 
 
-def generate(
-    prefix: str, amount: int, number: Optional[int] = None
-) -> List[str]:
+def generate(prefix: str, amount: int, number: int | None = None) -> list[str]:
     return [
         f"{prefix}_{number if number is not None else i}" for i in range(amount)
     ]
@@ -261,8 +257,8 @@ def test_generate_format_editor_html_report():
         assert response.status_code == 200
 
     images = [
-        as_datalink("p1".encode(), "png"),
-        as_datalink("p2".encode(), "jpg"),
+        as_datalink(b"p1", "png"),
+        as_datalink(b"p2", "jpg"),
     ]
     client = APIClient()
     url = reverse("transform")

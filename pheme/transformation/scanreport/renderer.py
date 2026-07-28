@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/transformation/scanreport/renderer.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -18,7 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 from base64 import b64encode
-from typing import Dict
 
 from django.core.cache import cache
 from django.template import Context, Template
@@ -34,7 +32,7 @@ from pheme.settings import DEBUG
 logger = logging.getLogger(__name__)
 
 
-def _load_template(name: str, params: Dict = None) -> Template:
+def _load_template(name: str, params: dict | None = None) -> Template:
     if not params:
         params = load_params()
     templ = params.get(name)
@@ -43,18 +41,18 @@ def _load_template(name: str, params: Dict = None) -> Template:
     return Template(templ)
 
 
-def _enrich(name: str, data: Dict, parameter: Dict) -> Dict:
+def _enrich(name: str, data: dict, parameter: dict | None = None) -> dict:
     data["internal_name"] = name
-    return {**parameter, **data}
+    return {**(parameter or {}), **data}
 
 
-def _get_request(renderer_context: Dict) -> Request:
+def _get_request(renderer_context: dict | None) -> Request:
     renderer_context = renderer_context or {}  # to throw key error
     return renderer_context["request"]
 
 
 def _default_not_found_response(
-    renderer_context: Dict, request: Request
+    renderer_context: dict, request: Request
 ) -> str:
     resp = renderer_context["response"]
     resp.status_code = 404
@@ -65,10 +63,15 @@ def _default_not_found_response(
 
 
 class Report(renderers.BaseRenderer):
-    def render(self, data, accepted_media_type=None, renderer_context=None):
+    def render(
+        self,
+        data,
+        accepted_media_type=None,
+        renderer_context: dict | None = None,
+    ):
         request = _get_request(renderer_context)
         if not data:
-            return _default_not_found_response(renderer_context, request)
+            return _default_not_found_response(renderer_context, request)  # type: ignore
 
         name = data.get("internal_name")
         cache_key = f"{self.media_type}/{name}" if name else None
@@ -91,7 +94,7 @@ class Report(renderers.BaseRenderer):
             cache.set(cache_key, result)
         return result
 
-    def apply(self, name: str, data: Dict, parameter: Dict):
+    def apply(self, name: str, data: dict, parameter: dict):
         raise NotImplementedError(
             "Report class requires .apply() to be implemented"
         )
@@ -103,7 +106,7 @@ class VulnerabilityHTMLReport(Report):
     media_type = "text/html"
     format = "html"
 
-    def apply(self, name: str, data: Dict, parameter: Dict):
+    def apply(self, name: str, data: dict, parameter: dict):
         css = _load_template(self.__css_template, parameter).render(
             Context(parameter)
         )
@@ -148,8 +151,8 @@ def _replace_inline_svg_with_img_tags(
 
 
 def enforce_limit(
-    data: Dict, parameter: Dict, format_type: str = "pdf"
-) -> Dict:
+    data: dict, parameter: dict, format_type: str = "pdf"
+) -> dict:
     if "results" not in data:
         return data
 
@@ -200,7 +203,7 @@ class VulnerabilityPDFReport(Report):
     media_type = "application/pdf"
     format = "binary"
 
-    def apply(self, name: str, data: Dict, parameter: Dict):
+    def apply(self, name: str, data: dict, parameter: dict):
         data = enforce_limit(data, parameter)
         css = _load_template(self.__css_template, parameter).render(
             Context(parameter)

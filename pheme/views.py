@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/views.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -43,11 +42,10 @@ def load_cache(request, key):
 def store_cache(request):
     key = request.data.get("key", "unknown")
     data = request.data.get("value")
-    if request.data.get("append"):
-        if isinstance(data, dict):
-            cached = load(key) or {}
-            cached[data.get("name", "unknown")] = data.get("content")
-            data = cached
+    if request.data.get("append") and isinstance(data, dict):
+        cached = load(key) or {}
+        cached[data.get("name", "unknown")] = data.get("content")
+        data = cached
     name = store(key, data, id_generator=str)
     return Response(name)
 

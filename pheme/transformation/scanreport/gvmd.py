@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/transformation/scanreport/gvmd.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -28,7 +27,6 @@ it is a specialized module for gvmd scanreports.
 
 import logging
 import time
-from typing import Dict, List, Optional
 
 from pheme.transformation.scanreport.model import (
     # Equipment,
@@ -52,14 +50,14 @@ def measure_time(func):
     return measure
 
 
-def __tansform_tags(item) -> Optional[Dict[str, str]]:
+def __tansform_tags(item) -> dict[str, str] | None:
     if isinstance(item, str):
         split = [i.split("=") for i in item.split("|")]
         return {i[0]: i[1].replace("\n", " ") for i in split if len(i) == 2}
     return None
 
 
-def __group_refs(refs: Dict[str, str]) -> Dict:
+def __group_refs(refs: dict[str, str]) -> dict:
     refs_ref = {}
     for ref in refs.get("ref", []):
         if isinstance(ref, dict):
@@ -87,7 +85,7 @@ def __get_hostname_from_result(result) -> str:
     return ""
 
 
-def __return_highest_threat(threats: List[int]) -> str:
+def __return_highest_threat(threats: list[int]) -> str:
     """
     returns the highest threat
     """
@@ -97,7 +95,7 @@ def __return_highest_threat(threats: List[int]) -> str:
     return "NA"
 
 
-def __host_threat_overview(threat_count: Dict) -> Dict:
+def __host_threat_overview(threat_count: dict) -> dict:
     """
     returns nvt statistics mostly used in the per host overview
     """
@@ -107,7 +105,7 @@ def __host_threat_overview(threat_count: Dict) -> Dict:
     return result
 
 
-def __return_highest_severity(severities: List[int]) -> str:
+def __return_highest_severity(severities: list[int]) -> str:
     """
     returns the highest severity within a list
     """
@@ -117,7 +115,7 @@ def __return_highest_severity(severities: List[int]) -> str:
     return "NA"
 
 
-def __host_severity_overview(nvt_count: List[int]) -> Dict:
+def __host_severity_overview(nvt_count: list[int]) -> dict:
     """
     returns nvt severity statistics mostly used in the per host overview
     """
@@ -127,18 +125,18 @@ def __host_severity_overview(nvt_count: List[int]) -> Dict:
     return result
 
 
-def __create_host_information_lookup(report: Dict) -> Dict:
+def __create_host_information_lookup(report: dict) -> dict:
     """
     created a lookup table for available host information
     """
     # lookup for host information name and dict name
     information_key = {"best_os_txt": "os", "hostname": "hostname"}
 
-    def filter_per_host(host: Dict) -> Dict:
+    def filter_per_host(host: dict) -> dict:
         information = {}
         found = 0
 
-        def check_host_detail(detail: Dict) -> int:
+        def check_host_detail(detail: dict) -> int:
             name = detail.get("name", "")
             if name in information_key:
                 information[information_key.get(name)] = detail.get("value")
@@ -182,7 +180,7 @@ def __create_host_information_lookup(report: Dict) -> Dict:
     return result
 
 
-def __is_container_image_report(report: Dict) -> bool:
+def __is_container_image_report(report: dict) -> bool:
     """
     checks if the report is a container image report by checking image digest in first host.
     """
@@ -202,8 +200,8 @@ def __is_container_image_report(report: Dict) -> bool:
 
 @measure_time
 def __create_results_per_host(
-    report: Dict, is_container_image_report: bool
-) -> List[Dict]:
+    report: dict, is_container_image_report: bool
+) -> list[dict]:
     """
     creates the results dict used by a vulnerability-report based on a given
     gvmd report.
@@ -216,7 +214,7 @@ def __create_results_per_host(
     host_severity_count = {}
     threat_count = [0] * len(__threats)
 
-    def transform_key(prefix: str, vic: Dict) -> Dict:
+    def transform_key(prefix: str, vic: dict) -> dict:
         return {f"{prefix}_{key}": value for key, value in vic.items()}
 
     def shorten(s, n=28):
@@ -412,15 +410,15 @@ def __create_results_per_host(
         __threats[i]: count for i, count in enumerate(threat_count)
     }
 
-    is_combined_key = all("##" in key for key in host_threat_count.keys())
+    is_combined_key = all("##" in key for key in host_threat_count)
 
     if is_container_image_report and is_combined_key:
-        results = map(
-            lambda item: (
+        results = (
+            (
                 shorten(split_image_name(item[0].split("##")[-1])),
                 item[1],
-            ),
-            host_threat_count.items(),
+            )
+            for item in host_threat_count.items()
         )
     else:
         results = host_threat_count.items()
@@ -438,7 +436,7 @@ def __create_results_per_host(
 
 
 @measure_time
-def transform(data: Dict[str, str]) -> Report:
+def transform(data: dict[str, str]) -> Report:
     """
     transform will use the given dict of a scanreport from gvmd
     to create an easy to use data representation for visual reports.

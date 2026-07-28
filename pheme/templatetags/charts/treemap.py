@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -27,7 +26,6 @@
 import math as m
 import numbers
 from dataclasses import dataclass
-from typing import Dict, List
 
 from django.utils.safestring import SafeText
 
@@ -78,7 +76,7 @@ def __create_rectangle(x: float, y: float, dx: float, dy: float) -> Rect:
     return Rect(x, y, dx, dy)
 
 
-def __layoutrow(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
+def __layoutrow(sizes: list[numbers.Number], rect: Rect) -> list[Rect]:
     covered_area = sum(sizes)
     width = covered_area / rect.dy
     rects = []
@@ -89,7 +87,7 @@ def __layoutrow(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     return rects
 
 
-def __layoutcol(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
+def __layoutcol(sizes: list[numbers.Number], rect: Rect) -> list[Rect]:
     covered_area = sum(sizes)
     height = covered_area / rect.dx
     rects = []
@@ -100,7 +98,7 @@ def __layoutcol(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     return rects
 
 
-def __layout(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
+def __layout(sizes: list[numbers.Number], rect: Rect) -> list[Rect]:
     if rect.dx >= rect.dy:
         return __layoutrow(sizes, rect)
     return __layoutcol(sizes, rect)
@@ -116,14 +114,14 @@ def __leftovercol(covered_area: float, rect: Rect) -> Rect:
     return Rect(rect.x, rect.y + height, rect.dx, rect.dy - height)
 
 
-def __leftover(sizes: List[numbers.Number], rect: Rect) -> Rect:
+def __leftover(sizes: list[numbers.Number], rect: Rect) -> Rect:
     covered_area = sum(sizes)
     if rect.dx >= rect.dy:
         return __leftoverrow(covered_area, rect)
     return __leftovercol(covered_area, rect)
 
 
-def __find_split(sizes: List[numbers.Number], rect: Rect) -> int:
+def __find_split(sizes: list[numbers.Number], rect: Rect) -> int:
     """
     returns the index to split the sizes based on worst ratio to get the
     remaining and current space.
@@ -152,7 +150,7 @@ def __find_split(sizes: List[numbers.Number], rect: Rect) -> int:
     return len(sizes) - 1
 
 
-def __squarify(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
+def __squarify(sizes: list[numbers.Number], rect: Rect) -> list[Rect]:
     """
     calculates treemap rectangles using an algorithm based on Bruls, Huizing,
     van Wijk, "Squarified Treemaps" and "squarify":
@@ -181,7 +179,7 @@ def __squarify(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     total_size = sum(sizes)
     total_area = rect.dx * rect.dy
 
-    sizes = list([size * total_area / total_size for size in sizes])
+    sizes = [size * total_area / total_size for size in sizes]
 
     if len(sizes) == 1:
         return __layout(sizes, rect)
@@ -195,7 +193,7 @@ def __squarify(sizes: List[numbers.Number], rect: Rect) -> List[Rect]:
     )
 
 
-def __transform_to_tree_data(data) -> List[Dict]:
+def __transform_to_tree_data(data) -> list[dict]:
     """
     tansforms given data to treemap compatible format.
     The support types are:
@@ -234,11 +232,11 @@ def __transform_to_tree_data(data) -> List[Dict]:
 
 @register.filter
 def treemap(
-    data: List[Dict],
+    data: list[dict],
     width: int = 1024,
     height: int = 768,
     border_color: str = "#ffffff",
-    title_color: Dict[str, str] = None,
+    title_color: dict[str, str] | None = None,
     font_size: int = 10,
     font_family: str = "Dejavu Sans",
 ) -> SafeText:
@@ -277,7 +275,7 @@ def treemap(
     if not title_color:
         title_color = _severity_class_colors
     sizes, label, color_keys = __transform_to_tree_data(data)
-    max_legend_len = max([len(k) for k in title_color.keys()])
+    max_legend_len = max([len(k) for k in title_color])
     s_width = width - max_legend_len * font_size - font_size
     sizes = __squarify(sizes, Rect(0, 0, s_width, height))
     elements = ""

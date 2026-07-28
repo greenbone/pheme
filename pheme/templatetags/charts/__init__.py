@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -15,8 +14,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from typing import Dict
 
 from django import template
 
@@ -41,14 +38,14 @@ __LEGEND_ELEMENT = """
 
 
 def calculate_legend_start_height(
-    height: int, label_color: Dict, font_size: int
+    height: int, label_color: dict, font_size: int
 ) -> int:
     return int(height / 2 - (len(label_color) * font_size) / 2)
 
 
 def build_legend(
     start_height: int,
-    label_color: Dict,
+    label_color: dict,
     font_family: str = "Dejavu Sans",
     font_size: int = 10,
 ) -> str:

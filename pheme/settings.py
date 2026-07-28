@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/settings.py
 # Copyright (C) 2020-2021 Greenbone AG
 #

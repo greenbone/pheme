@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/renderer/xml.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -16,9 +15,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from collections.abc import Generator
 from csv import DictWriter
 from io import StringIO
-from typing import Dict, Generator, List, Union
 
 import xmltodict
 from rest_framework.renderers import BaseRenderer
@@ -30,8 +29,8 @@ class CSVRenderer(BaseRenderer):
     charset = "utf-8"
 
     def __flatten_per_result(
-        self, data: Dict
-    ) -> Generator[Union[List[str], Dict], None, None]:
+        self, data: dict
+    ) -> Generator[list[str] | dict, None, None]:
         # for the case that results is there but it is None
         results = data.pop("results", None) or []
         send_keys = True
@@ -70,9 +69,9 @@ class MarkDownTableRenderer(BaseRenderer):
 
     def __as_md(self, previous_key, data):
         def append(value):
-            return isinstance(value, str) or isinstance(value, int)
+            return isinstance(value, (str, int))
 
-        if not (isinstance(data, dict) or isinstance(data, list)):
+        if not (isinstance(data, (dict, list))):
             return []
         items = None
         result = []

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # pheme/transformation/storage.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -16,17 +15,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from typing import Dict
 from uuid import uuid4
 
 from django.core.cache import cache
 
 
-def __default_store_handler(name: str, value: Dict):
+def __default_store_handler(name: str, value: dict):
     cache.set(name, value)
 
 
-def __default_load_handler(name: str) -> Dict:
+def __default_load_handler(name: str) -> dict:
     return cache.get(name)
 
 
@@ -34,13 +32,13 @@ def __default_id_generator(prefix: str) -> str:
     return f"{prefix}-{uuid4()}"
 
 
-def load(name: str, *, handler=__default_load_handler) -> Dict:
+def load(name: str, *, handler=__default_load_handler) -> dict:
     return handler(name)
 
 
 def store(
     prefix: str,
-    value: Dict,
+    value: dict,
     *,
     handler=__default_store_handler,
     id_generator=__default_id_generator,

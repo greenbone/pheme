@@ -1,5 +1,4 @@
 # pylint: disable=W0614,W0511,W0401,C0103
-# -*- coding: utf-8 -*-
 # tests/generate_test_data.py
 # Copyright (C) 2020-2021 Greenbone AG
 #
@@ -17,12 +16,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# pylint: disable=W0621,C0103
+#
+
 import string
 import uuid
 from pathlib import Path
 from random import choice, randint
-from typing import Dict, List
 
 import xmltodict
 
@@ -31,14 +30,14 @@ def _random_text(length: int) -> str:
     return "".join([choice(string.ascii_letters) for i in range(length)])
 
 
-def gen_solution() -> Dict:
+def gen_solution() -> dict:
     return {
         "type": "Maybe a mitigration, maybe not",
         "text": _random_text(250),
     }
 
 
-def gen_host(hostname="localhost") -> Dict:
+def gen_host(hostname="localhost") -> dict:
     return {
         "text": f"{randint(1, 254)}.{randint(1, 254)}."
         f"{randint(1, 254)}.{randint(1, 254)}",
@@ -46,21 +45,21 @@ def gen_host(hostname="localhost") -> Dict:
     }
 
 
-def gen_refs(length: int = 0) -> Dict:
+def gen_refs(length: int = 0) -> dict:
     def ref():
         return {"id": uuid.uuid1().hex, "type": "CVE"}
 
     return {"ref": [ref() for _ in range(length)]}
 
 
-def gen_qod() -> Dict:
+def gen_qod() -> dict:
     return {
         "type": _random_text(10),
         "value": f"{randint(1, 254)}",
     }
 
 
-def generate_nvt(oid: str, with_optional: bool = True) -> Dict:
+def generate_nvt(oid: str, with_optional: bool = True) -> dict:
     return {
         "oid": oid,
         "solution": gen_solution() if with_optional else None,
@@ -77,8 +76,8 @@ threats = ["Low", "Medium", "High"]
 
 
 def gen_result(
-    host: dict, oid: str, with_optional: bool = True, port: str = None
-) -> Dict:
+    host: dict, oid: str, with_optional: bool = True, port: str | None = None
+) -> dict:
     if not port:
         allowed_ports = [80, 8080, 443, 20, 25, 21, 23, 143, 22, 67, 68]
         port = f"{choice(allowed_ports)}/tcp"
@@ -93,15 +92,15 @@ def gen_result(
     }
 
 
-def gen_gmp() -> Dict:
+def gen_gmp() -> dict:
     return {"version": "21.04"}
 
 
-def gen_count(count: int = randint(1, 100)) -> Dict:
+def gen_count(count: int = randint(1, 100)) -> dict:
     return {"count": count}
 
 
-def gen_identifiable(name: str = None) -> dict:
+def gen_identifiable(name: str | None = None) -> dict:
     return {
         "id": uuid.uuid1().hex,
         "name": name or _random_text(10),
@@ -109,7 +108,7 @@ def gen_identifiable(name: str = None) -> dict:
     }
 
 
-def gen_task(name: str = None) -> Dict:
+def gen_task(name: str | None = None) -> dict:
     return {
         **gen_identifiable(name),
         "target": {
@@ -120,11 +119,11 @@ def gen_task(name: str = None) -> Dict:
     }
 
 
-def gen_filtered() -> Dict:
+def gen_filtered() -> dict:
     return {"full": _random_text(25), "filtered": _random_text(12)}
 
 
-def gen_result_count() -> Dict:
+def gen_result_count() -> dict:
     return {
         **gen_filtered(),
         "debug": gen_filtered(),
@@ -137,7 +136,7 @@ def gen_result_count() -> Dict:
     }
 
 
-def generate_result_count(full: int, filtered: int) -> Dict:
+def generate_result_count(full: int, filtered: int) -> dict:
     return {
         "full": str(full),
         "filtered": str(filtered),
@@ -145,19 +144,19 @@ def generate_result_count(full: int, filtered: int) -> Dict:
 
 
 def gen_report(
-    hosts: List[str],
-    oids: List[str],
+    hosts: list[str],
+    oids: list[str],
     with_optional: bool = True,
-    name: str = None,
-    port: str = None,
-) -> Dict:
+    name: str | None = None,
+    port: str | None = None,
+) -> dict:
     g_hosts = [gen_host(v) for v in hosts or []]
     result = []
     host_details = [] if hosts is not None else None
     for h in g_hosts:
         for _ in range(randint(1, len(oids) + 2)):
             res = gen_result(h, oids[randint(0, len(oids) - 1)], port=port)
-            host_details.append(
+            host_details.append(  # type: ignore
                 {
                     "ip": res["host"]["text"],
                     "detail": [

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2020-2021 Greenbone AG
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -18,8 +17,8 @@
 import json
 import logging
 import mimetypes
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Dict
 
 import rest_framework
 from django.core.files.uploadedfile import UploadedFile
@@ -39,7 +38,7 @@ from pheme.datalink import as_datalink
 logger = logging.getLogger(__name__)
 
 
-def __load_params(from_path: str) -> Dict:
+def __load_params(from_path: str) -> dict:
     """
     either loads json file from given_path or returns an empty dict when file
     does not exist.
@@ -56,7 +55,7 @@ def __load_params(from_path: str) -> Dict:
 def load_params(
     system_parameter_path: str = settings.PARAMETER_FILE_ADDRESS,
     default_parameter_path: str = settings.DEFAULT_PARAMETER_ADDRESS,
-) -> Dict:
+) -> dict:
     """
     loads default and system parameter and combines them so that system
     parameter may override default parameter.
@@ -70,17 +69,17 @@ def load_params(
     }
 
 
-def __store(params: Dict, *, from_path: str = None) -> Dict:
+def __store(params: dict, *, from_path: str | None = None) -> dict:
     Path(from_path).write_text(json.dumps(params), encoding="utf-8")
     return params
 
 
 def __put(
     request: HttpRequest,
-    func: Callable[[HttpRequest, Dict], Dict],
+    func: Callable[[HttpRequest, dict], dict],
     *,
     from_path: str = settings.PARAMETER_FILE_ADDRESS,
-    store: Callable[[Dict, str], Dict] = __store,
+    store: Callable[[dict, str], dict] = __store,
 ) -> Response:
     params = __load_params(from_path=from_path)
     username = request.META.get("GVM_USERNAME")
@@ -96,7 +95,7 @@ def __put(
     return Response(store(value, from_path=from_path))
 
 
-def __process_form_data(request: HttpRequest, data: Dict) -> Dict:
+def __process_form_data(request: HttpRequest, data: dict) -> dict:
     if not isinstance(request.data, dict):
         raise TypeError(
             "Request data is expected to be a dict, "
@@ -119,7 +118,7 @@ def __process_form_data(request: HttpRequest, data: Dict) -> Dict:
     return data
 
 
-def __process_json_object(request: HttpRequest, data: Dict) -> Dict:
+def __process_json_object(request: HttpRequest, data: dict) -> dict:
     return {**data, **request.data}
 
 
@@ -133,7 +132,7 @@ def __process_json_object(request: HttpRequest, data: Dict) -> Dict:
     ]
 )
 def put_value(request: HttpRequest, key: str) -> Response:
-    def __process_single_value(request: HttpRequest, data: Dict) -> Dict:
+    def __process_single_value(request: HttpRequest, data: dict) -> dict:
         data[key] = request.data
         return data
 
