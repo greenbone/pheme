@@ -16,7 +16,6 @@ on:
         type: string
         description: Set an explicit version, that will overwrite release-type. Fails if version is not compliant.
 
-
 jobs:
   build-and-release:
     name: Create a new release
@@ -33,7 +32,7 @@ jobs:
           contains(github.event.pull_request.labels.*.name, 'minor release') ||
           contains(github.event.pull_request.labels.*.name, 'major release')) &&
           github.event.pull_request.merged == true )
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     steps:
       - name: Selecting the Release type
         id: release-type
@@ -43,6 +42,7 @@ jobs:
       - name: Release with release action
         uses: greenbone/actions/release@v3
         with:
+          admin-bypass: "false"
           github-user: ${{ secrets.GREENBONE_BOT }}
           github-user-mail: ${{ secrets.GREENBONE_BOT_MAIL }}
           github-user-token: ${{ secrets.GREENBONE_BOT_TOKEN }}
