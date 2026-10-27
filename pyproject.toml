@@ -12,16 +12,16 @@ classifiers = [
   "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", # pylint: disable=line-too-long
   "Environment :: Web Environment",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Operating System :: OS Independent",
   "Topic :: Internet :: WWW/HTTP :: WSGI :: Server",
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 django = "=5.2.18"
 xmltodict = ">=0.12,<1.1"
 pyyaml = ">=5.3.1,<7.0.0"
@@ -53,7 +53,7 @@ mode = "poetry"
 
 [tool.ruff]
 line-length = 80
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 extend-select = ["I", "PLE", "PLW"]
